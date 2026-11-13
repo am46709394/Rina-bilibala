@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>RINA Pilates Studio | CMS & Schedule</title>
+  <title>RINA Pilates Studio | Solo Owner CMS & Schedule</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧘‍♀️</text></svg>">
 
-  <!-- Tailwind CSS -->
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- SheetJS -->
+  <!-- SheetJS / XLSX CDN for Excel export & import -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -19,8 +19,14 @@
         extend: {
           colors: {
             rina: {
-              50: '#FBF9F5', 100: '#F5EFE6', 200: '#E8DCC4', 300: '#D6C09D',
-              600: '#9E7241', 700: '#7E5728', 800: '#5F3F19', 900: '#3D280E',
+              50: '#FBF9F5',
+              100: '#F5EFE6',
+              200: '#E8DCC4',
+              300: '#D6C09D',
+              600: '#9E7241',
+              700: '#7E5728',
+              800: '#5F3F19',
+              900: '#3D280E',
             }
           },
           fontFamily: {
@@ -40,19 +46,26 @@
       -webkit-tap-highlight-color: transparent;
     }
     .modal-backdrop {
-      background-color: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(3px);
+      background-color: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(2px);
     }
-    /* Custom scrollbar for tables */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #F5EFE6; }
-    ::-webkit-scrollbar-thumb { background: #D6C09D; border-radius: 4px; }
-    
-    /* Hide scrollbar for clean mobile nav */
+    /* custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F5EFE6;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #D6C09D;
+      border-radius: 4px;
+    }
+    /* 隐藏移动端滚动条 */
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    
-    /* Calendar cell styles */
+
+    /* 日历格子样式 */
     .cal-cell {
       aspect-ratio: 1 / 1;
       display: flex;
@@ -71,69 +84,89 @@
     .cal-cell.today { border: 2px solid #5F3F19; }
     .cal-cell.selected { background-color: #E8DCC4; font-weight: bold; }
     .cal-cell.other-month { opacity: 0.3; pointer-events: none; }
-    
-    /* Touch friendly inputs */
+
+    /* 手机端输入框防放大 */
     input, select, textarea { font-size: 16px !important; }
     @media (min-width: 640px) { input, select, textarea { font-size: 0.875rem !important; } }
   </style>
 </head>
 <body class="min-h-screen flex flex-col antialiased pb-20 md:pb-0">
 
-  <!-- Top Navigation Bar -->
+  <!-- Top Sticky Navigation Bar -->
   <header class="sticky top-0 z-40 bg-[#FAF7F2]/95 border-b border-stone-200/80 backdrop-blur shadow-xs">
     <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2 sm:py-3 flex items-center justify-between">
-      <!-- Logo -->
+      <!-- Logo & Studio Title -->
       <div class="flex items-center gap-2 sm:gap-3">
-        <div class="h-8 w-8 sm:h-10 sm:w-10 rounded-xl sm:rounded-2xl bg-rina-900 text-white flex items-center justify-center font-serif font-bold text-lg sm:text-xl shadow-xs">
+        <div class="h-8 w-8 sm:h-10 sm:w-10 rounded-xl sm:rounded-2xl bg-rina-900 text-white flex items-center justify-center font-serif font-bold text-lg sm:text-xl shadow-xs ring-2 ring-rina-800/30">
           R
         </div>
         <div>
           <div class="flex items-center gap-2">
             <span class="font-serif font-bold text-lg sm:text-xl tracking-wider text-stone-900">RINA</span>
-            <span class="hidden sm:inline-block text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-rina-100 text-rina-800 border border-rina-200">CMS</span>
+            <span class="hidden sm:inline-block text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-rina-100 text-rina-800 border border-rina-200">
+              CMS
+            </span>
           </div>
         </div>
       </div>
 
-      <!-- Desktop Nav -->
+      <!-- Navigation Tabs (Desktop) -->
       <nav class="hidden md:flex items-center gap-1 bg-stone-100/90 p-1 rounded-2xl border border-stone-200 text-xs font-semibold">
         <button onclick="switchTab('schedule')" id="tab-btn-schedule" class="px-3.5 py-2 rounded-xl transition flex items-center gap-2 bg-white text-stone-900 shadow-xs font-bold">
-          <i data-lucide="calendar" class="w-4 h-4 text-rina-800"></i> <span>Schedule</span>
+          <i data-lucide="calendar" class="w-4 h-4 text-rina-800"></i>
+          <span>Daily Schedule</span>
         </button>
         <button onclick="switchTab('students')" id="tab-btn-students" class="px-3.5 py-2 rounded-xl transition flex items-center gap-2 text-stone-600 hover:text-stone-900">
-          <i data-lucide="users" class="w-4 h-4"></i> <span>Students</span>
+          <i data-lucide="users" class="w-4 h-4"></i>
+          <span>Students</span>
         </button>
         <button onclick="switchTab('datainput')" id="tab-btn-datainput" class="px-3.5 py-2 rounded-xl transition flex items-center gap-2 text-stone-600 hover:text-stone-900">
-          <i data-lucide="layout-grid" class="w-4 h-4"></i> <span>Data Entry</span>
+          <i data-lucide="layout-grid" class="w-4 h-4"></i>
+          <span>Data Entry</span>
         </button>
         <button onclick="switchTab('audit')" id="tab-btn-audit" class="px-3.5 py-2 rounded-xl transition flex items-center gap-2 text-stone-600 hover:text-stone-900">
-          <i data-lucide="history" class="w-4 h-4"></i> <span>Logs</span>
+          <i data-lucide="history" class="w-4 h-4"></i>
+          <span>Logs</span>
         </button>
       </nav>
 
-      <!-- Top Action Buttons -->
+      <!-- Action Buttons -->
       <div class="flex items-center gap-1.5 sm:gap-2">
-        <button onclick="exportToExcel()" class="flex items-center justify-center h-8 w-8 sm:h-auto sm:w-auto sm:px-3 sm:py-2 text-xs font-semibold text-emerald-900 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-lg sm:rounded-xl transition shadow-xs">
+        <button onclick="exportToExcel()" class="inline-flex items-center gap-1.5 px-2 sm:px-3 py-2 text-xs font-semibold text-emerald-900 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-xl transition shadow-xs" title="Download Excel .xlsx">
           <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-700"></i>
-          <span class="hidden sm:inline ml-1.5">Export Excel</span>
+          <span class="hidden sm:inline">Export Excel</span>
         </button>
-        <button onclick="openBookingModal()" class="flex items-center justify-center h-8 px-2.5 sm:h-auto sm:px-3.5 sm:py-2 text-xs font-semibold text-white bg-stone-900 hover:bg-stone-800 rounded-lg sm:rounded-xl transition shadow-xs">
+        <button onclick="openBookingModal()" class="inline-flex items-center gap-1.5 px-2.5 sm:px-3.5 py-2 text-xs font-semibold text-white bg-stone-900 hover:bg-stone-800 rounded-xl transition shadow-xs">
           <i data-lucide="plus" class="w-4 h-4"></i>
-          <span class="hidden sm:inline ml-1.5">Book Class</span>
+          <span class="hidden sm:inline">Book Class</span>
         </button>
       </div>
     </div>
+
+    <!-- Mobile Sub Tabs -->
+    <div class="md:hidden flex overflow-x-auto no-scrollbar px-3 py-2 border-t border-stone-200 gap-1 text-xs font-semibold bg-stone-50">
+      <button onclick="switchTab('schedule')" id="mob-tab-schedule" class="px-3 py-1.5 rounded-lg whitespace-nowrap bg-stone-900 text-white">Schedule</button>
+      <button onclick="switchTab('students')" id="mob-tab-students" class="px-3 py-1.5 rounded-lg whitespace-nowrap text-stone-600">Students</button>
+      <button onclick="switchTab('datainput')" id="mob-tab-datainput" class="px-3 py-1.5 rounded-lg whitespace-nowrap text-stone-600">Data Input</button>
+      <button onclick="switchTab('audit')" id="mob-tab-audit" class="px-3 py-1.5 rounded-lg whitespace-nowrap text-stone-600">Logs</button>
+    </div>
   </header>
 
-  <!-- Main Content -->
-  <main class="max-w-7xl mx-auto w-full px-3 sm:px-6 py-4 sm:py-6 flex-1">
+  <!-- 提示条 -->
+  <div class="bg-amber-50/80 border-b border-amber-200/60 px-3 py-1.5 text-center text-[10px] sm:text-xs text-amber-900 flex items-center justify-center gap-2">
+    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-amber-700 shrink-0"></i>
+    <span><strong>Local Storage:</strong> Data is saved on this device. Export to Excel for backup.</span>
+  </div>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto w-full px-3 sm:px-6 py-4 sm:py-6 flex-1 space-y-4 sm:space-y-6">
 
     <!-- ========================================== -->
-    <!-- TAB 1: SCHEDULE & CALENDAR                 -->
+    <!-- TAB 1: DAILY SCHEDULE VIEW                -->
     <!-- ========================================== -->
     <section id="view-schedule" class="space-y-4 sm:space-y-6">
       
-      <!-- VISUAL CALENDAR -->
+      <!-- 🌟 新增：可视化月历视图 -->
       <div class="bg-white p-3 sm:p-5 rounded-2xl border border-stone-200 shadow-xs">
         <div class="flex items-center justify-between mb-3">
           <h2 class="font-serif font-bold text-base sm:text-lg text-stone-900 flex items-center gap-2">
@@ -141,44 +174,50 @@
           </h2>
           <div class="flex items-center gap-1">
             <button onclick="changeMonth(-1)" class="p-1.5 rounded-lg hover:bg-stone-100 text-stone-600"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
-            <span id="calendar-month-label" class="text-xs sm:text-sm font-bold text-stone-800 min-w-[100px] text-center">Month</span>
+            <span id="calendar-month-label" class="text-xs sm:text-sm font-bold text-stone-800 min-w-[90px] text-center">Month</span>
             <button onclick="changeMonth(1)" class="p-1.5 rounded-lg hover:bg-stone-100 text-stone-600"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
           </div>
         </div>
         
-        <!-- Calendar Weekdays -->
         <div class="grid grid-cols-7 gap-1 mb-1 text-center text-[10px] sm:text-xs font-bold text-stone-400 uppercase">
           <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
         </div>
-        <!-- Calendar Grid -->
+        
+        <!-- 日历网格 -->
         <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-xs sm:text-sm">
-          <!-- JS renders cells here -->
+          <!-- JS 渲染 -->
         </div>
       </div>
 
-      <!-- Daily Schedule Controls -->
+      <!-- 当天排课列表控制 -->
       <div class="bg-white p-3 sm:p-5 rounded-2xl border border-stone-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div class="flex items-center gap-2">
           <div class="h-10 w-10 rounded-xl bg-rina-800 text-white flex items-center justify-center shadow-xs shrink-0">
             <i data-lucide="clock" class="w-5 h-5"></i>
           </div>
           <div>
-            <h2 id="schedule-display-date" class="font-serif font-bold text-sm sm:text-lg text-stone-900 leading-tight">Today's Schedule</h2>
-            <p id="schedule-stats-summary" class="text-[10px] sm:text-xs text-stone-500">0 sessions</p>
+            <div class="flex items-center gap-2">
+              <h2 id="schedule-display-date" class="font-serif font-bold text-sm sm:text-lg text-stone-900 leading-tight">Today's Schedule</h2>
+              <span id="schedule-today-tag" class="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">Today</span>
+            </div>
+            <p id="schedule-stats-summary" class="text-[10px] sm:text-xs text-stone-500">0 sessions booked</p>
           </div>
         </div>
-        
-        <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 no-scrollbar">
+
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
           <div class="inline-flex items-center bg-stone-50 border border-stone-200 rounded-xl p-0.5 text-xs shrink-0">
             <button onclick="stepDate(-1)" class="p-1.5 rounded-lg text-stone-600 hover:bg-white"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
             <button onclick="goToToday()" class="px-2 py-1 rounded-lg font-semibold text-stone-700 hover:bg-white text-[10px]">Today</button>
             <button onclick="stepDate(1)" class="p-1.5 rounded-lg text-stone-600 hover:bg-white"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
           </div>
           <input type="date" id="schedule-date-picker" onchange="onScheduleDateChange(this.value)" class="rounded-xl border border-stone-300 bg-white px-2 py-1.5 text-xs text-stone-800 focus:outline-none shrink-0">
+          <button onclick="openBookingModal()" class="inline-flex items-center gap-1.5 bg-stone-900 text-white px-3 py-1.5 rounded-xl text-xs font-semibold hover:bg-stone-800 transition shrink-0">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Book
+          </button>
         </div>
       </div>
 
-      <!-- Filter Pills -->
+      <!-- 筛选 -->
       <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
         <span class="text-stone-500 text-[10px] font-bold uppercase tracking-wider shrink-0 mr-1">Filter:</span>
         <button onclick="setScheduleFilter('all')" id="filter-sched-all" class="px-2.5 py-1 rounded-lg font-semibold uppercase text-[10px] bg-stone-900 text-white shrink-0">All</button>
@@ -187,26 +226,26 @@
         <button onclick="setScheduleFilter('cancelled')" id="filter-sched-cancelled" class="px-2.5 py-1 rounded-lg font-semibold uppercase text-[10px] bg-white border border-stone-200 text-stone-600 shrink-0">Cancelled</button>
       </div>
 
-      <!-- Schedule Cards -->
+      <!-- 排课卡片容器 -->
       <div id="schedule-cards-container" class="space-y-3">
-        <!-- JS renders cards here -->
+        <!-- JS 渲染 -->
       </div>
     </section>
 
 
     <!-- ========================================== -->
-    <!-- TAB 2: STUDENTS                            -->
+    <!-- TAB 2: STUDENT PORTFOLIO VIEW             -->
     <!-- ========================================== -->
     <section id="view-students" class="space-y-4 sm:space-y-6 hidden">
       <!-- Stats -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
         <div class="bg-white p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-stone-200 shadow-xs">
           <span class="text-[9px] sm:text-[11px] font-semibold uppercase text-stone-500 tracking-wider">Students</span>
           <div id="stat-student-count" class="font-serif font-bold text-xl sm:text-2xl text-stone-900 mt-0.5">0</div>
         </div>
         <div class="bg-white p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-stone-200 shadow-xs">
           <span class="text-[9px] sm:text-[11px] font-semibold uppercase text-stone-500 tracking-wider">Revenue</span>
-          <div id="stat-total-revenue" class="font-serif font-bold text-xl sm:text-2xl text-stone-900 mt-0.5">$0</div>
+          <div id="stat-total-revenue" class="font-serif font-bold text-xl sm:text-2xl text-stone-900 mt-0.5">$0.00</div>
         </div>
         <div class="bg-white p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-stone-200 shadow-xs">
           <span class="text-[9px] sm:text-[11px] font-semibold uppercase text-stone-500 tracking-wider">Classes Left</span>
@@ -218,11 +257,11 @@
         </div>
       </div>
 
-      <!-- Search & Add -->
+      <!-- Search & Filters -->
       <div class="bg-white p-3 rounded-2xl border border-stone-200 shadow-xs flex flex-col sm:flex-row items-center gap-2">
         <div class="relative w-full">
           <i data-lucide="search" class="w-4 h-4 text-stone-400 absolute left-3 top-2.5"></i>
-          <input type="text" id="student-search-input" oninput="renderStudentPortfolios()" placeholder="Search name, phone..." class="w-full rounded-xl border border-stone-300 bg-white pl-9 pr-3 py-2 text-xs sm:text-sm text-stone-800 focus:outline-none focus:border-stone-800">
+          <input type="text" id="student-search-input" oninput="renderStudentPortfolios()" placeholder="Search student..." class="w-full rounded-xl border border-stone-300 bg-white pl-9 pr-3 py-2 text-xs sm:text-sm text-stone-800 focus:outline-none focus:border-stone-800">
         </div>
         <div class="flex items-center gap-2 w-full sm:w-auto">
           <div class="inline-flex bg-stone-50 border border-stone-200 rounded-xl p-0.5 text-[10px] sm:text-[11px] font-semibold flex-1 sm:flex-none">
@@ -236,21 +275,23 @@
         </div>
       </div>
 
-      <!-- Student Cards -->
+      <!-- Grid -->
       <div id="students-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-        <!-- JS renders cards here -->
+        <!-- JS 渲染 -->
       </div>
     </section>
 
 
     <!-- ========================================== -->
-    <!-- TAB 3: DATA ENTRY                          -->
+    <!-- TAB 3: DATA INPUT CENTER                   -->
     <!-- ========================================== -->
     <section id="view-datainput" class="space-y-4 sm:space-y-6 hidden">
-      <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div class="bg-white p-3 sm:p-5 rounded-2xl border border-stone-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 class="font-serif font-bold text-base sm:text-lg text-stone-900">Data Input</h2>
-          <p class="text-[11px] sm:text-xs text-stone-500">Batch entry, recurring schedule, or Excel import.</p>
+          <h2 class="font-serif font-bold text-base sm:text-lg text-stone-900 flex items-center gap-2">
+            <i data-lucide="zap" class="w-4 h-4 text-rina-800"></i> Data Input
+          </h2>
+          <p class="text-[11px] sm:text-xs text-stone-500 mt-0.5">Batch entry, recurring schedule, or Excel import.</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
           <button onclick="openBookingModal()" class="inline-flex items-center justify-center gap-1.5 bg-stone-900 text-white px-3 py-1.5 rounded-xl text-xs font-semibold flex-1 sm:flex-none"><i data-lucide="calendar" class="w-3.5 h-3.5"></i> Book</button>
@@ -259,17 +300,10 @@
         </div>
       </div>
 
-      <!-- Mode Tabs -->
       <div class="flex overflow-x-auto no-scrollbar border-b border-stone-200 bg-white px-2 sm:px-5 rounded-t-2xl pt-2 gap-3 text-xs font-semibold">
-        <button onclick="switchInputMode('spreadsheet')" id="input-mode-btn-spreadsheet" class="pb-2 sm:pb-3 border-b-2 border-rina-800 text-rina-900 font-bold flex items-center gap-1.5 whitespace-nowrap">
-          <i data-lucide="table" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i> Spreadsheet
-        </button>
-        <button onclick="switchInputMode('recurring')" id="input-mode-btn-recurring" class="pb-2 sm:pb-3 border-b-2 border-transparent text-stone-500 hover:text-stone-800 flex items-center gap-1.5 whitespace-nowrap">
-          <i data-lucide="repeat" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i> Recurring
-        </button>
-        <button onclick="switchInputMode('excelimport')" id="input-mode-btn-excelimport" class="pb-2 sm:pb-3 border-b-2 border-transparent text-stone-500 hover:text-stone-800 flex items-center gap-1.5 whitespace-nowrap">
-          <i data-lucide="file-up" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i> Excel Import
-        </button>
+        <button onclick="switchInputMode('spreadsheet')" id="input-mode-btn-spreadsheet" class="pb-2 sm:pb-3 border-b-2 border-rina-800 text-rina-900 font-bold flex items-center gap-1.5 whitespace-nowrap"><i data-lucide="table" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i> Spreadsheet</button>
+        <button onclick="switchInputMode('recurring')" id="input-mode-btn-recurring" class="pb-2 sm:pb-3 border-b-2 border-transparent text-stone-500 hover:text-stone-800 flex items-center gap-1.5 whitespace-nowrap"><i data-lucide="repeat" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i> Recurring</button>
+        <button onclick="switchInputMode('excelimport')" id="input-mode-btn-excelimport" class="pb-2 sm:pb-3 border-b-2 border-transparent text-stone-500 hover:text-stone-800 flex items-center gap-1.5 whitespace-nowrap"><i data-lucide="file-up" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i> Import</button>
       </div>
 
       <!-- Spreadsheet Mode -->
@@ -285,9 +319,8 @@
           <table class="w-full text-left text-[10px] sm:text-xs min-w-[800px]">
             <thead class="bg-[#FAF7F2] border-b border-stone-200 font-semibold text-stone-700 uppercase tracking-wider">
               <tr>
-                <th class="p-2">Name *</th><th class="p-2">Phone</th><th class="p-2">Email</th>
-                <th class="p-2">Package</th><th class="p-2">Total</th><th class="p-2">Left</th>
-                <th class="p-2">Price</th><th class="p-2">Method</th><th class="p-2">Injury</th><th class="p-2"></th>
+                <th class="p-2">Name *</th><th class="p-2">Phone</th><th class="p-2">Email</th><th class="p-2">Package</th>
+                <th class="p-2">Total</th><th class="p-2">Left</th><th class="p-2">Price</th><th class="p-2">Method</th><th class="p-2">Injury</th><th class="p-2"></th>
               </tr>
             </thead>
             <tbody id="batch-rows-tbody" class="divide-y divide-stone-100"></tbody>
@@ -305,10 +338,8 @@
           <div>
             <label class="block text-[10px] font-semibold text-stone-600 uppercase mb-1">Class Type</label>
             <select id="rec-class-type" class="w-full rounded-xl border border-stone-300 p-2.5 text-xs text-stone-800 bg-white">
-              <option value="Private Reformer">Private Reformer</option>
-              <option value="Duet Reformer">Duet Reformer</option>
-              <option value="Cadillac & Tower">Cadillac & Tower</option>
-              <option value="Mat Pilates Flow">Mat Pilates Flow</option>
+              <option value="Private Reformer">Private Reformer</option><option value="Duet Reformer">Duet Reformer</option>
+              <option value="Cadillac & Tower">Cadillac & Tower</option><option value="Mat Pilates Flow">Mat Pilates Flow</option>
               <option value="Prenatal Pilates">Prenatal Pilates</option>
             </select>
           </div>
@@ -325,41 +356,25 @@
           </div>
         </div>
         <div class="grid grid-cols-3 gap-2">
-          <div>
-            <label class="block text-[10px] font-semibold text-stone-600 uppercase mb-1">Time</label>
-            <input type="time" id="rec-start-time" value="10:00" required class="w-full rounded-xl border border-stone-300 p-2 text-xs text-stone-800">
-          </div>
-          <div>
-            <label class="block text-[10px] font-semibold text-stone-600 uppercase mb-1">Start Date</label>
-            <input type="date" id="rec-start-date" required class="w-full rounded-xl border border-stone-300 p-2 text-xs text-stone-800">
-          </div>
-          <div>
-            <label class="block text-[10px] font-semibold text-stone-600 uppercase mb-1">Weeks</label>
-            <input type="number" id="rec-weeks" min="1" max="12" value="4" required class="w-full rounded-xl border border-stone-300 p-2 text-xs text-stone-800">
-          </div>
+          <div><label class="block text-[10px] font-semibold text-stone-600 uppercase mb-1">Time</label><input type="time" id="rec-start-time" value="10:00" required class="w-full rounded-xl border border-stone-300 p-2 text-xs text-stone-800"></div>
+          <div><label class="block text-[10px] font-semibold text-stone-600 uppercase mb-1">Start Date</label><input type="date" id="rec-start-date" required class="w-full rounded-xl border border-stone-300 p-2 text-xs text-stone-800"></div>
+          <div><label class="block text-[10px] font-semibold text-stone-600 uppercase mb-1">Weeks</label><input type="number" id="rec-weeks" min="1" max="12" value="4" required class="w-full rounded-xl border border-stone-300 p-2 text-xs text-stone-800"></div>
         </div>
-        <label class="flex items-center gap-2 cursor-pointer text-[11px]">
-          <input type="checkbox" id="rec-auto-deduct" checked class="rounded border-stone-300 text-stone-900">
-          <span class="font-semibold text-stone-800">Auto-deduct 1 class per session</span>
-        </label>
-        <div class="flex justify-end pt-2">
-          <button type="submit" class="w-full sm:w-auto bg-stone-900 hover:bg-stone-800 text-white px-5 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow-xs">
-            <i data-lucide="calendar-plus" class="w-4 h-4"></i> Generate Bookings
-          </button>
-        </div>
+        <label class="flex items-center gap-2 cursor-pointer text-[11px]"><input type="checkbox" id="rec-auto-deduct" checked class="rounded border-stone-300 text-stone-900"><span class="font-semibold text-stone-800">Auto-deduct 1 class per session</span></label>
+        <div class="flex justify-end pt-2"><button type="submit" class="w-full sm:w-auto bg-stone-900 hover:bg-stone-800 text-white px-5 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow-xs"><i data-lucide="calendar-plus" class="w-4 h-4"></i> Generate Bookings</button></div>
       </form>
 
       <!-- Excel Import Mode -->
       <div id="input-panel-excelimport" class="bg-white p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4 hidden">
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-          <p class="text-[11px] sm:text-xs text-stone-500">Import client list from .xlsx or .csv</p>
-          <button onclick="downloadSampleTemplate()" class="text-xs font-semibold text-rina-800 hover:underline flex items-center gap-1"><i data-lucide="download" class="w-3.5 h-3.5"></i> Sample Template</button>
+          <p class="text-[11px] sm:text-xs text-stone-500">Import from .xlsx or .csv</p>
+          <button onclick="downloadSampleTemplate()" class="text-xs font-semibold text-rina-800 hover:underline flex items-center gap-1"><i data-lucide="download" class="w-3.5 h-3.5"></i> Sample</button>
         </div>
         <div class="border-2 border-dashed border-stone-300 rounded-2xl p-6 text-center bg-stone-50/60 relative">
           <input type="file" id="excel-file-input" accept=".xlsx,.xls,.csv" onchange="handleExcelFileUpload(event)" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
           <div class="flex flex-col items-center gap-2 pointer-events-none">
             <div class="h-10 w-10 rounded-xl bg-rina-100 text-rina-800 flex items-center justify-center"><i data-lucide="upload-cloud" class="w-5 h-5"></i></div>
-            <p id="file-upload-label" class="text-xs font-semibold text-stone-800">Tap to choose Excel/CSV</p>
+            <p id="file-upload-label" class="text-xs font-semibold text-stone-800">Tap to choose file</p>
           </div>
         </div>
         <div id="parsed-preview-section" class="space-y-3 hidden">
@@ -377,13 +392,14 @@
       </div>
     </section>
 
+
     <!-- ========================================== -->
-    <!-- TAB 4: AUDIT LOGS                          -->
+    <!-- TAB 4: DEDUCTION AUDIT TRAIL              -->
     <!-- ========================================== -->
     <section id="view-audit" class="space-y-4 sm:space-y-6 hidden">
       <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h2 class="font-serif font-bold text-base sm:text-lg text-stone-900 flex items-center gap-2"><i data-lucide="history" class="w-5 h-5 text-rina-800"></i> Deduction Logs</h2>
+          <h2 class="font-serif font-bold text-base sm:text-lg text-stone-900 flex items-center gap-2"><i data-lucide="history" class="w-5 h-5 text-rina-800"></i> Logs</h2>
           <p class="text-[11px] sm:text-xs text-stone-500 mt-0.5">Chronological ledger of all class adjustments.</p>
         </div>
         <div class="flex items-center gap-2 w-full sm:w-auto">
@@ -409,34 +425,16 @@
   </main>
 
   <!-- ========================================== -->
-  <!-- MOBILE BOTTOM NAVIGATION                   -->
-  <!-- ========================================== -->
-  <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 z-40 flex items-center justify-around pb-safe shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
-    <button onclick="switchTab('schedule')" id="mob-tab-schedule" class="flex flex-col items-center py-2 text-rina-800 flex-1">
-      <i data-lucide="calendar" class="w-5 h-5 mb-1"></i><span class="text-[9px] font-bold">Schedule</span>
-    </button>
-    <button onclick="switchTab('students')" id="mob-tab-students" class="flex flex-col items-center py-2 text-stone-400 hover:text-stone-800 flex-1">
-      <i data-lucide="users" class="w-5 h-5 mb-1"></i><span class="text-[9px] font-medium">Students</span>
-    </button>
-    <button onclick="switchTab('datainput')" id="mob-tab-datainput" class="flex flex-col items-center py-2 text-stone-400 hover:text-stone-800 flex-1">
-      <i data-lucide="layout-grid" class="w-5 h-5 mb-1"></i><span class="text-[9px] font-medium">Data</span>
-    </button>
-    <button onclick="switchTab('audit')" id="mob-tab-audit" class="flex flex-col items-center py-2 text-stone-400 hover:text-stone-800 flex-1">
-      <i data-lucide="history" class="w-5 h-5 mb-1"></i><span class="text-[9px] font-medium">Logs</span>
-    </button>
-  </nav>
-
-  <!-- ========================================== -->
-  <!-- MODALS                                     -->
+  <!-- MODALS 保持原样，只是加了移动端适配类 -->
   <!-- ========================================== -->
 
-  <!-- BOOKING MODAL -->
+  <!-- MODAL 1: BOOKING -->
   <div id="modal-booking" class="fixed inset-0 z-50 modal-backdrop hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl border border-stone-200 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
       <div class="bg-[#FAF7F2] p-3 sm:p-4 border-b border-stone-200 flex items-center justify-between shrink-0">
         <div class="flex items-center gap-2">
           <div class="h-8 w-8 rounded-xl bg-rina-800/10 text-rina-800 flex items-center justify-center"><i data-lucide="calendar" class="w-4 h-4"></i></div>
-          <h3 class="font-serif font-bold text-stone-900 text-sm sm:text-base">New Booking</h3>
+          <div><h3 class="font-serif font-bold text-stone-900 text-sm sm:text-base">New Booking</h3></div>
         </div>
         <button onclick="closeModal('modal-booking')" class="text-stone-400 hover:text-stone-700 p-2"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
@@ -450,34 +448,13 @@
           <div><span class="font-bold">Note: </span><span id="booking-injury-text"></span></div>
         </div>
         <div class="grid grid-cols-2 gap-2">
-          <div class="col-span-2 sm:col-span-1">
-            <label class="block font-semibold uppercase text-stone-600 mb-1">Date *</label>
-            <input type="date" id="booking-date" required class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
-          </div>
-          <div>
-            <label class="block font-semibold uppercase text-stone-600 mb-1">Start *</label>
-            <input type="time" id="booking-start-time" required value="10:00" onchange="autoFillEndTime(this.value)" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
-          </div>
-          <div>
-            <label class="block font-semibold uppercase text-stone-600 mb-1">End *</label>
-            <input type="time" id="booking-end-time" required value="10:55" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
-          </div>
+          <div class="col-span-2 sm:col-span-1"><label class="block font-semibold uppercase text-stone-600 mb-1">Date *</label><input type="date" id="booking-date" required class="w-full rounded-xl border border-stone-300 p-2 text-stone-800"></div>
+          <div><label class="block font-semibold uppercase text-stone-600 mb-1">Start *</label><input type="time" id="booking-start-time" required value="10:00" onchange="autoFillEndTime(this.value)" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800"></div>
+          <div><label class="block font-semibold uppercase text-stone-600 mb-1">End *</label><input type="time" id="booking-end-time" required value="10:55" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800"></div>
         </div>
         <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block font-semibold uppercase text-stone-600 mb-1">Class Type</label>
-            <select id="booking-class-type" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800 bg-white">
-              <option value="Private Reformer">Private Reformer</option>
-              <option value="Duet Reformer">Duet Reformer</option>
-              <option value="Cadillac & Tower">Cadillac & Tower</option>
-              <option value="Mat Pilates Flow">Mat Pilates Flow</option>
-              <option value="Prenatal Pilates">Prenatal Pilates</option>
-            </select>
-          </div>
-          <div>
-            <label class="block font-semibold uppercase text-stone-600 mb-1">Instructor</label>
-            <input type="text" id="booking-instructor" value="Rina" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
-          </div>
+          <div><label class="block font-semibold uppercase text-stone-600 mb-1">Class Type</label><select id="booking-class-type" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800 bg-white"><option value="Private Reformer">Private Reformer</option><option value="Duet Reformer">Duet Reformer</option><option value="Cadillac & Tower">Cadillac & Tower</option><option value="Mat Pilates Flow">Mat Pilates Flow</option><option value="Prenatal Pilates">Prenatal Pilates</option></select></div>
+          <div><label class="block font-semibold uppercase text-stone-600 mb-1">Instructor</label><input type="text" id="booking-instructor" value="Rina" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800"></div>
         </div>
         <div class="rounded-xl border border-stone-200 bg-stone-50 p-3 space-y-2">
           <div class="flex items-center justify-between">
@@ -485,143 +462,70 @@
             <span id="booking-package-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">0 left</span>
           </div>
           <p id="booking-package-text" class="text-stone-600 text-[10px]">Select student to see package.</p>
-          <label class="flex items-start gap-2 cursor-pointer pt-1">
-            <input type="checkbox" id="booking-auto-deduct" checked class="rounded border-stone-300 text-stone-900 mt-0.5">
-            <span class="text-stone-800 font-semibold text-[11px]">Auto-deduct 1 class with timestamp</span>
-          </label>
+          <label class="flex items-start gap-2 cursor-pointer pt-1"><input type="checkbox" id="booking-auto-deduct" checked class="rounded border-stone-300 text-stone-900 mt-0.5"><span class="text-stone-800 font-semibold text-[11px]">Auto-deduct 1 class with timestamp</span></label>
         </div>
-        <div>
-          <label class="block font-semibold uppercase text-stone-600 mb-1">Notes</label>
-          <input type="text" id="booking-notes" placeholder="Focus or notes..." class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
-        </div>
-        <div class="flex justify-end gap-2 pt-2 border-t border-stone-100">
-          <button type="button" onclick="closeModal('modal-booking')" class="px-4 py-2.5 text-stone-600 hover:bg-stone-100 rounded-xl font-semibold w-full sm:w-auto">Cancel</button>
-          <button type="submit" class="px-4 py-2.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl font-semibold shadow-xs w-full sm:w-auto">Confirm Booking</button>
-        </div>
+        <div><label class="block font-semibold uppercase text-stone-600 mb-1">Notes</label><input type="text" id="booking-notes" placeholder="Focus or notes..." class="w-full rounded-xl border border-stone-300 p-2 text-stone-800"></div>
+        <div class="flex justify-end gap-2 pt-2 border-t border-stone-100"><button type="button" onclick="closeModal('modal-booking')" class="px-4 py-2.5 text-stone-600 hover:bg-stone-100 rounded-xl font-semibold w-full sm:w-auto">Cancel</button><button type="submit" class="px-4 py-2.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl font-semibold shadow-xs w-full sm:w-auto">Confirm Booking</button></div>
       </form>
     </div>
   </div>
 
-  <!-- STUDENT MODAL -->
+  <!-- MODAL 2: STUDENT -->
   <div id="modal-student" class="fixed inset-0 z-50 modal-backdrop hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl border border-stone-200 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
       <div class="bg-[#FAF7F2] p-3 sm:p-4 border-b border-stone-200 flex items-center justify-between shrink-0">
-        <div class="flex items-center gap-2">
-          <div class="h-8 w-8 rounded-xl bg-stone-900 text-white flex items-center justify-center"><i data-lucide="user-plus" class="w-4 h-4"></i></div>
-          <h3 id="student-modal-title" class="font-serif font-bold text-stone-900 text-sm sm:text-base">New Student</h3>
-        </div>
+        <div class="flex items-center gap-2"><div class="h-8 w-8 rounded-xl bg-stone-900 text-white flex items-center justify-center"><i data-lucide="user-plus" class="w-4 h-4"></i></div><h3 id="student-modal-title" class="font-serif font-bold text-stone-900 text-sm sm:text-base">New Student</h3></div>
         <button onclick="closeModal('modal-student')" class="text-stone-400 hover:text-stone-700 p-2"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
       <form id="student-form" onsubmit="handleStudentSubmit(event)" class="p-4 sm:p-5 space-y-3 overflow-y-auto text-xs">
         <input type="hidden" id="student-edit-id" value="">
-        <div>
-          <label class="block font-semibold uppercase text-stone-600 mb-1">Full Name *</label>
-          <input type="text" id="st-name" required placeholder="e.g. Claire Vance" class="w-full rounded-xl border border-stone-300 p-2.5 text-stone-800">
-        </div>
+        <div><label class="block font-semibold uppercase text-stone-600 mb-1">Full Name *</label><input type="text" id="st-name" required placeholder="e.g. Claire Vance" class="w-full rounded-xl border border-stone-300 p-2.5 text-stone-800"></div>
         <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block font-semibold uppercase text-stone-600 mb-1">Phone</label>
-            <input type="text" id="st-phone" placeholder="555-0100" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
-          </div>
-          <div>
-            <label class="block font-semibold uppercase text-stone-600 mb-1">Email</label>
-            <input type="email" id="st-email" placeholder="test@test.com" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
-          </div>
+          <div><label class="block font-semibold uppercase text-stone-600 mb-1">Phone</label><input type="text" id="st-phone" placeholder="555-0100" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800"></div>
+          <div><label class="block font-semibold uppercase text-stone-600 mb-1">Email</label><input type="email" id="st-email" placeholder="test@test.com" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800"></div>
         </div>
-        <div>
-          <label class="block font-semibold uppercase text-stone-600 mb-1">Emergency Contact</label>
-          <input type="text" id="st-emergency" placeholder="Name - Phone" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
-        </div>
+        <div><label class="block font-semibold uppercase text-stone-600 mb-1">Emergency Contact</label><input type="text" id="st-emergency" placeholder="Name - Phone" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800"></div>
         <div class="rounded-xl bg-amber-50/60 border border-amber-200 p-3 space-y-2">
           <span class="font-bold text-amber-900 uppercase text-[10px] flex items-center gap-1"><i data-lucide="heart" class="w-3.5 h-3.5 text-amber-700"></i> Medical & Goals</span>
-          <div>
-            <label class="block font-medium text-stone-700 mb-0.5 text-[10px]">Injuries</label>
-            <textarea id="st-injuries" rows="2" placeholder="L4-S1 disc bulge..." class="w-full rounded-lg border border-stone-300 p-1.5 text-stone-800 bg-white"></textarea>
-          </div>
-          <div>
-            <label class="block font-medium text-stone-700 mb-0.5 text-[10px]">Goals</label>
-            <input type="text" id="st-goals" placeholder="Core stability..." class="w-full rounded-lg border border-stone-300 p-1.5 text-stone-800 bg-white">
-          </div>
+          <div><label class="block font-medium text-stone-700 mb-0.5 text-[10px]">Injuries</label><textarea id="st-injuries" rows="2" placeholder="L4-S1 disc bulge..." class="w-full rounded-lg border border-stone-300 p-1.5 text-stone-800 bg-white"></textarea></div>
+          <div><label class="block font-medium text-stone-700 mb-0.5 text-[10px]">Goals</label><input type="text" id="st-goals" placeholder="Core stability..." class="w-full rounded-lg border border-stone-300 p-1.5 text-stone-800 bg-white"></div>
         </div>
         <div id="st-package-section" class="rounded-xl border border-stone-200 bg-stone-50 p-3 space-y-2">
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" id="st-has-package" checked class="rounded border-stone-300 text-stone-900">
-            <span class="font-bold uppercase text-stone-800 text-[10px]">Log Initial Package</span>
-          </label>
+          <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="st-has-package" checked class="rounded border-stone-300 text-stone-900"><span class="font-bold uppercase text-stone-800 text-[10px]">Log Initial Package</span></label>
           <div id="st-package-fields" class="space-y-2">
-            <div class="grid grid-cols-2 gap-2">
-              <div><label class="block text-stone-600 mb-0.5 text-[10px]">Package Name</label><input type="text" id="st-pkg-name" value="10x Private Reformer" class="w-full rounded-lg border border-stone-300 p-1.5 bg-white"></div>
-              <div><label class="block text-stone-600 mb-0.5 text-[10px]">Total Classes</label><input type="number" id="st-pkg-classes" value="10" min="1" class="w-full rounded-lg border border-stone-300 p-1.5 bg-white"></div>
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-              <div><label class="block text-stone-600 mb-0.5 text-[10px]">Price ($)</label><input type="number" id="st-pkg-price" value="1200" step="0.01" class="w-full rounded-lg border border-stone-300 p-1.5 bg-white"></div>
-              <div>
-                <label class="block text-stone-600 mb-0.5 text-[10px]">Method</label>
-                <select id="st-pkg-method" class="w-full rounded-lg border border-stone-300 p-1.5 bg-white">
-                  <option value="Credit Card">Credit Card</option><option value="Bank Transfer">Bank Transfer</option><option value="Cash">Cash</option><option value="PayNow / Zelle">PayNow</option>
-                </select>
-              </div>
-            </div>
+            <div class="grid grid-cols-2 gap-2"><div><label class="block text-stone-600 mb-0.5 text-[10px]">Package Name</label><input type="text" id="st-pkg-name" value="10x Private Reformer" class="w-full rounded-lg border border-stone-300 p-1.5 bg-white"></div><div><label class="block text-stone-600 mb-0.5 text-[10px]">Total Classes</label><input type="number" id="st-pkg-classes" value="10" min="1" class="w-full rounded-lg border border-stone-300 p-1.5 bg-white"></div></div>
+            <div class="grid grid-cols-2 gap-2"><div><label class="block text-stone-600 mb-0.5 text-[10px]">Price ($)</label><input type="number" id="st-pkg-price" value="1200" step="0.01" class="w-full rounded-lg border border-stone-300 p-1.5 bg-white"></div><div><label class="block text-stone-600 mb-0.5 text-[10px]">Method</label><select id="st-pkg-method" class="w-full rounded-lg border border-stone-300 p-1.5 bg-white"><option value="Credit Card">Credit Card</option><option value="Bank Transfer">Bank Transfer</option><option value="Cash">Cash</option><option value="PayNow / Zelle">PayNow</option></select></div></div>
           </div>
         </div>
-        <div class="flex justify-end gap-2 pt-2 border-t border-stone-100">
-          <button type="button" onclick="closeModal('modal-student')" class="px-4 py-2.5 text-stone-600 hover:bg-stone-100 rounded-xl font-semibold w-full sm:w-auto">Cancel</button>
-          <button type="submit" class="px-4 py-2.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl font-semibold shadow-xs w-full sm:w-auto">Save</button>
-        </div>
+        <div class="flex justify-end gap-2 pt-2 border-t border-stone-100"><button type="button" onclick="closeModal('modal-student')" class="px-4 py-2.5 text-stone-600 hover:bg-stone-100 rounded-xl font-semibold w-full sm:w-auto">Cancel</button><button type="submit" class="px-4 py-2.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl font-semibold shadow-xs w-full sm:w-auto">Save</button></div>
       </form>
     </div>
   </div>
 
-  <!-- PACKAGE MODAL -->
+  <!-- MODAL 3: PACKAGE -->
   <div id="modal-package" class="fixed inset-0 z-50 modal-backdrop hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl border border-stone-200 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
       <div class="bg-[#FAF7F2] p-3 sm:p-4 border-b border-stone-200 flex items-center justify-between shrink-0">
-        <div class="flex items-center gap-2">
-          <div class="h-8 w-8 rounded-xl bg-amber-800 text-white flex items-center justify-center"><i data-lucide="credit-card" class="w-4 h-4"></i></div>
-          <h3 class="font-serif font-bold text-stone-900 text-sm sm:text-base">Log Payment</h3>
-        </div>
+        <div class="flex items-center gap-2"><div class="h-8 w-8 rounded-xl bg-amber-800 text-white flex items-center justify-center"><i data-lucide="credit-card" class="w-4 h-4"></i></div><h3 class="font-serif font-bold text-stone-900 text-sm sm:text-base">Log Payment</h3></div>
         <button onclick="closeModal('modal-package')" class="text-stone-400 hover:text-stone-700 p-2"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
       <form id="package-form" onsubmit="handlePackageSubmit(event)" class="p-4 sm:p-5 space-y-3 overflow-y-auto text-xs">
-        <div>
-          <label class="block font-semibold uppercase text-stone-600 mb-1">Student *</label>
-          <select id="pkg-student-select" required class="w-full rounded-xl border border-stone-300 p-2.5 font-medium text-stone-800 bg-white"></select>
-        </div>
-        <div>
-          <label class="block font-semibold uppercase text-stone-600 mb-1">Package Name *</label>
-          <input type="text" id="pkg-name" value="10x Private Reformer" required class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-          <div><label class="block font-semibold uppercase text-stone-600 mb-1">Total</label><input type="number" id="pkg-total" value="10" min="1" required class="w-full rounded-xl border border-stone-300 p-2 text-stone-800"></div>
-          <div><label class="block font-semibold uppercase text-stone-600 mb-1">Price ($)</label><input type="number" id="pkg-price" value="1200" step="0.01" required class="w-full rounded-xl border border-stone-300 p-2 text-stone-800"></div>
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block font-semibold uppercase text-stone-600 mb-1">Method</label>
-            <select id="pkg-method" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800 bg-white">
-              <option value="Credit Card">Credit Card</option><option value="Bank Transfer">Bank Transfer</option><option value="Cash">Cash</option><option value="PayNow / Zelle">PayNow</option>
-            </select>
-          </div>
-          <div><label class="block font-semibold uppercase text-stone-600 mb-1">Date</label><input type="date" id="pkg-date" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800"></div>
-        </div>
-        <div class="flex justify-end gap-2 pt-2 border-t border-stone-100">
-          <button type="button" onclick="closeModal('modal-package')" class="px-4 py-2.5 text-stone-600 hover:bg-stone-100 rounded-xl font-semibold w-full sm:w-auto">Cancel</button>
-          <button type="submit" class="px-4 py-2.5 bg-rina-800 hover:bg-rina-900 text-white rounded-xl font-semibold shadow-xs w-full sm:w-auto">Save</button>
-        </div>
+        <div><label class="block font-semibold uppercase text-stone-600 mb-1">Student *</label><select id="pkg-student-select" required class="w-full rounded-xl border border-stone-300 p-2.5 font-medium text-stone-800 bg-white"></select></div>
+        <div><label class="block font-semibold uppercase text-stone-600 mb-1">Package Name *</label><input type="text" id="pkg-name" value="10x Private Reformer" required class="w-full rounded-xl border border-stone-300 p-2 text-stone-800"></div>
+        <div class="grid grid-cols-2 gap-2"><div><label class="block font-semibold uppercase text-stone-600 mb-1">Total</label><input type="number" id="pkg-total" value="10" min="1" required class="w-full rounded-xl border border-stone-300 p-2 text-stone-800"></div><div><label class="block font-semibold uppercase text-stone-600 mb-1">Price ($)</label><input type="number" id="pkg-price" value="1200" step="0.01" required class="w-full rounded-xl border border-stone-300 p-2 text-stone-800"></div></div>
+        <div class="grid grid-cols-2 gap-2"><div><label class="block font-semibold uppercase text-stone-600 mb-1">Method</label><select id="pkg-method" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800 bg-white"><option value="Credit Card">Credit Card</option><option value="Bank Transfer">Bank Transfer</option><option value="Cash">Cash</option><option value="PayNow / Zelle">PayNow</option></select></div><div><label class="block font-semibold uppercase text-stone-600 mb-1">Date</label><input type="date" id="pkg-date" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800"></div></div>
+        <div class="flex justify-end gap-2 pt-2 border-t border-stone-100"><button type="button" onclick="closeModal('modal-package')" class="px-4 py-2.5 text-stone-600 hover:bg-stone-100 rounded-xl font-semibold w-full sm:w-auto">Cancel</button><button type="submit" class="px-4 py-2.5 bg-rina-800 hover:bg-rina-900 text-white rounded-xl font-semibold shadow-xs w-full sm:w-auto">Save</button></div>
       </form>
     </div>
   </div>
 
-  <!-- PORTFOLIO MODAL -->
+  <!-- MODAL 4: PORTFOLIO -->
   <div id="modal-portfolio" class="fixed inset-0 z-50 modal-backdrop hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-white w-full max-w-3xl rounded-t-2xl sm:rounded-2xl border border-stone-200 shadow-2xl overflow-hidden flex flex-col h-[90vh] sm:h-auto sm:max-h-[88vh]">
       <div class="bg-[#FAF7F2] p-4 border-b border-stone-200 flex items-center justify-between shrink-0">
         <div class="flex items-center gap-3">
           <div id="portfolio-avatar" class="h-10 w-10 rounded-xl bg-rina-900 text-white flex items-center justify-center font-serif font-bold text-lg shadow-xs">C</div>
-          <div>
-            <h3 id="portfolio-name" class="font-serif font-bold text-stone-900 text-base sm:text-lg leading-tight">Name</h3>
-            <p id="portfolio-contact" class="text-[10px] sm:text-xs text-stone-500">Phone • Email</p>
-          </div>
+          <div><h3 id="portfolio-name" class="font-serif font-bold text-stone-900 text-base sm:text-lg leading-tight">Name</h3><p id="portfolio-contact" class="text-[10px] sm:text-xs text-stone-500">Phone • Email</p></div>
         </div>
         <button onclick="closeModal('modal-portfolio')" class="text-stone-400 hover:text-stone-700 p-2"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
@@ -632,40 +536,30 @@
           <div class="p-2 bg-stone-50 rounded-xl border border-stone-200"><span class="text-[9px] uppercase font-bold text-stone-500">Attended</span><div id="portfolio-attended" class="font-serif font-bold text-lg sm:text-2xl text-emerald-800">0</div></div>
           <div class="p-2 bg-stone-50 rounded-xl border border-stone-200"><span class="text-[9px] uppercase font-bold text-stone-500">Packages</span><div id="portfolio-packages-count" class="font-serif font-bold text-lg sm:text-2xl text-stone-900">0</div></div>
         </div>
-        <div class="p-3 rounded-xl bg-amber-50/70 border border-amber-200 space-y-1">
-          <span class="font-bold text-amber-900 uppercase text-[9px] flex items-center gap-1"><i data-lucide="heart" class="w-3 h-3 text-amber-700"></i> Medical Note</span>
-          <p id="portfolio-injuries" class="text-xs font-medium text-amber-950">None</p>
-        </div>
-        <div class="space-y-2">
-          <h4 class="font-bold text-stone-900 uppercase text-[10px]">Packages</h4>
-          <div id="portfolio-packages-list" class="space-y-1.5"></div>
-        </div>
-        <div class="space-y-2">
-          <h4 class="font-bold text-stone-900 uppercase text-[10px]">Deductions</h4>
-          <div id="portfolio-deductions-list" class="space-y-1.5 font-mono"></div>
-        </div>
+        <div class="p-3 rounded-xl bg-amber-50/70 border border-amber-200 space-y-1"><span class="font-bold text-amber-900 uppercase text-[9px] flex items-center gap-1"><i data-lucide="heart" class="w-3 h-3 text-amber-700"></i> Medical Note</span><p id="portfolio-injuries" class="text-xs font-medium text-amber-950">None</p></div>
+        <div class="space-y-2"><h4 class="font-bold text-stone-900 uppercase text-[10px]">Packages</h4><div id="portfolio-packages-list" class="space-y-1.5"></div></div>
+        <div class="space-y-2"><h4 class="font-bold text-stone-900 uppercase text-[10px]">Deductions</h4><div id="portfolio-deductions-list" class="space-y-1.5 font-mono"></div></div>
       </div>
-      <div class="p-3 bg-stone-50 border-t border-stone-200 flex justify-end shrink-0">
-        <button onclick="closeModal('modal-portfolio')" class="px-4 py-2 bg-stone-200 text-stone-800 font-semibold rounded-xl text-xs w-full sm:w-auto">Close</button>
-      </div>
+      <div class="p-3 bg-stone-50 border-t border-stone-200 flex justify-end shrink-0"><button onclick="closeModal('modal-portfolio')" class="px-4 py-2 bg-stone-200 text-stone-800 font-semibold rounded-xl text-xs w-full sm:w-auto">Close</button></div>
     </div>
   </div>
 
-  <!-- TOAST -->
+  <!-- Toast -->
   <div id="toast" class="fixed bottom-20 md:bottom-6 right-4 left-4 sm:left-auto z-50 bg-stone-900 text-white px-4 py-3 rounded-2xl text-xs font-semibold shadow-2xl flex items-center justify-center gap-2 border border-stone-800 hidden transition-all">
-    <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
-    <span id="toast-text">Success</span>
+    <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i><span id="toast-text">Success</span>
   </div>
 
   <!-- ========================================== -->
   <!-- JAVASCRIPT LOGIC                           -->
   <!-- ========================================== -->
   <script>
+    // --- 1. LOCAL STORAGE KEYS ---
     const STORAGE_KEY_STUDENTS = 'rina_pilates_students';
     const STORAGE_KEY_PACKAGES = 'rina_pilates_packages';
     const STORAGE_KEY_BOOKINGS = 'rina_pilates_bookings';
     const STORAGE_KEY_DEDUCTIONS = 'rina_pilates_deductions';
 
+    // --- 2. INITIAL DATA ---
     function initializeDefaultData() {
       if (!localStorage.getItem(STORAGE_KEY_STUDENTS)) {
         const initialStudents = [
@@ -695,6 +589,7 @@
       }
     }
 
+    // --- 3. HELPERS ---
     const getStudents = () => JSON.parse(localStorage.getItem(STORAGE_KEY_STUDENTS) || '[]');
     const saveStudents = (data) => localStorage.setItem(STORAGE_KEY_STUDENTS, JSON.stringify(data));
     const getPackages = () => JSON.parse(localStorage.getItem(STORAGE_KEY_PACKAGES) || '[]');
@@ -704,80 +599,82 @@
     const getDeductions = () => JSON.parse(localStorage.getItem(STORAGE_KEY_DEDUCTIONS) || '[]');
     const saveDeductions = (data) => localStorage.setItem(STORAGE_KEY_DEDUCTIONS, JSON.stringify(data));
 
+    // --- 4. STATE ---
     let currentScheduleDate = new Date().toISOString().split('T')[0];
     let scheduleFilter = 'all';
     let studentFilter = 'all';
     let recSelectedDays = [2, 4];
-    
     let calendarDate = new Date();
     calendarDate.setDate(1);
 
     function showToast(msg) {
       const el = document.getElementById('toast');
+      if (!el) return;
       document.getElementById('toast-text').innerText = msg;
       el.classList.remove('hidden');
       setTimeout(() => el.classList.add('hidden'), 3000);
     }
 
+    // --- 5. TAB SWITCHING (修复空白 Bug 的核心逻辑) ---
     function switchTab(tabId) {
       ['schedule', 'students', 'datainput', 'audit'].forEach(t => {
-        document.getElementById(`view-${t}`).classList.add('hidden');
+        const view = document.getElementById(`view-${t}`);
+        if (view) view.classList.add('hidden');
+        
         const btn = document.getElementById(`tab-btn-${t}`);
         const mobBtn = document.getElementById(`mob-tab-${t}`);
         
         if (btn) btn.className = "px-3.5 py-2 rounded-xl transition flex items-center gap-2 text-stone-600 hover:text-stone-900";
-        if (mobBtn) {
-          mobBtn.className = "flex flex-col items-center py-2 text-stone-400 hover:text-stone-800 flex-1";
-          mobBtn.querySelector('i').classList.remove('text-rina-800');
-          mobBtn.querySelector('span').className = "text-[9px] font-medium";
-        }
+        if (mobBtn) mobBtn.className = "px-3 py-1.5 rounded-lg whitespace-nowrap text-stone-600";
       });
 
-      document.getElementById(`view-${tabId}`).classList.remove('hidden');
+      const activeView = document.getElementById(`view-${tabId}`);
+      if (activeView) activeView.classList.remove('hidden');
       
       const activeBtn = document.getElementById(`tab-btn-${tabId}`);
       if (activeBtn) activeBtn.className = "px-3.5 py-2 rounded-xl transition flex items-center gap-2 bg-white text-stone-900 shadow-xs font-bold";
       
       const activeMobBtn = document.getElementById(`mob-tab-${tabId}`);
-      if (activeMobBtn) {
-        activeMobBtn.className = "flex flex-col items-center py-2 text-rina-800 flex-1";
-        activeMobBtn.querySelector('i').classList.add('text-rina-800');
-        activeMobBtn.querySelector('span').className = "text-[9px] font-bold";
-      }
+      if (activeMobBtn) activeMobBtn.className = "px-3 py-1.5 rounded-lg whitespace-nowrap bg-stone-900 text-white";
 
+      // 渲染对应的视图内容
       if (tabId === 'schedule') { renderCalendar(); renderSchedule(); }
       if (tabId === 'students') renderStudentPortfolios();
       if (tabId === 'datainput') populateDataInputOptions();
       if (tabId === 'audit') renderDeductionAudit();
     }
 
-    // --- 1. CALENDAR & SCHEDULE ---
+    // --- 6. CALENDAR LOGIC ---
     function changeMonth(offset) {
       calendarDate.setMonth(calendarDate.getMonth() + offset);
       renderCalendar();
     }
 
     function renderCalendar() {
+      const grid = document.getElementById('calendar-grid');
+      if (!grid) return;
+      
       const year = calendarDate.getFullYear();
       const month = calendarDate.getMonth();
       const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      document.getElementById('calendar-month-label').textContent = `${monthNames[month]} ${year}`;
+      const label = document.getElementById('calendar-month-label');
+      if (label) label.textContent = `${monthNames[month]} ${year}`;
 
-      const grid = document.getElementById('calendar-grid');
       grid.innerHTML = '';
 
       const firstDay = new Date(year, month, 1).getDay();
       const daysInMonth = new Date(year, month + 1, 0).getDate();
       const todayStr = new Date().toISOString().split('T')[0];
-      
       const bookings = getBookings();
 
+      // 填充上个月的空格
       for (let i = 0; i < firstDay; i++) {
         const empty = document.createElement('div');
         empty.className = 'cal-cell other-month';
         grid.appendChild(empty);
       }
 
+      // 填充当月天数
       for (let d = 1; d <= daysInMonth; d++) {
         const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
         const cell = document.createElement('div');
@@ -793,6 +690,7 @@
         }
         cell.innerHTML = html;
 
+        // 点击日历格子，切换下方列表的日期
         cell.onclick = () => {
           currentScheduleDate = dateStr;
           renderCalendar();
@@ -836,12 +734,21 @@
       renderSchedule();
     }
 
+    // --- 7. SCHEDULE RENDER ---
     function renderSchedule() {
-      document.getElementById('schedule-date-picker').value = currentScheduleDate;
+      const picker = document.getElementById('schedule-date-picker');
+      if (picker) picker.value = currentScheduleDate;
 
       const dateObj = new Date(currentScheduleDate + 'T00:00:00');
       const dateText = dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-      document.getElementById('schedule-display-date').innerText = dateText;
+      
+      const displayDate = document.getElementById('schedule-display-date');
+      if (displayDate) displayDate.innerText = dateText;
+
+      const todayStr = new Date().toISOString().split('T')[0];
+      const isToday = currentScheduleDate === todayStr;
+      const todayTag = document.getElementById('schedule-today-tag');
+      if (todayTag) todayTag.style.display = isToday ? 'inline-block' : 'none';
 
       const bookings = getBookings();
       const students = getStudents();
@@ -852,9 +759,11 @@
         .filter(b => scheduleFilter === 'all' ? true : b.status === scheduleFilter)
         .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
-      document.getElementById('schedule-stats-summary').innerText = `${dayBookings.length} session${dayBookings.length === 1 ? '' : 's'}`;
+      const summary = document.getElementById('schedule-stats-summary');
+      if (summary) summary.innerText = `${dayBookings.length} session${dayBookings.length === 1 ? '' : 's'} booked`;
 
       const container = document.getElementById('schedule-cards-container');
+      if (!container) return;
 
       if (dayBookings.length === 0) {
         container.innerHTML = `
@@ -864,7 +773,7 @@
             <button onclick="openBookingModal('${currentScheduleDate}')" class="bg-stone-900 text-white px-4 py-2 rounded-xl text-xs font-semibold inline-flex items-center gap-1.5 hover:bg-stone-800 mx-auto"><i data-lucide="plus" class="w-4 h-4"></i> Book Class</button>
           </div>
         `;
-        lucide.createIcons();
+        if (window.lucide) lucide.createIcons();
         return;
       }
 
@@ -873,7 +782,7 @@
         const pkg = packages.find(p => p.id === b.packageId);
 
         return `
-          <div class="bg-white rounded-xl sm:rounded-2xl border border-stone-200 p-3 sm:p-5 shadow-xs">
+          <div class="bg-white rounded-xl sm:rounded-2xl border border-stone-200 p-3 sm:p-5 shadow-xs hover:shadow-md transition">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div class="flex items-start gap-3">
                 <div class="bg-[#FAF7F2] border border-stone-200 px-2.5 py-1.5 rounded-lg text-center shrink-0">
@@ -894,6 +803,7 @@
                     `}
                     ${pkg ? `<span class="text-stone-500 flex items-center gap-1"><i data-lucide="layers" class="w-3 h-3"></i> ${pkg.remainingClasses} left</span>` : ''}
                   </div>
+                  ${b.notes ? `<p class="text-[10px] text-stone-500 italic mt-0.5">"${b.notes}"</p>` : ''}
                 </div>
               </div>
               <div class="flex items-center gap-1.5 border-t sm:border-t-0 pt-2 sm:pt-0">
@@ -902,23 +812,30 @@
                 <button onclick="deleteBooking(${b.id})" class="text-stone-400 hover:text-red-600 p-1.5"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
               </div>
             </div>
+            ${student && student.injuryNotes ? `
+              <div class="mt-2 bg-amber-50/70 border border-amber-200 p-2 rounded-lg flex items-start gap-2 text-[10px] text-amber-950">
+                <i data-lucide="heart" class="w-3.5 h-3.5 text-amber-800 shrink-0 mt-0.5"></i>
+                <div><span class="font-bold text-amber-900">Note: </span><span>${student.injuryNotes}</span></div>
+              </div>
+            ` : ''}
           </div>
         `;
       }).join('');
 
-      lucide.createIcons();
+      if (window.lucide) lucide.createIcons();
     }
 
-    function markBookingAttended(id) {
+    // --- 8. BOOKING ACTIONS ---
+    function markBookingAttended(bookingId) {
       const bookings = getBookings();
-      const b = bookings.find(x => x.id === id);
+      const b = bookings.find(x => x.id === bookingId);
       if (b) { b.status = 'attended'; saveBookings(bookings); showToast("Marked attended"); renderSchedule(); }
     }
 
-    function cancelBooking(id) {
+    function cancelBooking(bookingId) {
       const restore = confirm("Cancel session?\n\nOK: Restore 1 credit.\nCancel: Keep deducted (late policy).");
       const bookings = getBookings(), packages = getPackages(), deductions = getDeductions(), students = getStudents();
-      const b = bookings.find(x => x.id === id);
+      const b = bookings.find(x => x.id === bookingId);
       if (!b) return;
       b.status = 'cancelled';
       if (restore && b.deducted && b.packageId) {
@@ -937,9 +854,9 @@
       renderSchedule();
     }
 
-    function manuallyDeductBooking(id) {
+    function manuallyDeductBooking(bookingId) {
       const bookings = getBookings(), packages = getPackages(), deductions = getDeductions(), students = getStudents();
-      const b = bookings.find(x => x.id === id);
+      const b = bookings.find(x => x.id === bookingId);
       if (!b) return;
       const targetPkg = packages.find(p => p.studentId === b.studentId && p.remainingClasses > 0);
       if (!targetPkg) { alert("No package credits available."); return; }
@@ -956,13 +873,13 @@
       showToast("Deducted 1 class"); renderSchedule();
     }
 
-    function deleteBooking(id) {
+    function deleteBooking(bookingId) {
       if (!confirm("Delete this booking record?")) return;
-      saveBookings(getBookings().filter(b => b.id !== id));
+      saveBookings(getBookings().filter(b => b.id !== bookingId));
       showToast("Booking deleted"); renderSchedule();
     }
 
-    // --- 2. STUDENT PORTFOLIOS ---
+    // --- 9. STUDENT PORTFOLIO ---
     function setStudentFilter(filter) {
       studentFilter = filter;
       ['all', 'low', 'empty'].forEach(f => {
@@ -977,8 +894,6 @@
 
     function renderStudentPortfolios() {
       const students = getStudents(), packages = getPackages(), bookings = getBookings();
-      
-      // Safe check for search input (fixes the blank page bug)
       const searchInput = document.getElementById('student-search-input');
       const searchVal = searchInput ? searchInput.value.toLowerCase() : '';
 
@@ -986,10 +901,14 @@
       packages.forEach(p => { totalRev += parseFloat(p.pricePaid || 0); totalClassesLeft += parseInt(p.remainingClasses || 0); });
       bookings.forEach(b => { if (b.status === 'attended') totalAttended++; });
 
-      document.getElementById('stat-student-count').innerText = students.length;
-      document.getElementById('stat-total-revenue').innerText = `$${totalRev.toLocaleString(undefined, {minimumFractionDigits: 0})}`;
-      document.getElementById('stat-classes-left').innerText = totalClassesLeft;
-      document.getElementById('stat-sessions-attended').innerText = totalAttended;
+      const sCount = document.getElementById('stat-student-count');
+      const sRev = document.getElementById('stat-total-revenue');
+      const sLeft = document.getElementById('stat-classes-left');
+      const sAtt = document.getElementById('stat-sessions-attended');
+      if (sCount) sCount.innerText = students.length;
+      if (sRev) sRev.innerText = `$${totalRev.toLocaleString(undefined, {minimumFractionDigits: 0})}`;
+      if (sLeft) sLeft.innerText = totalClassesLeft;
+      if (sAtt) sAtt.innerText = totalAttended;
 
       const filtered = students.filter(s => {
         const matchesSearch = s.name.toLowerCase().includes(searchVal) || (s.email && s.email.toLowerCase().includes(searchVal)) || (s.phone && s.phone.includes(searchVal));
@@ -1001,6 +920,8 @@
       });
 
       const grid = document.getElementById('students-grid');
+      if (!grid) return;
+
       if (filtered.length === 0) {
         grid.innerHTML = `<div class="col-span-full bg-white rounded-2xl border border-dashed border-stone-200 p-8 text-center text-xs text-stone-500">No students matched.</div>`;
         return;
@@ -1012,6 +933,7 @@
         const totalPaid = stPkgs.reduce((acc, p) => acc + parseFloat(p.pricePaid || 0), 0);
         const remainingClasses = stPkgs.reduce((acc, p) => acc + (p.remainingClasses || 0), 0);
         const attended = stBookings.filter(b => b.status === 'attended').length;
+        const activePkg = stPkgs.find(p => p.remainingClasses > 0) || stPkgs[0];
         const isLow = remainingClasses > 0 && remainingClasses <= 2;
         const isZero = remainingClasses === 0;
 
@@ -1032,6 +954,7 @@
                 <div><span class="text-[8px] sm:text-[10px] font-semibold uppercase text-stone-500">Paid</span><div class="font-bold text-stone-900">$${totalPaid.toFixed(0)}</div></div>
                 <div><span class="text-[8px] sm:text-[10px] font-semibold uppercase text-stone-500">Attended</span><div class="font-bold text-stone-800">${attended}</div></div>
               </div>
+              ${s.injuryNotes ? `<div class="bg-amber-50/70 border border-amber-200/80 p-2 rounded-lg flex items-start gap-1.5 text-[10px] text-amber-950"><i data-lucide="heart" class="w-3 h-3 text-amber-800 shrink-0 mt-0.5"></i><p class="line-clamp-2"><span class="font-bold">Medical: </span>${s.injuryNotes}</p></div>` : ''}
             </div>
             <div class="mt-3 pt-2 border-t border-stone-100 flex items-center justify-between text-[10px] sm:text-xs" onclick="event.stopPropagation()">
               <button onclick="openPortfolioModal(${s.id})" class="font-semibold text-rina-800 hover:underline">View</button>
@@ -1045,7 +968,7 @@
           </div>
         `;
       }).join('');
-      lucide.createIcons();
+      if (window.lucide) lucide.createIcons();
     }
 
     function deleteStudent(id) {
@@ -1057,16 +980,20 @@
       showToast("Student deleted"); renderStudentPortfolios();
     }
 
-    // --- 3. DATA INPUT SYSTEM ---
+    // --- 10. DATA INPUT ---
     let batchTableRows = [{ name: "", phone: "", email: "", packageName: "10x Private Reformer", totalClasses: 10, remainingClasses: 10, pricePaid: 1200, paymentMethod: "Credit Card", injuryNotes: "" }];
 
     function switchInputMode(mode) {
       ['spreadsheet', 'recurring', 'excelimport'].forEach(m => {
-        document.getElementById(`input-panel-${m}`).classList.add('hidden');
-        document.getElementById(`input-mode-btn-${m}`).className = "pb-2 sm:pb-3 border-b-2 border-transparent text-stone-500 hover:text-stone-800 flex items-center gap-1.5 whitespace-nowrap";
+        const p = document.getElementById(`input-panel-${m}`);
+        const b = document.getElementById(`input-mode-btn-${m}`);
+        if (p) p.classList.add('hidden');
+        if (b) b.className = "pb-2 sm:pb-3 border-b-2 border-transparent text-stone-500 hover:text-stone-800 flex items-center gap-1.5 whitespace-nowrap";
       });
-      document.getElementById(`input-panel-${mode}`).classList.remove('hidden');
-      document.getElementById(`input-mode-btn-${mode}`).className = "pb-2 sm:pb-3 border-b-2 border-rina-800 text-rina-900 font-bold flex items-center gap-1.5 whitespace-nowrap";
+      const activeP = document.getElementById(`input-panel-${mode}`);
+      const activeB = document.getElementById(`input-mode-btn-${mode}`);
+      if (activeP) activeP.classList.remove('hidden');
+      if (activeB) activeB.className = "pb-2 sm:pb-3 border-b-2 border-rina-800 text-rina-900 font-bold flex items-center gap-1.5 whitespace-nowrap";
     }
 
     function renderBatchTable() {
@@ -1092,7 +1019,7 @@
           <td class="p-1.5 text-center"><button onclick="removeBatchRow(${i})" class="text-stone-400 hover:text-red-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></td>
         </tr>
       `).join('');
-      lucide.createIcons();
+      if (window.lucide) lucide.createIcons();
     }
 
     function addBatchRow() { batchTableRows.push({ name: "", phone: "", email: "", packageName: "10x Private Reformer", totalClasses: 10, remainingClasses: 10, pricePaid: 1200, paymentMethod: "Credit Card", injuryNotes: "" }); renderBatchTable(); }
@@ -1169,7 +1096,8 @@
     let parsedRowsToCommit = [];
     function handleExcelFileUpload(e) {
       const file = e.target.files[0]; if (!file) return;
-      document.getElementById('file-upload-label').innerText = file.name;
+      const label = document.getElementById('file-upload-label');
+      if (label) label.innerText = file.name;
       const reader = new FileReader();
       reader.onload = function(evt) {
         try {
@@ -1184,10 +1112,14 @@
             pricePaid: parseFloat(r["Price Paid"] || 1200)
           })).filter(r => r.name.trim().length > 0);
 
-          document.getElementById('parsed-preview-tbody').innerHTML = parsedRowsToCommit.map(r => `
-            <tr><td class="p-2 font-bold">${r.name}</td><td class="p-2">${r.phone||'-'}</td><td class="p-2 text-amber-900">${r.packageName}</td><td class="p-2 font-bold">${r.remainingClasses}</td><td class="p-2">$${r.pricePaid}</td></tr>
-          `).join('');
-          document.getElementById('parsed-preview-section').classList.remove('hidden');
+          const tbody = document.getElementById('parsed-preview-tbody');
+          if (tbody) {
+            tbody.innerHTML = parsedRowsToCommit.map(r => `
+              <tr><td class="p-2 font-bold">${r.name}</td><td class="p-2">${r.phone||'-'}</td><td class="p-2 text-amber-900">${r.packageName}</td><td class="p-2 font-bold">${r.remainingClasses}</td><td class="p-2">$${r.pricePaid}</td></tr>
+            `).join('');
+          }
+          const preview = document.getElementById('parsed-preview-section');
+          if (preview) preview.classList.remove('hidden');
         } catch (err) { alert("Error reading file."); }
       };
       reader.readAsBinaryString(file);
@@ -1204,8 +1136,10 @@
       saveStudents(students); savePackages(packages);
       showToast(`Imported ${parsedRowsToCommit.length} students`);
       parsedRowsToCommit = [];
-      document.getElementById('parsed-preview-section').classList.add('hidden');
-      document.getElementById('file-upload-label').innerText = "Tap to choose Excel/CSV";
+      const preview = document.getElementById('parsed-preview-section');
+      if (preview) preview.classList.add('hidden');
+      const label = document.getElementById('file-upload-label');
+      if (label) label.innerText = "Tap to choose Excel/CSV";
       renderStudentPortfolios();
     }
 
@@ -1219,20 +1153,24 @@
     function populateDataInputOptions() {
       renderBatchTable();
       const students = getStudents();
-      document.getElementById('rec-student-select').innerHTML = '<option value="">Select student...</option>' + students.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
-      document.getElementById('rec-start-date').value = currentScheduleDate;
+      const recSelect = document.getElementById('rec-student-select');
+      if (recSelect) recSelect.innerHTML = '<option value="">Select student...</option>' + students.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+      const recDate = document.getElementById('rec-start-date');
+      if (recDate) recDate.value = currentScheduleDate;
     }
 
-    // --- 4. AUDIT LOGS ---
+    // --- 11. AUDIT LOGS ---
     function renderDeductionAudit() {
       const deductions = getDeductions(), students = getStudents();
-      const filterStudentId = document.getElementById('audit-filter-student').value;
+      const filterSelect = document.getElementById('audit-filter-student');
+      if (!filterSelect) return;
       
-      const sel = document.getElementById('audit-filter-student');
-      sel.innerHTML = '<option value="all">All Students</option>' + students.map(s => `<option value="${s.id}" ${sel.value == s.id ? 'selected' : ''}>${s.name}</option>`).join('');
+      const filterStudentId = filterSelect.value;
+      filterSelect.innerHTML = '<option value="all">All Students</option>' + students.map(s => `<option value="${s.id}" ${filterStudentId == s.id ? 'selected' : ''}>${s.name}</option>`).join('');
 
       const list = filterStudentId === 'all' ? deductions : deductions.filter(d => String(d.studentId) === String(filterStudentId));
       const tbody = document.getElementById('audit-log-tbody');
+      if (!tbody) return;
       
       if (list.length === 0) {
         tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-stone-400 text-xs">No logs recorded.</td></tr>`;
@@ -1252,7 +1190,7 @@
           </td>
         </tr>
       `).join('');
-      lucide.createIcons();
+      if (window.lucide) lucide.createIcons();
     }
 
     function deleteDeductionLog(id) {
@@ -1261,7 +1199,7 @@
       showToast("Log deleted"); renderDeductionAudit();
     }
 
-    // --- 5. EXCEL EXPORT ---
+    // --- 12. EXPORT EXCEL ---
     function exportToExcel() {
       const students = getStudents(), packages = getPackages(), bookings = getBookings(), deductions = getDeductions();
       const wb = XLSX.utils.book_new();
@@ -1293,47 +1231,58 @@
       showToast("Excel exported!");
     }
 
-    // --- 6. MODAL HANDLERS ---
-    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+    // --- 13. MODALS ---
+    function closeModal(id) { const el = document.getElementById(id); if (el) el.classList.add('hidden'); }
 
     function openBookingModal(date, studentId) {
       const students = getStudents();
-      document.getElementById('booking-student-select').innerHTML = '<option value="">Select student...</option>' + students.map(s => `<option value="${s.id}" ${studentId === s.id ? 'selected' : ''}>${s.name}</option>`).join('');
-      document.getElementById('booking-date').value = date || currentScheduleDate;
-      document.getElementById('booking-start-time').value = "10:00";
-      document.getElementById('booking-end-time').value = "10:55";
-      document.getElementById('booking-notes').value = "";
-      document.getElementById('booking-auto-deduct').checked = true;
+      const sel = document.getElementById('booking-student-select');
+      if (sel) sel.innerHTML = '<option value="">Select student...</option>' + students.map(s => `<option value="${s.id}" ${studentId === s.id ? 'selected' : ''}>${s.name}</option>`).join('');
+      const dInput = document.getElementById('booking-date');
+      if (dInput) dInput.value = date || currentScheduleDate;
+      const stInput = document.getElementById('booking-start-time');
+      if (stInput) stInput.value = "10:00";
+      const enInput = document.getElementById('booking-end-time');
+      if (enInput) enInput.value = "10:55";
+      const notes = document.getElementById('booking-notes');
+      if (notes) notes.value = "";
+      const auto = document.getElementById('booking-auto-deduct');
+      if (auto) auto.checked = true;
       onBookingStudentChanged();
-      document.getElementById('modal-booking').classList.remove('hidden');
-      lucide.createIcons();
+      const modal = document.getElementById('modal-booking');
+      if (modal) modal.classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
     }
 
     function onBookingStudentChanged() {
       const studentId = parseInt(document.getElementById('booking-student-select').value);
       const student = getStudents().find(s => s.id === studentId);
       const banner = document.getElementById('booking-injury-banner');
-      if (student && student.injuryNotes) {
-        document.getElementById('booking-injury-text').innerText = student.injuryNotes;
-        banner.classList.remove('hidden');
-      } else banner.classList.add('hidden');
+      if (banner) {
+        if (student && student.injuryNotes) {
+          document.getElementById('booking-injury-text').innerText = student.injuryNotes;
+          banner.classList.remove('hidden');
+        } else banner.classList.add('hidden');
+      }
 
       const activePkg = getPackages().find(p => p.studentId === studentId && p.remainingClasses > 0);
       const badge = document.getElementById('booking-package-badge');
       const text = document.getElementById('booking-package-text');
       
-      if (!studentId) {
-        badge.innerText = "No student";
-        badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-stone-200 text-stone-700";
-        text.innerText = "Select a student.";
-      } else if (activePkg) {
-        badge.innerText = `${activePkg.remainingClasses} left`;
-        badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800";
-        text.innerText = `${activePkg.packageName}. Will deduct 1 class.`;
-      } else {
-        badge.innerText = "0 left";
-        badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800";
-        text.innerText = "No credits remaining.";
+      if (badge && text) {
+        if (!studentId) {
+          badge.innerText = "No student";
+          badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-stone-200 text-stone-700";
+          text.innerText = "Select a student.";
+        } else if (activePkg) {
+          badge.innerText = `${activePkg.remainingClasses} left`;
+          badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800";
+          text.innerText = `${activePkg.packageName}. Will deduct 1 class.`;
+        } else {
+          badge.innerText = "0 left";
+          badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800";
+          text.innerText = "No credits remaining.";
+        }
       }
     }
 
@@ -1343,7 +1292,8 @@
       const total = m + 55;
       const endH = h + Math.floor(total / 60);
       const endM = total % 60;
-      document.getElementById('booking-end-time').value = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
+      const endInput = document.getElementById('booking-end-time');
+      if (endInput) endInput.value = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
     }
 
     function handleBookingSubmit(e) {
@@ -1397,7 +1347,7 @@
         ['st-name','st-phone','st-email','st-emergency','st-injuries','st-goals'].forEach(id => document.getElementById(id).value = "");
       }
       document.getElementById('modal-student').classList.remove('hidden');
-      lucide.createIcons();
+      if (window.lucide) lucide.createIcons();
     }
 
     function handleStudentSubmit(e) {
@@ -1428,10 +1378,13 @@
     }
 
     function openPackageModal(studentId) {
-      document.getElementById('pkg-student-select').innerHTML = '<option value="">Select...</option>' + getStudents().map(s => `<option value="${s.id}" ${studentId === s.id ? 'selected' : ''}>${s.name}</option>`).join('');
-      document.getElementById('pkg-date').value = new Date().toISOString().split('T')[0];
-      document.getElementById('modal-package').classList.remove('hidden');
-      lucide.createIcons();
+      const sel = document.getElementById('pkg-student-select');
+      if (sel) sel.innerHTML = '<option value="">Select...</option>' + getStudents().map(s => `<option value="${s.id}" ${studentId === s.id ? 'selected' : ''}>${s.name}</option>`).join('');
+      const dateInput = document.getElementById('pkg-date');
+      if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+      const modal = document.getElementById('modal-package');
+      if (modal) modal.classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
     }
 
     function handlePackageSubmit(e) {
@@ -1478,17 +1431,17 @@
       `).join('');
 
       document.getElementById('modal-portfolio').classList.remove('hidden');
-      lucide.createIcons();
+      if (window.lucide) lucide.createIcons();
     }
 
-    // --- INIT ---
+    // --- 14. INIT ---
     window.addEventListener('DOMContentLoaded', () => {
       initializeDefaultData();
       renderCalendar();
       renderSchedule();
       renderStudentPortfolios();
       populateDataInputOptions();
-      lucide.createIcons();
+      if (window.lucide) lucide.createIcons();
     });
   </script>
 </body>
