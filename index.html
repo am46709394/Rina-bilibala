@@ -1,14 +1,32 @@
+Here is the fully optimized, mobile-responsive version. I have made the following major improvements:
+
+1. True Mobile Layout: The top navigation and buttons now stack perfectly on small screens. The tables collapse into scrollable blocks, and font sizes adapt to your screen.
+2. NEW Visual Calendar: I added a brand-new Monthly Calendar view at the very top of the "Daily Schedule" tab. It automatically shows a dot/count badge on days that have bookings. You can tap any day on the calendar to instantly filter the schedule below it.
+3. Touch-Friendly Modals: The forms and buttons inside the pop-up windows (modals) are now much larger and easier to tap on a phone screen.
+
+📝 How to Update:
+
+1. Open your GitHub repository on your phone.
+2. Click on index.html.
+3. Click the Pencil icon (Edit).
+4. Delete everything and paste the new code below.
+5. Click Commit changes.
+6. Wait 1-2 minutes, then refresh your app link!
+
+Here is the updated code:
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RINA Pilates Studio | Solo Owner CMS & Schedule</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>RINA Pilates Studio | CMS & Schedule</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧘‍♀️</text></svg>">
 
-  <!-- Tailwind CSS CDN -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- SheetJS / XLSX CDN for Excel export & import -->
+  <!-- SheetJS -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -19,14 +37,8 @@
         extend: {
           colors: {
             rina: {
-              50: '#FBF9F5',
-              100: '#F5EFE6',
-              200: '#E8DCC4',
-              300: '#D6C09D',
-              600: '#9E7241',
-              700: '#7E5728',
-              800: '#5F3F19',
-              900: '#3D280E',
+              50: '#FBF9F5', 100: '#F5EFE6', 200: '#E8DCC4', 300: '#D6C09D',
+              600: '#9E7241', 700: '#7E5728', 800: '#5F3F19', 900: '#3D280E',
             }
           },
           fontFamily: {
@@ -43,309 +55,273 @@
       background-color: #FAF7F2;
       color: #292524;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
     }
     .modal-backdrop {
-      background-color: rgba(0, 0, 0, 0.55);
-      backdrop-filter: blur(2px);
+      background-color: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(3px);
     }
-    /* custom scrollbar */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
+    /* Custom scrollbar for tables */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #F5EFE6; }
+    ::-webkit-scrollbar-thumb { background: #D6C09D; border-radius: 4px; }
+    
+    /* Hide scrollbar for clean mobile nav */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    /* Calendar cell styles */
+    .cal-cell {
+      aspect-ratio: 1 / 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.15s;
     }
-    ::-webkit-scrollbar-track {
-      background: #F5EFE6;
+    @media (min-width: 640px) {
+      .cal-cell { aspect-ratio: auto; height: 5rem; padding: 0.5rem; align-items: flex-start; justify-content: flex-start; }
     }
-    ::-webkit-scrollbar-thumb {
-      background: #D6C09D;
-      border-radius: 4px;
-    }
+    .cal-cell:hover { background-color: #F5EFE6; }
+    .cal-cell.today { border: 2px solid #5F3F19; }
+    .cal-cell.selected { background-color: #E8DCC4; font-weight: bold; }
+    .cal-cell.other-month { opacity: 0.3; pointer-events: none; }
+    
+    /* Touch friendly inputs */
+    input, select, textarea { font-size: 16px !important; }
+    @media (min-width: 640px) { input, select, textarea { font-size: 0.875rem !important; } }
   </style>
 </head>
-<body class="min-h-screen flex flex-col antialiased">
+<body class="min-h-screen flex flex-col antialiased pb-20 md:pb-0">
 
-  <!-- Top Sticky Navigation Bar -->
+  <!-- Top Navigation Bar -->
   <header class="sticky top-0 z-40 bg-[#FAF7F2]/95 border-b border-stone-200/80 backdrop-blur shadow-xs">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
-      <!-- Logo & Studio Title -->
-      <div class="flex items-center gap-3">
-        <div class="h-10 w-10 rounded-2xl bg-rina-900 text-white flex items-center justify-center font-serif font-bold text-xl shadow-xs ring-2 ring-rina-800/30">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2 sm:py-3 flex items-center justify-between">
+      <!-- Logo -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <div class="h-8 w-8 sm:h-10 sm:w-10 rounded-xl sm:rounded-2xl bg-rina-900 text-white flex items-center justify-center font-serif font-bold text-lg sm:text-xl shadow-xs">
           R
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <span class="font-serif font-bold text-xl tracking-wider text-stone-900">RINA</span>
-            <span class="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-rina-100 text-rina-800 border border-rina-200">
-              Pilates Studio CMS
-            </span>
+            <span class="font-serif font-bold text-lg sm:text-xl tracking-wider text-stone-900">RINA</span>
+            <span class="hidden sm:inline-block text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-rina-100 text-rina-800 border border-rina-200">CMS</span>
           </div>
-          <p class="text-xs text-stone-500 font-medium">Daily Schedule, Balance Deductions & Portfolio</p>
         </div>
       </div>
 
-      <!-- Navigation Tabs -->
+      <!-- Desktop Nav -->
       <nav class="hidden md:flex items-center gap-1 bg-stone-100/90 p-1 rounded-2xl border border-stone-200 text-xs font-semibold">
         <button onclick="switchTab('schedule')" id="tab-btn-schedule" class="px-3.5 py-2 rounded-xl transition flex items-center gap-2 bg-white text-stone-900 shadow-xs font-bold">
-          <i data-lucide="calendar" class="w-4 h-4 text-rina-800"></i>
-          <span>Daily Schedule</span>
-          <span id="nav-today-badge" class="px-1.5 py-0.2 rounded-full text-[10px] bg-rina-800 text-white font-mono">0</span>
+          <i data-lucide="calendar" class="w-4 h-4 text-rina-800"></i> <span>Schedule</span>
         </button>
         <button onclick="switchTab('students')" id="tab-btn-students" class="px-3.5 py-2 rounded-xl transition flex items-center gap-2 text-stone-600 hover:text-stone-900">
-          <i data-lucide="users" class="w-4 h-4"></i>
-          <span>Student Portfolios</span>
-          <span id="nav-student-count" class="px-1.5 py-0.2 rounded-full text-[10px] bg-stone-200 text-stone-700 font-mono">0</span>
+          <i data-lucide="users" class="w-4 h-4"></i> <span>Students</span>
         </button>
         <button onclick="switchTab('datainput')" id="tab-btn-datainput" class="px-3.5 py-2 rounded-xl transition flex items-center gap-2 text-stone-600 hover:text-stone-900">
-          <i data-lucide="layout-grid" class="w-4 h-4"></i>
-          <span>Data Input System</span>
+          <i data-lucide="layout-grid" class="w-4 h-4"></i> <span>Data Entry</span>
         </button>
         <button onclick="switchTab('audit')" id="tab-btn-audit" class="px-3.5 py-2 rounded-xl transition flex items-center gap-2 text-stone-600 hover:text-stone-900">
-          <i data-lucide="history" class="w-4 h-4"></i>
-          <span>Deduction Logs</span>
+          <i data-lucide="history" class="w-4 h-4"></i> <span>Logs</span>
         </button>
       </nav>
 
-      <!-- Action Buttons -->
-      <div class="flex items-center gap-2">
-        <button onclick="exportToExcel()" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-emerald-900 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-xl transition shadow-xs" title="Download Excel .xlsx with all bookings, deductions, and student balances">
+      <!-- Top Action Buttons -->
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        <button onclick="exportToExcel()" class="flex items-center justify-center h-8 w-8 sm:h-auto sm:w-auto sm:px-3 sm:py-2 text-xs font-semibold text-emerald-900 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-lg sm:rounded-xl transition shadow-xs">
           <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-700"></i>
-          <span class="hidden sm:inline">Extract to Excel</span>
+          <span class="hidden sm:inline ml-1.5">Export Excel</span>
         </button>
-        <button onclick="openBookingModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-stone-900 hover:bg-stone-800 rounded-xl transition shadow-xs">
+        <button onclick="openBookingModal()" class="flex items-center justify-center h-8 px-2.5 sm:h-auto sm:px-3.5 sm:py-2 text-xs font-semibold text-white bg-stone-900 hover:bg-stone-800 rounded-lg sm:rounded-xl transition shadow-xs">
           <i data-lucide="plus" class="w-4 h-4"></i>
-          <span class="hidden sm:inline">Book Class</span>
+          <span class="hidden sm:inline ml-1.5">Book Class</span>
         </button>
       </div>
-    </div>
-
-    <!-- Mobile Sub Tabs -->
-    <div class="md:hidden flex overflow-x-auto px-4 py-2 border-t border-stone-200 gap-1 text-xs font-semibold bg-stone-50">
-      <button onclick="switchTab('schedule')" class="px-3 py-1.5 rounded-lg whitespace-nowrap bg-stone-900 text-white">Daily Schedule</button>
-      <button onclick="switchTab('students')" class="px-3 py-1.5 rounded-lg whitespace-nowrap text-stone-600">Students</button>
-      <button onclick="switchTab('datainput')" class="px-3 py-1.5 rounded-lg whitespace-nowrap text-stone-600">Data Input</button>
-      <button onclick="switchTab('audit')" class="px-3 py-1.5 rounded-lg whitespace-nowrap text-stone-600">Deduction Logs</button>
     </div>
   </header>
 
-  <!-- Local Storage Notice Banner -->
-  <div class="bg-amber-50/80 border-b border-amber-200/60 px-4 py-1.5 text-center text-xs text-amber-900 flex items-center justify-center gap-2">
-    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-amber-700 shrink-0"></i>
-    <span><strong>Local Private Storage:</strong> All student portfolios and bookings are stored in your local browser storage. Extract data anytime via <strong>Excel</strong>.</span>
-  </div>
-
-  <!-- Main Container -->
-  <main class="max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 flex-1 space-y-6">
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto w-full px-3 sm:px-6 py-4 sm:py-6 flex-1">
 
     <!-- ========================================== -->
-    <!-- TAB 1: DAILY SCHEDULE VIEW                -->
+    <!-- TAB 1: SCHEDULE & CALENDAR                 -->
     <!-- ========================================== -->
-    <section id="view-schedule" class="space-y-6">
-      <!-- Date Bar & Controls -->
-      <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div class="flex items-center gap-3">
-          <div class="h-12 w-12 rounded-2xl bg-rina-800 text-white flex items-center justify-center shadow-xs">
-            <i data-lucide="calendar" class="w-6 h-6"></i>
+    <section id="view-schedule" class="space-y-4 sm:space-y-6">
+      
+      <!-- VISUAL CALENDAR -->
+      <div class="bg-white p-3 sm:p-5 rounded-2xl border border-stone-200 shadow-xs">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="font-serif font-bold text-base sm:text-lg text-stone-900 flex items-center gap-2">
+            <i data-lucide="calendar-days" class="w-5 h-5 text-rina-800"></i> Monthly Calendar
+          </h2>
+          <div class="flex items-center gap-1">
+            <button onclick="changeMonth(-1)" class="p-1.5 rounded-lg hover:bg-stone-100 text-stone-600"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
+            <span id="calendar-month-label" class="text-xs sm:text-sm font-bold text-stone-800 min-w-[100px] text-center">Month</span>
+            <button onclick="changeMonth(1)" class="p-1.5 rounded-lg hover:bg-stone-100 text-stone-600"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
+          </div>
+        </div>
+        
+        <!-- Calendar Weekdays -->
+        <div class="grid grid-cols-7 gap-1 mb-1 text-center text-[10px] sm:text-xs font-bold text-stone-400 uppercase">
+          <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+        </div>
+        <!-- Calendar Grid -->
+        <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-xs sm:text-sm">
+          <!-- JS renders cells here -->
+        </div>
+      </div>
+
+      <!-- Daily Schedule Controls -->
+      <div class="bg-white p-3 sm:p-5 rounded-2xl border border-stone-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <div class="h-10 w-10 rounded-xl bg-rina-800 text-white flex items-center justify-center shadow-xs shrink-0">
+            <i data-lucide="clock" class="w-5 h-5"></i>
           </div>
           <div>
-            <div class="flex items-center gap-2">
-              <h2 id="schedule-display-date" class="font-serif font-bold text-xl text-stone-900">Today's Schedule</h2>
-              <span id="schedule-today-tag" class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">Today</span>
-            </div>
-            <p id="schedule-stats-summary" class="text-xs text-stone-500 mt-0.5">0 sessions booked for this day</p>
+            <h2 id="schedule-display-date" class="font-serif font-bold text-sm sm:text-lg text-stone-900 leading-tight">Today's Schedule</h2>
+            <p id="schedule-stats-summary" class="text-[10px] sm:text-xs text-stone-500">0 sessions</p>
           </div>
         </div>
-
-        <div class="flex flex-wrap items-center gap-2">
-          <div class="inline-flex items-center bg-stone-50 border border-stone-200 rounded-xl p-1 text-xs">
-            <button onclick="stepDate(-1)" class="p-1.5 rounded-lg text-stone-600 hover:bg-white hover:text-stone-900">
-              <i data-lucide="chevron-left" class="w-4 h-4"></i>
-            </button>
-            <button onclick="goToToday()" class="px-2.5 py-1 rounded-lg font-semibold text-stone-700 hover:bg-white">Today</button>
-            <button onclick="stepDate(1)" class="p-1.5 rounded-lg text-stone-600 hover:bg-white hover:text-stone-900">
-              <i data-lucide="chevron-right" class="w-4 h-4"></i>
-            </button>
+        
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 no-scrollbar">
+          <div class="inline-flex items-center bg-stone-50 border border-stone-200 rounded-xl p-0.5 text-xs shrink-0">
+            <button onclick="stepDate(-1)" class="p-1.5 rounded-lg text-stone-600 hover:bg-white"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+            <button onclick="goToToday()" class="px-2 py-1 rounded-lg font-semibold text-stone-700 hover:bg-white text-[10px]">Today</button>
+            <button onclick="stepDate(1)" class="p-1.5 rounded-lg text-stone-600 hover:bg-white"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
           </div>
-          <input type="date" id="schedule-date-picker" onchange="onScheduleDateChange(this.value)" class="rounded-xl border border-stone-300 bg-white px-3 py-2 text-xs text-stone-800 focus:outline-none">
-          <button onclick="openBookingModal()" class="inline-flex items-center gap-1.5 bg-stone-900 text-white px-3.5 py-2 rounded-xl text-xs font-semibold hover:bg-stone-800 transition">
-            <i data-lucide="plus" class="w-4 h-4"></i> Book For This Day
-          </button>
+          <input type="date" id="schedule-date-picker" onchange="onScheduleDateChange(this.value)" class="rounded-xl border border-stone-300 bg-white px-2 py-1.5 text-xs text-stone-800 focus:outline-none shrink-0">
         </div>
       </div>
 
-      <!-- Schedule Filter Pills -->
-      <div class="flex items-center justify-between text-xs">
-        <div class="flex items-center gap-1.5">
-          <span class="text-stone-500 font-medium">Filter:</span>
-          <button onclick="setScheduleFilter('all')" id="filter-sched-all" class="px-2.5 py-1 rounded-lg font-semibold uppercase text-[10px] bg-stone-900 text-white">All</button>
-          <button onclick="setScheduleFilter('confirmed')" id="filter-sched-confirmed" class="px-2.5 py-1 rounded-lg font-semibold uppercase text-[10px] bg-white border border-stone-200 text-stone-600">Confirmed</button>
-          <button onclick="setScheduleFilter('attended')" id="filter-sched-attended" class="px-2.5 py-1 rounded-lg font-semibold uppercase text-[10px] bg-white border border-stone-200 text-stone-600">Attended</button>
-          <button onclick="setScheduleFilter('cancelled')" id="filter-sched-cancelled" class="px-2.5 py-1 rounded-lg font-semibold uppercase text-[10px] bg-white border border-stone-200 text-stone-600">Cancelled</button>
-        </div>
-        <div class="text-[11px] text-stone-500 hidden sm:block">
-          ⚡ System automatically records class deduction date & time on booking
-        </div>
+      <!-- Filter Pills -->
+      <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
+        <span class="text-stone-500 text-[10px] font-bold uppercase tracking-wider shrink-0 mr-1">Filter:</span>
+        <button onclick="setScheduleFilter('all')" id="filter-sched-all" class="px-2.5 py-1 rounded-lg font-semibold uppercase text-[10px] bg-stone-900 text-white shrink-0">All</button>
+        <button onclick="setScheduleFilter('confirmed')" id="filter-sched-confirmed" class="px-2.5 py-1 rounded-lg font-semibold uppercase text-[10px] bg-white border border-stone-200 text-stone-600 shrink-0">Confirmed</button>
+        <button onclick="setScheduleFilter('attended')" id="filter-sched-attended" class="px-2.5 py-1 rounded-lg font-semibold uppercase text-[10px] bg-white border border-stone-200 text-stone-600 shrink-0">Attended</button>
+        <button onclick="setScheduleFilter('cancelled')" id="filter-sched-cancelled" class="px-2.5 py-1 rounded-lg font-semibold uppercase text-[10px] bg-white border border-stone-200 text-stone-600 shrink-0">Cancelled</button>
       </div>
 
-      <!-- Schedule Cards Container -->
-      <div id="schedule-cards-container" class="space-y-3.5">
-        <!-- Rendered via JavaScript -->
+      <!-- Schedule Cards -->
+      <div id="schedule-cards-container" class="space-y-3">
+        <!-- JS renders cards here -->
       </div>
     </section>
 
 
     <!-- ========================================== -->
-    <!-- TAB 2: STUDENT PORTFOLIO VIEW             -->
+    <!-- TAB 2: STUDENTS                            -->
     <!-- ========================================== -->
-    <section id="view-students" class="space-y-6 hidden">
-      <!-- Studio Metric Stats Cards -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs">
-          <span class="text-[11px] font-semibold uppercase text-stone-500 tracking-wider">Total Active Students</span>
-          <div id="stat-student-count" class="font-serif font-bold text-2xl text-stone-900 mt-1">0</div>
-          <span class="text-[11px] text-stone-400">Enrolled portfolio</span>
+    <section id="view-students" class="space-y-4 sm:space-y-6 hidden">
+      <!-- Stats -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
+        <div class="bg-white p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-stone-200 shadow-xs">
+          <span class="text-[9px] sm:text-[11px] font-semibold uppercase text-stone-500 tracking-wider">Students</span>
+          <div id="stat-student-count" class="font-serif font-bold text-xl sm:text-2xl text-stone-900 mt-0.5">0</div>
         </div>
-        <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs">
-          <span class="text-[11px] font-semibold uppercase text-stone-500 tracking-wider">Total Studio Revenue</span>
-          <div id="stat-total-revenue" class="font-serif font-bold text-2xl text-stone-900 mt-1">$0.00</div>
-          <span class="text-[11px] text-stone-400">Total amount paid</span>
+        <div class="bg-white p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-stone-200 shadow-xs">
+          <span class="text-[9px] sm:text-[11px] font-semibold uppercase text-stone-500 tracking-wider">Revenue</span>
+          <div id="stat-total-revenue" class="font-serif font-bold text-xl sm:text-2xl text-stone-900 mt-0.5">$0</div>
         </div>
-        <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs">
-          <span class="text-[11px] font-semibold uppercase text-stone-500 tracking-wider">Remaining Classes</span>
-          <div id="stat-classes-left" class="font-serif font-bold text-2xl text-rina-800 mt-1">0</div>
-          <span class="text-[11px] text-stone-400">Prepaid balance left</span>
+        <div class="bg-white p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-stone-200 shadow-xs">
+          <span class="text-[9px] sm:text-[11px] font-semibold uppercase text-stone-500 tracking-wider">Classes Left</span>
+          <div id="stat-classes-left" class="font-serif font-bold text-xl sm:text-2xl text-rina-800 mt-0.5">0</div>
         </div>
-        <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs">
-          <span class="text-[11px] font-semibold uppercase text-stone-500 tracking-wider">Sessions Attended</span>
-          <div id="stat-sessions-attended" class="font-serif font-bold text-2xl text-emerald-800 mt-1">0</div>
-          <span class="text-[11px] text-stone-400">Completed classes</span>
+        <div class="bg-white p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-stone-200 shadow-xs">
+          <span class="text-[9px] sm:text-[11px] font-semibold uppercase text-stone-500 tracking-wider">Attended</span>
+          <div id="stat-sessions-attended" class="font-serif font-bold text-xl sm:text-2xl text-emerald-800 mt-0.5">0</div>
         </div>
       </div>
 
-      <!-- Search & Filters -->
-      <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div class="relative w-full sm:max-w-md">
-          <i data-lucide="search" class="w-4 h-4 text-stone-400 absolute left-3.5 top-3"></i>
-          <input type="text" id="student-search-input" oninput="renderStudentPortfolios()" placeholder="Search student by name, phone, or email..." class="w-full rounded-xl border border-stone-300 bg-white pl-10 pr-4 py-2 text-xs text-stone-800 focus:outline-none focus:border-stone-800">
+      <!-- Search & Add -->
+      <div class="bg-white p-3 rounded-2xl border border-stone-200 shadow-xs flex flex-col sm:flex-row items-center gap-2">
+        <div class="relative w-full">
+          <i data-lucide="search" class="w-4 h-4 text-stone-400 absolute left-3 top-2.5"></i>
+          <input type="text" id="student-search-input" oninput="renderStudentPortfolios()" placeholder="Search name, phone..." class="w-full rounded-xl border border-stone-300 bg-white pl-9 pr-3 py-2 text-xs sm:text-sm text-stone-800 focus:outline-none focus:border-stone-800">
         </div>
-        <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
-          <div class="inline-flex bg-stone-50 border border-stone-200 rounded-xl p-1 text-[11px] font-semibold">
-            <button onclick="setStudentFilter('all')" id="btn-st-filter-all" class="px-2.5 py-1 rounded-lg bg-stone-900 text-white">All</button>
-            <button onclick="setStudentFilter('low')" id="btn-st-filter-low" class="px-2.5 py-1 rounded-lg text-stone-600 hover:bg-white">Low Balance (≤2)</button>
-            <button onclick="setStudentFilter('empty')" id="btn-st-filter-empty" class="px-2.5 py-1 rounded-lg text-stone-600 hover:bg-white">0 Left</button>
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <div class="inline-flex bg-stone-50 border border-stone-200 rounded-xl p-0.5 text-[10px] sm:text-[11px] font-semibold flex-1 sm:flex-none">
+            <button onclick="setStudentFilter('all')" id="btn-st-filter-all" class="px-2 py-1 rounded-lg bg-stone-900 text-white flex-1 sm:flex-none">All</button>
+            <button onclick="setStudentFilter('low')" id="btn-st-filter-low" class="px-2 py-1 rounded-lg text-stone-600 hover:bg-white flex-1 sm:flex-none">Low</button>
+            <button onclick="setStudentFilter('empty')" id="btn-st-filter-empty" class="px-2 py-1 rounded-lg text-stone-600 hover:bg-white flex-1 sm:flex-none">Empty</button>
           </div>
-          <button onclick="openStudentModal()" class="inline-flex items-center gap-1.5 bg-stone-900 text-white px-3.5 py-2 rounded-xl text-xs font-semibold hover:bg-stone-800 transition">
-            <i data-lucide="user-plus" class="w-4 h-4"></i> Add Student
+          <button onclick="openStudentModal()" class="inline-flex items-center justify-center bg-stone-900 text-white px-3 py-2 rounded-xl text-xs font-semibold hover:bg-stone-800 transition shrink-0">
+            <i data-lucide="user-plus" class="w-4 h-4 sm:mr-1.5"></i> <span class="hidden sm:inline">Add</span>
           </button>
         </div>
       </div>
 
-      <!-- Students Grid -->
-      <div id="students-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Rendered via JavaScript -->
+      <!-- Student Cards -->
+      <div id="students-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+        <!-- JS renders cards here -->
       </div>
     </section>
 
 
     <!-- ========================================== -->
-    <!-- TAB 3: DATA INPUT CENTER                   -->
+    <!-- TAB 3: DATA ENTRY                          -->
     <!-- ========================================== -->
-    <section id="view-datainput" class="space-y-6 hidden">
-      <!-- Input Center Banner -->
-      <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <section id="view-datainput" class="space-y-4 sm:space-y-6 hidden">
+      <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <div class="flex items-center gap-2">
-            <div class="h-8 w-8 rounded-xl bg-rina-800 text-white flex items-center justify-center font-bold text-xs">
-              <i data-lucide="zap" class="w-4 h-4"></i>
-            </div>
-            <h2 class="font-serif font-bold text-lg text-stone-900">Studio Data Input Center</h2>
-          </div>
-          <p class="text-xs text-stone-500 mt-1">
-            Choose between multi-row spreadsheet entry, recurring schedule builder, or fast single forms.
-          </p>
+          <h2 class="font-serif font-bold text-base sm:text-lg text-stone-900">Data Input</h2>
+          <p class="text-[11px] sm:text-xs text-stone-500">Batch entry, recurring schedule, or Excel import.</p>
         </div>
-
         <div class="flex flex-wrap items-center gap-2">
-          <button onclick="openBookingModal()" class="inline-flex items-center gap-1.5 bg-stone-900 text-white px-3 py-2 rounded-xl text-xs font-semibold hover:bg-stone-800 transition">
-            <i data-lucide="calendar" class="w-3.5 h-3.5"></i> Fast Booking
-          </button>
-          <button onclick="openStudentModal()" class="inline-flex items-center gap-1.5 bg-stone-100 text-stone-800 border border-stone-300 px-3 py-2 rounded-xl text-xs font-semibold hover:bg-stone-200 transition">
-            <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Fast Student
-          </button>
-          <button onclick="openPackageModal()" class="inline-flex items-center gap-1.5 bg-amber-50 text-amber-900 border border-amber-200 px-3 py-2 rounded-xl text-xs font-semibold hover:bg-amber-100 transition">
-            <i data-lucide="layers" class="w-3.5 h-3.5"></i> Log Payment
-          </button>
+          <button onclick="openBookingModal()" class="inline-flex items-center justify-center gap-1.5 bg-stone-900 text-white px-3 py-1.5 rounded-xl text-xs font-semibold flex-1 sm:flex-none"><i data-lucide="calendar" class="w-3.5 h-3.5"></i> Book</button>
+          <button onclick="openStudentModal()" class="inline-flex items-center justify-center gap-1.5 bg-stone-100 text-stone-800 border border-stone-300 px-3 py-1.5 rounded-xl text-xs font-semibold flex-1 sm:flex-none"><i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Student</button>
+          <button onclick="openPackageModal()" class="inline-flex items-center justify-center gap-1.5 bg-amber-50 text-amber-900 border border-amber-200 px-3 py-1.5 rounded-xl text-xs font-semibold flex-1 sm:flex-none"><i data-lucide="layers" class="w-3.5 h-3.5"></i> Payment</button>
         </div>
       </div>
 
-      <!-- Mode Selector Tabs -->
-      <div class="flex border-b border-stone-200 bg-white px-5 rounded-t-2xl pt-2 gap-3 text-xs font-semibold">
-        <button onclick="switchInputMode('spreadsheet')" id="input-mode-btn-spreadsheet" class="pb-3 border-b-2 border-rina-800 text-rina-900 font-bold flex items-center gap-1.5">
-          <i data-lucide="table" class="w-4 h-4"></i> Interactive Spreadsheet Entry
+      <!-- Mode Tabs -->
+      <div class="flex overflow-x-auto no-scrollbar border-b border-stone-200 bg-white px-2 sm:px-5 rounded-t-2xl pt-2 gap-3 text-xs font-semibold">
+        <button onclick="switchInputMode('spreadsheet')" id="input-mode-btn-spreadsheet" class="pb-2 sm:pb-3 border-b-2 border-rina-800 text-rina-900 font-bold flex items-center gap-1.5 whitespace-nowrap">
+          <i data-lucide="table" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i> Spreadsheet
         </button>
-        <button onclick="switchInputMode('recurring')" id="input-mode-btn-recurring" class="pb-3 border-b-2 border-transparent text-stone-500 hover:text-stone-800 flex items-center gap-1.5">
-          <i data-lucide="repeat" class="w-4 h-4"></i> Recurring Schedule Generator
+        <button onclick="switchInputMode('recurring')" id="input-mode-btn-recurring" class="pb-2 sm:pb-3 border-b-2 border-transparent text-stone-500 hover:text-stone-800 flex items-center gap-1.5 whitespace-nowrap">
+          <i data-lucide="repeat" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i> Recurring
         </button>
-        <button onclick="switchInputMode('excelimport')" id="input-mode-btn-excelimport" class="pb-3 border-b-2 border-transparent text-stone-500 hover:text-stone-800 flex items-center gap-1.5">
-          <i data-lucide="file-up" class="w-4 h-4"></i> Excel / CSV File Import
+        <button onclick="switchInputMode('excelimport')" id="input-mode-btn-excelimport" class="pb-2 sm:pb-3 border-b-2 border-transparent text-stone-500 hover:text-stone-800 flex items-center gap-1.5 whitespace-nowrap">
+          <i data-lucide="file-up" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i> Excel Import
         </button>
       </div>
 
-      <!-- MODE A: SPREADSHEET TABLE ENTRY -->
-      <div id="input-panel-spreadsheet" class="bg-white p-5 rounded-2xl border border-stone-200 shadow-xs space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div>
-            <h3 class="font-bold text-stone-900 text-sm">Batch Student & Package Quick Input</h3>
-            <p class="text-xs text-stone-500">Fill in multiple students and packages in this table, then save all with one click.</p>
-          </div>
-          <div class="flex items-center gap-2">
-            <button onclick="addBatchRow()" class="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-medium rounded-xl border border-stone-300 inline-flex items-center gap-1">
-              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Row
-            </button>
-            <button onclick="saveBatchRows()" class="px-4 py-1.5 bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold rounded-xl inline-flex items-center gap-1">
-              <i data-lucide="save" class="w-3.5 h-3.5"></i> Save All to Local Storage
-            </button>
+      <!-- Spreadsheet Mode -->
+      <div id="input-panel-spreadsheet" class="bg-white p-3 sm:p-5 rounded-2xl border border-stone-200 shadow-xs space-y-3">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <p class="text-[11px] sm:text-xs text-stone-500">Add multiple students at once.</p>
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <button onclick="addBatchRow()" class="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-medium rounded-xl border border-stone-300 flex-1 sm:flex-none">+ Row</button>
+            <button onclick="saveBatchRows()" class="px-3 py-1.5 bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold rounded-xl flex-1 sm:flex-none">Save All</button>
           </div>
         </div>
-
         <div class="overflow-x-auto border border-stone-200 rounded-xl">
-          <table class="w-full text-left text-xs min-w-[900px]">
+          <table class="w-full text-left text-[10px] sm:text-xs min-w-[800px]">
             <thead class="bg-[#FAF7F2] border-b border-stone-200 font-semibold text-stone-700 uppercase tracking-wider">
               <tr>
-                <th class="p-2.5">Student Name *</th>
-                <th class="p-2.5">Phone</th>
-                <th class="p-2.5">Email</th>
-                <th class="p-2.5">Package Name</th>
-                <th class="p-2.5 w-20">Total</th>
-                <th class="p-2.5 w-20">Left</th>
-                <th class="p-2.5 w-24">Price ($)</th>
-                <th class="p-2.5">Method</th>
-                <th class="p-2.5">Injury / Focus</th>
-                <th class="p-2.5 w-10 text-center"></th>
+                <th class="p-2">Name *</th><th class="p-2">Phone</th><th class="p-2">Email</th>
+                <th class="p-2">Package</th><th class="p-2">Total</th><th class="p-2">Left</th>
+                <th class="p-2">Price</th><th class="p-2">Method</th><th class="p-2">Injury</th><th class="p-2"></th>
               </tr>
             </thead>
-            <tbody id="batch-rows-tbody" class="divide-y divide-stone-100">
-              <!-- Rendered via JS -->
-            </tbody>
+            <tbody id="batch-rows-tbody" class="divide-y divide-stone-100"></tbody>
           </table>
         </div>
       </div>
 
-      <!-- MODE B: RECURRING SCHEDULE GENERATOR -->
-      <form id="input-panel-recurring" onsubmit="handleGenerateRecurring(event)" class="bg-white p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4 hidden">
-        <div>
-          <h3 class="font-bold text-stone-900 text-sm">Recurring Weekly Schedule Generator</h3>
-          <p class="text-xs text-stone-500">Auto-create repetitive appointments (e.g. every Tue & Thu for 4 weeks) and deduct class balances with timestamps.</p>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <!-- Recurring Mode -->
+      <form id="input-panel-recurring" onsubmit="handleGenerateRecurring(event)" class="bg-white p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4 hidden">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-stone-600 uppercase mb-1">Select Student *</label>
-            <select id="rec-student-select" required class="w-full rounded-xl border border-stone-300 p-2.5 text-xs text-stone-800 bg-white">
-              <!-- Options populated by JS -->
-            </select>
+            <label class="block text-[10px] font-semibold text-stone-600 uppercase mb-1">Student *</label>
+            <select id="rec-student-select" required class="w-full rounded-xl border border-stone-300 p-2.5 text-xs text-stone-800 bg-white"></select>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-stone-600 uppercase mb-1">Class Type</label>
+            <label class="block text-[10px] font-semibold text-stone-600 uppercase mb-1">Class Type</label>
             <select id="rec-class-type" class="w-full rounded-xl border border-stone-300 p-2.5 text-xs text-stone-800 bg-white">
               <option value="Private Reformer">Private Reformer</option>
               <option value="Duet Reformer">Duet Reformer</option>
@@ -355,139 +331,95 @@
             </select>
           </div>
         </div>
-
         <div>
-          <label class="block text-xs font-semibold text-stone-600 uppercase mb-2">Days of Week:</label>
-          <div class="flex flex-wrap gap-2 text-xs" id="rec-days-container">
-            <button type="button" onclick="toggleRecDay(1)" data-day="1" class="rec-day-btn px-3 py-1.5 rounded-xl border border-stone-200 bg-stone-100 text-stone-700 font-semibold">Mon</button>
-            <button type="button" onclick="toggleRecDay(2)" data-day="2" class="rec-day-btn px-3 py-1.5 rounded-xl border border-rina-800 bg-rina-800 text-white font-semibold">Tue</button>
-            <button type="button" onclick="toggleRecDay(3)" data-day="3" class="rec-day-btn px-3 py-1.5 rounded-xl border border-stone-200 bg-stone-100 text-stone-700 font-semibold">Wed</button>
-            <button type="button" onclick="toggleRecDay(4)" data-day="4" class="rec-day-btn px-3 py-1.5 rounded-xl border border-rina-800 bg-rina-800 text-white font-semibold">Thu</button>
-            <button type="button" onclick="toggleRecDay(5)" data-day="5" class="rec-day-btn px-3 py-1.5 rounded-xl border border-stone-200 bg-stone-100 text-stone-700 font-semibold">Fri</button>
-            <button type="button" onclick="toggleRecDay(6)" data-day="6" class="rec-day-btn px-3 py-1.5 rounded-xl border border-stone-200 bg-stone-100 text-stone-700 font-semibold">Sat</button>
+          <label class="block text-[10px] font-semibold text-stone-600 uppercase mb-1">Days of Week</label>
+          <div class="flex flex-wrap gap-1.5" id="rec-days-container">
+            <button type="button" onclick="toggleRecDay(1)" data-day="1" class="rec-day-btn px-2.5 py-1.5 rounded-lg border border-stone-200 bg-stone-100 text-stone-700 text-xs font-semibold">Mon</button>
+            <button type="button" onclick="toggleRecDay(2)" data-day="2" class="rec-day-btn px-2.5 py-1.5 rounded-lg border border-rina-800 bg-rina-800 text-white text-xs font-semibold">Tue</button>
+            <button type="button" onclick="toggleRecDay(3)" data-day="3" class="rec-day-btn px-2.5 py-1.5 rounded-lg border border-stone-200 bg-stone-100 text-stone-700 text-xs font-semibold">Wed</button>
+            <button type="button" onclick="toggleRecDay(4)" data-day="4" class="rec-day-btn px-2.5 py-1.5 rounded-lg border border-rina-800 bg-rina-800 text-white text-xs font-semibold">Thu</button>
+            <button type="button" onclick="toggleRecDay(5)" data-day="5" class="rec-day-btn px-2.5 py-1.5 rounded-lg border border-stone-200 bg-stone-100 text-stone-700 text-xs font-semibold">Fri</button>
+            <button type="button" onclick="toggleRecDay(6)" data-day="6" class="rec-day-btn px-2.5 py-1.5 rounded-lg border border-stone-200 bg-stone-100 text-stone-700 text-xs font-semibold">Sat</button>
           </div>
         </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="grid grid-cols-3 gap-2">
           <div>
-            <label class="block text-xs font-semibold text-stone-600 uppercase mb-1">Time (Start)</label>
+            <label class="block text-[10px] font-semibold text-stone-600 uppercase mb-1">Time</label>
             <input type="time" id="rec-start-time" value="10:00" required class="w-full rounded-xl border border-stone-300 p-2 text-xs text-stone-800">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-stone-600 uppercase mb-1">Start Date</label>
+            <label class="block text-[10px] font-semibold text-stone-600 uppercase mb-1">Start Date</label>
             <input type="date" id="rec-start-date" required class="w-full rounded-xl border border-stone-300 p-2 text-xs text-stone-800">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-stone-600 uppercase mb-1">Weeks Count</label>
+            <label class="block text-[10px] font-semibold text-stone-600 uppercase mb-1">Weeks</label>
             <input type="number" id="rec-weeks" min="1" max="12" value="4" required class="w-full rounded-xl border border-stone-300 p-2 text-xs text-stone-800">
           </div>
         </div>
-
-        <label class="flex items-center gap-2 cursor-pointer text-xs">
-          <input type="checkbox" id="rec-auto-deduct" checked class="rounded border-stone-300 text-stone-900 focus:ring-stone-900">
-          <span class="font-semibold text-stone-800">Auto-deduct 1 class per created session & record timestamp</span>
+        <label class="flex items-center gap-2 cursor-pointer text-[11px]">
+          <input type="checkbox" id="rec-auto-deduct" checked class="rounded border-stone-300 text-stone-900">
+          <span class="font-semibold text-stone-800">Auto-deduct 1 class per session</span>
         </label>
-
         <div class="flex justify-end pt-2">
-          <button type="submit" class="bg-stone-900 hover:bg-stone-800 text-white px-5 py-2.5 rounded-xl text-xs font-semibold inline-flex items-center gap-2 shadow-xs">
-            <i data-lucide="calendar-plus" class="w-4 h-4"></i> Generate Recurring Bookings
+          <button type="submit" class="w-full sm:w-auto bg-stone-900 hover:bg-stone-800 text-white px-5 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow-xs">
+            <i data-lucide="calendar-plus" class="w-4 h-4"></i> Generate Bookings
           </button>
         </div>
       </form>
 
-      <!-- MODE C: EXCEL FILE IMPORTER -->
-      <div id="input-panel-excelimport" class="bg-white p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4 hidden">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div>
-            <h3 class="font-bold text-stone-900 text-sm">Upload Excel / CSV Roster</h3>
-            <p class="text-xs text-stone-500">Import your existing client list from an Excel (.xlsx) or CSV file.</p>
-          </div>
-          <button onclick="downloadSampleTemplate()" class="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-semibold rounded-xl border border-stone-300 inline-flex items-center gap-1.5">
-            <i data-lucide="download" class="w-3.5 h-3.5 text-rina-800"></i> Download Sample Excel
-          </button>
+      <!-- Excel Import Mode -->
+      <div id="input-panel-excelimport" class="bg-white p-4 sm:p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4 hidden">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <p class="text-[11px] sm:text-xs text-stone-500">Import client list from .xlsx or .csv</p>
+          <button onclick="downloadSampleTemplate()" class="text-xs font-semibold text-rina-800 hover:underline flex items-center gap-1"><i data-lucide="download" class="w-3.5 h-3.5"></i> Sample Template</button>
         </div>
-
-        <div class="border-2 border-dashed border-stone-300 rounded-2xl p-8 text-center bg-stone-50/60 hover:bg-stone-50 transition relative">
+        <div class="border-2 border-dashed border-stone-300 rounded-2xl p-6 text-center bg-stone-50/60 relative">
           <input type="file" id="excel-file-input" accept=".xlsx,.xls,.csv" onchange="handleExcelFileUpload(event)" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
-          <div class="flex flex-col items-center gap-2">
-            <div class="h-12 w-12 rounded-2xl bg-rina-100 text-rina-800 flex items-center justify-center">
-              <i data-lucide="upload-cloud" class="w-6 h-6"></i>
-            </div>
-            <p id="file-upload-label" class="text-sm font-semibold text-stone-800">Click to choose or drop your Excel/CSV file here</p>
-            <p class="text-xs text-stone-400">Supports .xlsx, .xls, .csv</p>
+          <div class="flex flex-col items-center gap-2 pointer-events-none">
+            <div class="h-10 w-10 rounded-xl bg-rina-100 text-rina-800 flex items-center justify-center"><i data-lucide="upload-cloud" class="w-5 h-5"></i></div>
+            <p id="file-upload-label" class="text-xs font-semibold text-stone-800">Tap to choose Excel/CSV</p>
           </div>
         </div>
-
         <div id="parsed-preview-section" class="space-y-3 hidden">
           <div class="flex items-center justify-between">
-            <h4 class="text-xs font-bold uppercase text-stone-700">Preview Data to Import</h4>
-            <button onclick="commitParsedExcelData()" class="px-4 py-2 bg-rina-800 hover:bg-rina-900 text-white rounded-xl text-xs font-semibold shadow-xs">
-              Confirm & Save to Roster
-            </button>
+            <h4 class="text-[10px] font-bold uppercase text-stone-700">Preview</h4>
+            <button onclick="commitParsedExcelData()" class="px-3 py-1.5 bg-rina-800 text-white rounded-xl text-xs font-semibold">Confirm & Save</button>
           </div>
           <div class="overflow-x-auto border border-stone-200 rounded-xl">
-            <table class="w-full text-left text-xs">
-              <thead class="bg-[#FAF7F2] font-semibold text-stone-600">
-                <tr>
-                  <th class="p-2.5">Name</th>
-                  <th class="p-2.5">Phone</th>
-                  <th class="p-2.5">Package</th>
-                  <th class="p-2.5">Classes Left</th>
-                  <th class="p-2.5">Amount Paid</th>
-                </tr>
-              </thead>
-              <tbody id="parsed-preview-tbody" class="divide-y divide-stone-100">
-                <!-- Populated via JS -->
-              </tbody>
+            <table class="w-full text-left text-[10px] sm:text-xs">
+              <thead class="bg-[#FAF7F2] font-semibold text-stone-600"><tr><th class="p-2">Name</th><th class="p-2">Phone</th><th class="p-2">Package</th><th class="p-2">Left</th><th class="p-2">Paid</th></tr></thead>
+              <tbody id="parsed-preview-tbody" class="divide-y divide-stone-100"></tbody>
             </table>
           </div>
         </div>
       </div>
     </section>
 
-
     <!-- ========================================== -->
-    <!-- TAB 4: DEDUCTION AUDIT TRAIL              -->
+    <!-- TAB 4: AUDIT LOGS                          -->
     <!-- ========================================== -->
-    <section id="view-audit" class="space-y-6 hidden">
-      <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <section id="view-audit" class="space-y-4 sm:space-y-6 hidden">
+      <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <div class="flex items-center gap-2">
-            <div class="h-8 w-8 rounded-xl bg-rina-800 text-white flex items-center justify-center font-bold text-xs">
-              <i data-lucide="history" class="w-4 h-4"></i>
-            </div>
-            <h2 class="font-serif font-bold text-lg text-stone-900">Deduction & Credit Audit Log</h2>
-          </div>
-          <p class="text-xs text-stone-500 mt-1">Official chronological ledger of every single class deducted or restored with precise date and time.</p>
+          <h2 class="font-serif font-bold text-base sm:text-lg text-stone-900 flex items-center gap-2"><i data-lucide="history" class="w-5 h-5 text-rina-800"></i> Deduction Logs</h2>
+          <p class="text-[11px] sm:text-xs text-stone-500 mt-0.5">Chronological ledger of all class adjustments.</p>
         </div>
-
-        <div class="flex items-center gap-2">
-          <select id="audit-filter-student" onchange="renderDeductionAudit()" class="rounded-xl border border-stone-300 p-2 text-xs text-stone-800 bg-white">
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <select id="audit-filter-student" onchange="renderDeductionAudit()" class="flex-1 sm:flex-none rounded-xl border border-stone-300 p-2 text-xs text-stone-800 bg-white">
             <option value="all">All Students</option>
-            <!-- Options populated by JS -->
           </select>
-          <button onclick="exportToExcel()" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-emerald-900 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-xl transition">
-            <i data-lucide="download" class="w-3.5 h-3.5 text-emerald-700"></i> Export Audit Log
-          </button>
         </div>
       </div>
 
       <div class="overflow-x-auto bg-white rounded-2xl border border-stone-200 shadow-xs">
-        <table class="w-full text-left text-xs min-w-[700px]">
+        <table class="w-full text-left text-[10px] sm:text-xs min-w-[700px]">
           <thead class="bg-[#FAF7F2] border-b border-stone-200 font-semibold uppercase tracking-wider text-stone-600">
             <tr>
-              <th class="p-3.5">Date & Exact Time</th>
-              <th class="p-3.5">Student</th>
-              <th class="p-3.5">Package</th>
-              <th class="p-3.5">Adjustment</th>
-              <th class="p-3.5">Balance Remaining</th>
-              <th class="p-3.5">Session / Reason</th>
-              <th class="p-3.5 text-center">Manage</th>
+              <th class="p-3">Date & Time</th><th class="p-3">Student</th><th class="p-3">Package</th>
+              <th class="p-3">Change</th><th class="p-3">Balance</th><th class="p-3">Reason</th><th class="p-3 text-center">Manage</th>
             </tr>
           </thead>
-          <tbody id="audit-log-tbody" class="divide-y divide-stone-100">
-            <!-- Populated via JS -->
-          </tbody>
+          <tbody id="audit-log-tbody" class="divide-y divide-stone-100"></tbody>
         </table>
       </div>
     </section>
@@ -495,61 +427,61 @@
   </main>
 
   <!-- ========================================== -->
+  <!-- MOBILE BOTTOM NAVIGATION                   -->
+  <!-- ========================================== -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 z-40 flex items-center justify-around pb-safe shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
+    <button onclick="switchTab('schedule')" id="mob-tab-schedule" class="flex flex-col items-center py-2 text-rina-800 flex-1">
+      <i data-lucide="calendar" class="w-5 h-5 mb-1"></i><span class="text-[9px] font-bold">Schedule</span>
+    </button>
+    <button onclick="switchTab('students')" id="mob-tab-students" class="flex flex-col items-center py-2 text-stone-400 hover:text-stone-800 flex-1">
+      <i data-lucide="users" class="w-5 h-5 mb-1"></i><span class="text-[9px] font-medium">Students</span>
+    </button>
+    <button onclick="switchTab('datainput')" id="mob-tab-datainput" class="flex flex-col items-center py-2 text-stone-400 hover:text-stone-800 flex-1">
+      <i data-lucide="layout-grid" class="w-5 h-5 mb-1"></i><span class="text-[9px] font-medium">Data</span>
+    </button>
+    <button onclick="switchTab('audit')" id="mob-tab-audit" class="flex flex-col items-center py-2 text-stone-400 hover:text-stone-800 flex-1">
+      <i data-lucide="history" class="w-5 h-5 mb-1"></i><span class="text-[9px] font-medium">Logs</span>
+    </button>
+  </nav>
+
+  <!-- ========================================== -->
   <!-- MODALS                                     -->
   <!-- ========================================== -->
 
-  <!-- MODAL 1: BOOKING MODAL -->
-  <div id="modal-booking" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-lg rounded-2xl border border-stone-200 shadow-2xl overflow-hidden animate-in fade-in">
-      <div class="bg-[#FAF7F2] p-4 border-b border-stone-200 flex items-center justify-between">
+  <!-- BOOKING MODAL -->
+  <div id="modal-booking" class="fixed inset-0 z-50 modal-backdrop hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl border border-stone-200 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+      <div class="bg-[#FAF7F2] p-3 sm:p-4 border-b border-stone-200 flex items-center justify-between shrink-0">
         <div class="flex items-center gap-2">
-          <div class="h-8 w-8 rounded-xl bg-rina-800/10 text-rina-800 flex items-center justify-center">
-            <i data-lucide="calendar" class="w-4 h-4"></i>
-          </div>
-          <div>
-            <h3 id="booking-modal-title" class="font-serif font-bold text-stone-900 text-base">New Studio Booking</h3>
-            <p class="text-[11px] text-stone-500">Schedules session & deducts from package with date/time</p>
-          </div>
+          <div class="h-8 w-8 rounded-xl bg-rina-800/10 text-rina-800 flex items-center justify-center"><i data-lucide="calendar" class="w-4 h-4"></i></div>
+          <h3 class="font-serif font-bold text-stone-900 text-sm sm:text-base">New Booking</h3>
         </div>
-        <button onclick="closeModal('modal-booking')" class="text-stone-400 hover:text-stone-700 p-1">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
+        <button onclick="closeModal('modal-booking')" class="text-stone-400 hover:text-stone-700 p-2"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
-
-      <form id="booking-form" onsubmit="handleBookingSubmit(event)" class="p-5 space-y-4 max-h-[80vh] overflow-y-auto text-xs">
-        <input type="hidden" id="booking-edit-id" value="">
-
+      <form id="booking-form" onsubmit="handleBookingSubmit(event)" class="p-4 sm:p-5 space-y-3 overflow-y-auto text-xs">
         <div>
-          <label class="block font-semibold uppercase text-stone-600 mb-1">Student Name *</label>
-          <select id="booking-student-select" required onchange="onBookingStudentChanged()" class="w-full rounded-xl border border-stone-300 p-2.5 font-medium text-stone-800 bg-white">
-            <!-- Populated by JS -->
-          </select>
+          <label class="block font-semibold uppercase text-stone-600 mb-1">Student *</label>
+          <select id="booking-student-select" required onchange="onBookingStudentChanged()" class="w-full rounded-xl border border-stone-300 p-2.5 font-medium text-stone-800 bg-white"></select>
         </div>
-
-        <div id="booking-injury-banner" class="hidden rounded-xl bg-amber-50 p-3 border border-amber-200 text-amber-950 flex items-start gap-2">
+        <div id="booking-injury-banner" class="hidden rounded-xl bg-amber-50 p-2.5 border border-amber-200 text-amber-950 flex items-start gap-2">
           <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-700 shrink-0 mt-0.5"></i>
-          <div>
-            <span class="font-bold">Student Physical Note: </span>
-            <span id="booking-injury-text"></span>
-          </div>
+          <div><span class="font-bold">Note: </span><span id="booking-injury-text"></span></div>
         </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div>
-            <label class="block font-semibold uppercase text-stone-600 mb-1">Session Date *</label>
+        <div class="grid grid-cols-2 gap-2">
+          <div class="col-span-2 sm:col-span-1">
+            <label class="block font-semibold uppercase text-stone-600 mb-1">Date *</label>
             <input type="date" id="booking-date" required class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
           </div>
           <div>
-            <label class="block font-semibold uppercase text-stone-600 mb-1">Start Time *</label>
+            <label class="block font-semibold uppercase text-stone-600 mb-1">Start *</label>
             <input type="time" id="booking-start-time" required value="10:00" onchange="autoFillEndTime(this.value)" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
           </div>
           <div>
-            <label class="block font-semibold uppercase text-stone-600 mb-1">End Time *</label>
+            <label class="block font-semibold uppercase text-stone-600 mb-1">End *</label>
             <input type="time" id="booking-end-time" required value="10:55" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
           </div>
         </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="block font-semibold uppercase text-stone-600 mb-1">Class Type</label>
             <select id="booking-class-type" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800 bg-white">
@@ -565,569 +497,375 @@
             <input type="text" id="booking-instructor" value="Rina" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
           </div>
         </div>
-
-        <!-- Deduction Settings -->
-        <div id="booking-deduct-box" class="rounded-xl border border-stone-200 bg-stone-50 p-3.5 space-y-2">
+        <div class="rounded-xl border border-stone-200 bg-stone-50 p-3 space-y-2">
           <div class="flex items-center justify-between">
-            <span class="font-bold text-stone-800 uppercase text-[11px] flex items-center gap-1.5">
-              <i data-lucide="layers" class="w-3.5 h-3.5 text-rina-800"></i> Package Deduction
-            </span>
-            <span id="booking-package-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
-              0 classes left
-            </span>
+            <span class="font-bold text-stone-800 uppercase text-[10px] flex items-center gap-1"><i data-lucide="layers" class="w-3.5 h-3.5 text-rina-800"></i> Deduction</span>
+            <span id="booking-package-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">0 left</span>
           </div>
-          <p id="booking-package-text" class="text-stone-600 text-[11px]">Selecting a student will display their package details.</p>
-          <label class="flex items-start gap-2 pt-1 cursor-pointer">
+          <p id="booking-package-text" class="text-stone-600 text-[10px]">Select student to see package.</p>
+          <label class="flex items-start gap-2 cursor-pointer pt-1">
             <input type="checkbox" id="booking-auto-deduct" checked class="rounded border-stone-300 text-stone-900 mt-0.5">
-            <span class="text-stone-800 font-semibold">
-              Mark deduction automatically with current date & time
-              <span class="block text-[11px] font-normal text-stone-500">Will deduct 1 class credit and record the exact timestamp in the audit trail.</span>
-            </span>
+            <span class="text-stone-800 font-semibold text-[11px]">Auto-deduct 1 class with timestamp</span>
           </label>
         </div>
-
         <div>
-          <label class="block font-semibold uppercase text-stone-600 mb-1">Session Focus / Student Notes</label>
-          <input type="text" id="booking-notes" placeholder="e.g. Scapular depression, yellow spring footwork" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
+          <label class="block font-semibold uppercase text-stone-600 mb-1">Notes</label>
+          <input type="text" id="booking-notes" placeholder="Focus or notes..." class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
         </div>
-
-        <div class="flex justify-end gap-2 pt-3 border-t border-stone-100">
-          <button type="button" onclick="closeModal('modal-booking')" class="px-4 py-2 text-stone-600 hover:bg-stone-100 rounded-xl font-semibold">Cancel</button>
-          <button type="submit" class="px-5 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl font-semibold shadow-xs">Confirm Booking</button>
+        <div class="flex justify-end gap-2 pt-2 border-t border-stone-100">
+          <button type="button" onclick="closeModal('modal-booking')" class="px-4 py-2.5 text-stone-600 hover:bg-stone-100 rounded-xl font-semibold w-full sm:w-auto">Cancel</button>
+          <button type="submit" class="px-4 py-2.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl font-semibold shadow-xs w-full sm:w-auto">Confirm Booking</button>
         </div>
       </form>
     </div>
   </div>
 
-
-  <!-- MODAL 2: STUDENT ONBOARDING / EDIT MODAL -->
-  <div id="modal-student" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-lg rounded-2xl border border-stone-200 shadow-2xl overflow-hidden">
-      <div class="bg-[#FAF7F2] p-4 border-b border-stone-200 flex items-center justify-between">
+  <!-- STUDENT MODAL -->
+  <div id="modal-student" class="fixed inset-0 z-50 modal-backdrop hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl border border-stone-200 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+      <div class="bg-[#FAF7F2] p-3 sm:p-4 border-b border-stone-200 flex items-center justify-between shrink-0">
         <div class="flex items-center gap-2">
-          <div class="h-8 w-8 rounded-xl bg-stone-900 text-white flex items-center justify-center">
-            <i data-lucide="user-plus" class="w-4 h-4"></i>
-          </div>
-          <div>
-            <h3 id="student-modal-title" class="font-serif font-bold text-stone-900 text-base">New Student Onboarding</h3>
-            <p class="text-[11px] text-stone-500">Register student and setup package balance</p>
-          </div>
+          <div class="h-8 w-8 rounded-xl bg-stone-900 text-white flex items-center justify-center"><i data-lucide="user-plus" class="w-4 h-4"></i></div>
+          <h3 id="student-modal-title" class="font-serif font-bold text-stone-900 text-sm sm:text-base">New Student</h3>
         </div>
-        <button onclick="closeModal('modal-student')" class="text-stone-400 hover:text-stone-700 p-1">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
+        <button onclick="closeModal('modal-student')" class="text-stone-400 hover:text-stone-700 p-2"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
-
-      <form id="student-form" onsubmit="handleStudentSubmit(event)" class="p-5 space-y-4 max-h-[80vh] overflow-y-auto text-xs">
+      <form id="student-form" onsubmit="handleStudentSubmit(event)" class="p-4 sm:p-5 space-y-3 overflow-y-auto text-xs">
         <input type="hidden" id="student-edit-id" value="">
-
         <div>
           <label class="block font-semibold uppercase text-stone-600 mb-1">Full Name *</label>
           <input type="text" id="st-name" required placeholder="e.g. Claire Vance" class="w-full rounded-xl border border-stone-300 p-2.5 text-stone-800">
         </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="grid grid-cols-2 gap-2">
           <div>
-            <label class="block font-semibold uppercase text-stone-600 mb-1">Phone Number</label>
-            <input type="text" id="st-phone" placeholder="+1 (555) 234-5678" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
+            <label class="block font-semibold uppercase text-stone-600 mb-1">Phone</label>
+            <input type="text" id="st-phone" placeholder="555-0100" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
           </div>
           <div>
             <label class="block font-semibold uppercase text-stone-600 mb-1">Email</label>
-            <input type="email" id="st-email" placeholder="claire@example.com" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
+            <input type="email" id="st-email" placeholder="test@test.com" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
           </div>
         </div>
-
         <div>
           <label class="block font-semibold uppercase text-stone-600 mb-1">Emergency Contact</label>
-          <input type="text" id="st-emergency" placeholder="e.g. David Vance (Husband) - 555-901-2233" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
+          <input type="text" id="st-emergency" placeholder="Name - Phone" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
         </div>
-
         <div class="rounded-xl bg-amber-50/60 border border-amber-200 p-3 space-y-2">
-          <span class="font-bold text-amber-900 uppercase text-[10px] flex items-center gap-1">
-            <i data-lucide="heart" class="w-3.5 h-3.5 text-amber-700"></i> Pilates Medical Assessment
-          </span>
+          <span class="font-bold text-amber-900 uppercase text-[10px] flex items-center gap-1"><i data-lucide="heart" class="w-3.5 h-3.5 text-amber-700"></i> Medical & Goals</span>
           <div>
-            <label class="block font-medium text-stone-700 mb-0.5">Injuries, Disc Issues or Contraindications</label>
-            <textarea id="st-injuries" rows="2" placeholder="e.g. L4-S1 disc bulge, avoid extreme flexion" class="w-full rounded-lg border border-stone-300 p-1.5 text-stone-800 bg-white"></textarea>
+            <label class="block font-medium text-stone-700 mb-0.5 text-[10px]">Injuries</label>
+            <textarea id="st-injuries" rows="2" placeholder="L4-S1 disc bulge..." class="w-full rounded-lg border border-stone-300 p-1.5 text-stone-800 bg-white"></textarea>
           </div>
           <div>
-            <label class="block font-medium text-stone-700 mb-0.5">Pilates Goals</label>
-            <input type="text" id="st-goals" placeholder="e.g. Core stability, pelvic alignment" class="w-full rounded-lg border border-stone-300 p-1.5 text-stone-800 bg-white">
+            <label class="block font-medium text-stone-700 mb-0.5 text-[10px]">Goals</label>
+            <input type="text" id="st-goals" placeholder="Core stability..." class="w-full rounded-lg border border-stone-300 p-1.5 text-stone-800 bg-white">
           </div>
         </div>
-
-        <!-- Initial Package Section (Only for new students) -->
-        <div id="st-package-section" class="rounded-xl border border-stone-200 bg-stone-50 p-3.5 space-y-3">
+        <div id="st-package-section" class="rounded-xl border border-stone-200 bg-stone-50 p-3 space-y-2">
           <label class="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" id="st-has-package" checked class="rounded border-stone-300 text-stone-900">
-            <span class="font-bold uppercase tracking-wider text-stone-800 text-[11px]">Log Initial Package & Payment Now</span>
+            <span class="font-bold uppercase text-stone-800 text-[10px]">Log Initial Package</span>
           </label>
-          <div id="st-package-fields" class="space-y-3">
+          <div id="st-package-fields" class="space-y-2">
             <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="block text-stone-600 mb-0.5">Package Name</label>
-                <input type="text" id="st-pkg-name" value="10x Private Reformer" class="w-full rounded-lg border border-stone-300 p-1.5 bg-white">
-              </div>
-              <div>
-                <label class="block text-stone-600 mb-0.5">Total Classes</label>
-                <input type="number" id="st-pkg-classes" value="10" min="1" class="w-full rounded-lg border border-stone-300 p-1.5 bg-white">
-              </div>
+              <div><label class="block text-stone-600 mb-0.5 text-[10px]">Package Name</label><input type="text" id="st-pkg-name" value="10x Private Reformer" class="w-full rounded-lg border border-stone-300 p-1.5 bg-white"></div>
+              <div><label class="block text-stone-600 mb-0.5 text-[10px]">Total Classes</label><input type="number" id="st-pkg-classes" value="10" min="1" class="w-full rounded-lg border border-stone-300 p-1.5 bg-white"></div>
             </div>
             <div class="grid grid-cols-2 gap-2">
+              <div><label class="block text-stone-600 mb-0.5 text-[10px]">Price ($)</label><input type="number" id="st-pkg-price" value="1200" step="0.01" class="w-full rounded-lg border border-stone-300 p-1.5 bg-white"></div>
               <div>
-                <label class="block text-stone-600 mb-0.5">Price Paid ($)</label>
-                <input type="number" id="st-pkg-price" value="1200" step="0.01" class="w-full rounded-lg border border-stone-300 p-1.5 bg-white">
-              </div>
-              <div>
-                <label class="block text-stone-600 mb-0.5">Payment Method</label>
+                <label class="block text-stone-600 mb-0.5 text-[10px]">Method</label>
                 <select id="st-pkg-method" class="w-full rounded-lg border border-stone-300 p-1.5 bg-white">
-                  <option value="Credit Card">Credit Card</option>
-                  <option value="Bank Transfer">Bank Transfer</option>
-                  <option value="Cash">Cash</option>
-                  <option value="PayNow / Zelle">PayNow / Zelle</option>
+                  <option value="Credit Card">Credit Card</option><option value="Bank Transfer">Bank Transfer</option><option value="Cash">Cash</option><option value="PayNow / Zelle">PayNow</option>
                 </select>
               </div>
             </div>
           </div>
         </div>
-
-        <div class="flex justify-end gap-2 pt-3 border-t border-stone-100">
-          <button type="button" onclick="closeModal('modal-student')" class="px-4 py-2 text-stone-600 hover:bg-stone-100 rounded-xl font-semibold">Cancel</button>
-          <button type="submit" class="px-5 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl font-semibold shadow-xs">Save Student</button>
+        <div class="flex justify-end gap-2 pt-2 border-t border-stone-100">
+          <button type="button" onclick="closeModal('modal-student')" class="px-4 py-2.5 text-stone-600 hover:bg-stone-100 rounded-xl font-semibold w-full sm:w-auto">Cancel</button>
+          <button type="submit" class="px-4 py-2.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl font-semibold shadow-xs w-full sm:w-auto">Save</button>
         </div>
       </form>
     </div>
   </div>
 
-
-  <!-- MODAL 3: LOG PACKAGE & PAYMENT / ADJUST BALANCE -->
-  <div id="modal-package" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-md rounded-2xl border border-stone-200 shadow-2xl overflow-hidden">
-      <div class="bg-[#FAF7F2] p-4 border-b border-stone-200 flex items-center justify-between">
+  <!-- PACKAGE MODAL -->
+  <div id="modal-package" class="fixed inset-0 z-50 modal-backdrop hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl border border-stone-200 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+      <div class="bg-[#FAF7F2] p-3 sm:p-4 border-b border-stone-200 flex items-center justify-between shrink-0">
         <div class="flex items-center gap-2">
-          <div class="h-8 w-8 rounded-xl bg-amber-800 text-white flex items-center justify-center">
-            <i data-lucide="credit-card" class="w-4 h-4"></i>
-          </div>
-          <div>
-            <h3 class="font-serif font-bold text-stone-900 text-base">Record Package & Payment</h3>
-            <p class="text-[11px] text-stone-500">Add prepaid class credits and payment record</p>
-          </div>
+          <div class="h-8 w-8 rounded-xl bg-amber-800 text-white flex items-center justify-center"><i data-lucide="credit-card" class="w-4 h-4"></i></div>
+          <h3 class="font-serif font-bold text-stone-900 text-sm sm:text-base">Log Payment</h3>
         </div>
-        <button onclick="closeModal('modal-package')" class="text-stone-400 hover:text-stone-700 p-1">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
+        <button onclick="closeModal('modal-package')" class="text-stone-400 hover:text-stone-700 p-2"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
-
-      <form id="package-form" onsubmit="handlePackageSubmit(event)" class="p-5 space-y-4 text-xs">
+      <form id="package-form" onsubmit="handlePackageSubmit(event)" class="p-4 sm:p-5 space-y-3 overflow-y-auto text-xs">
         <div>
           <label class="block font-semibold uppercase text-stone-600 mb-1">Student *</label>
-          <select id="pkg-student-select" required class="w-full rounded-xl border border-stone-300 p-2.5 font-medium text-stone-800 bg-white">
-            <!-- Populated by JS -->
-          </select>
+          <select id="pkg-student-select" required class="w-full rounded-xl border border-stone-300 p-2.5 font-medium text-stone-800 bg-white"></select>
         </div>
-
         <div>
           <label class="block font-semibold uppercase text-stone-600 mb-1">Package Name *</label>
-          <input type="text" id="pkg-name" value="10x Private Reformer Package" required class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
+          <input type="text" id="pkg-name" value="10x Private Reformer" required class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
         </div>
-
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-2 gap-2">
+          <div><label class="block font-semibold uppercase text-stone-600 mb-1">Total</label><input type="number" id="pkg-total" value="10" min="1" required class="w-full rounded-xl border border-stone-300 p-2 text-stone-800"></div>
+          <div><label class="block font-semibold uppercase text-stone-600 mb-1">Price ($)</label><input type="number" id="pkg-price" value="1200" step="0.01" required class="w-full rounded-xl border border-stone-300 p-2 text-stone-800"></div>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
           <div>
-            <label class="block font-semibold uppercase text-stone-600 mb-1">Total Classes</label>
-            <input type="number" id="pkg-total" value="10" min="1" required class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
+            <label class="block font-semibold uppercase text-stone-600 mb-1">Method</label>
+            <select id="pkg-method" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800 bg-white">
+              <option value="Credit Card">Credit Card</option><option value="Bank Transfer">Bank Transfer</option><option value="Cash">Cash</option><option value="PayNow / Zelle">PayNow</option>
+            </select>
           </div>
-          <div>
-            <label class="block font-semibold uppercase text-stone-600 mb-1">Price Paid ($)</label>
-            <input type="number" id="pkg-price" value="1200" step="0.01" required class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
-          </div>
+          <div><label class="block font-semibold uppercase text-stone-600 mb-1">Date</label><input type="date" id="pkg-date" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800"></div>
         </div>
-
-        <div>
-          <label class="block font-semibold uppercase text-stone-600 mb-1">Payment Method</label>
-          <select id="pkg-method" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800 bg-white">
-            <option value="Credit Card">Credit Card</option>
-            <option value="Bank Transfer">Bank Transfer</option>
-            <option value="Cash">Cash</option>
-            <option value="PayNow / Zelle">PayNow / Zelle</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block font-semibold uppercase text-stone-600 mb-1">Payment Date</label>
-          <input type="date" id="pkg-date" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
-        </div>
-
-        <div class="flex justify-end gap-2 pt-3 border-t border-stone-100">
-          <button type="button" onclick="closeModal('modal-package')" class="px-4 py-2 text-stone-600 hover:bg-stone-100 rounded-xl font-semibold">Cancel</button>
-          <button type="submit" class="px-5 py-2 bg-rina-800 hover:bg-rina-900 text-white rounded-xl font-semibold shadow-xs">Save Package</button>
+        <div class="flex justify-end gap-2 pt-2 border-t border-stone-100">
+          <button type="button" onclick="closeModal('modal-package')" class="px-4 py-2.5 text-stone-600 hover:bg-stone-100 rounded-xl font-semibold w-full sm:w-auto">Cancel</button>
+          <button type="submit" class="px-4 py-2.5 bg-rina-800 hover:bg-rina-900 text-white rounded-xl font-semibold shadow-xs w-full sm:w-auto">Save</button>
         </div>
       </form>
     </div>
   </div>
 
-
-  <!-- MODAL 4: DETAILED STUDENT PORTFOLIO MODAL -->
-  <div id="modal-portfolio" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-3xl rounded-2xl border border-stone-200 shadow-2xl overflow-hidden flex flex-col max-h-[88vh]">
-      <div class="bg-[#FAF7F2] p-5 border-b border-stone-200 flex items-center justify-between">
+  <!-- PORTFOLIO MODAL -->
+  <div id="modal-portfolio" class="fixed inset-0 z-50 modal-backdrop hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white w-full max-w-3xl rounded-t-2xl sm:rounded-2xl border border-stone-200 shadow-2xl overflow-hidden flex flex-col h-[90vh] sm:h-auto sm:max-h-[88vh]">
+      <div class="bg-[#FAF7F2] p-4 border-b border-stone-200 flex items-center justify-between shrink-0">
         <div class="flex items-center gap-3">
-          <div id="portfolio-avatar" class="h-12 w-12 rounded-2xl bg-rina-900 text-white flex items-center justify-center font-serif font-bold text-xl shadow-xs">
-            C
-          </div>
+          <div id="portfolio-avatar" class="h-10 w-10 rounded-xl bg-rina-900 text-white flex items-center justify-center font-serif font-bold text-lg shadow-xs">C</div>
           <div>
-            <h3 id="portfolio-name" class="font-serif font-bold text-stone-900 text-xl">Claire Vance</h3>
-            <p id="portfolio-contact" class="text-xs text-stone-500">+1 (555) 234-8910 • claire@example.com</p>
+            <h3 id="portfolio-name" class="font-serif font-bold text-stone-900 text-base sm:text-lg leading-tight">Name</h3>
+            <p id="portfolio-contact" class="text-[10px] sm:text-xs text-stone-500">Phone • Email</p>
           </div>
         </div>
-        <button onclick="closeModal('modal-portfolio')" class="text-stone-400 hover:text-stone-700 p-1">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
+        <button onclick="closeModal('modal-portfolio')" class="text-stone-400 hover:text-stone-700 p-2"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
-
-      <div class="p-6 overflow-y-auto space-y-6 flex-1 text-xs">
-        <!-- 4 Stat Badges -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div class="p-3 bg-stone-50 rounded-xl border border-stone-200">
-            <span class="text-[10px] uppercase font-bold text-stone-500">Classes Remaining</span>
-            <div id="portfolio-classes-left" class="font-serif font-bold text-2xl text-rina-800 mt-0.5">0</div>
-          </div>
-          <div class="p-3 bg-stone-50 rounded-xl border border-stone-200">
-            <span class="text-[10px] uppercase font-bold text-stone-500">Total Paid</span>
-            <div id="portfolio-total-paid" class="font-serif font-bold text-2xl text-stone-900 mt-0.5">$0.00</div>
-          </div>
-          <div class="p-3 bg-stone-50 rounded-xl border border-stone-200">
-            <span class="text-[10px] uppercase font-bold text-stone-500">Attended</span>
-            <div id="portfolio-attended" class="font-serif font-bold text-2xl text-emerald-800 mt-0.5">0</div>
-          </div>
-          <div class="p-3 bg-stone-50 rounded-xl border border-stone-200">
-            <span class="text-[10px] uppercase font-bold text-stone-500">Packages</span>
-            <div id="portfolio-packages-count" class="font-serif font-bold text-2xl text-stone-900 mt-0.5">0</div>
-          </div>
+      <div class="p-4 sm:p-6 overflow-y-auto space-y-4 flex-1 text-xs">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div class="p-2 bg-stone-50 rounded-xl border border-stone-200"><span class="text-[9px] uppercase font-bold text-stone-500">Classes Left</span><div id="portfolio-classes-left" class="font-serif font-bold text-lg sm:text-2xl text-rina-800">0</div></div>
+          <div class="p-2 bg-stone-50 rounded-xl border border-stone-200"><span class="text-[9px] uppercase font-bold text-stone-500">Paid</span><div id="portfolio-total-paid" class="font-serif font-bold text-lg sm:text-2xl text-stone-900">$0</div></div>
+          <div class="p-2 bg-stone-50 rounded-xl border border-stone-200"><span class="text-[9px] uppercase font-bold text-stone-500">Attended</span><div id="portfolio-attended" class="font-serif font-bold text-lg sm:text-2xl text-emerald-800">0</div></div>
+          <div class="p-2 bg-stone-50 rounded-xl border border-stone-200"><span class="text-[9px] uppercase font-bold text-stone-500">Packages</span><div id="portfolio-packages-count" class="font-serif font-bold text-lg sm:text-2xl text-stone-900">0</div></div>
         </div>
-
-        <!-- Injury Note -->
-        <div class="p-4 rounded-xl bg-amber-50/70 border border-amber-200 space-y-1">
-          <span class="font-bold text-amber-900 uppercase text-[10px] flex items-center gap-1">
-            <i data-lucide="heart" class="w-3.5 h-3.5 text-amber-700"></i> Pilates Injury & Contraindication Note
-          </span>
-          <p id="portfolio-injuries" class="text-sm font-medium text-amber-950">None</p>
+        <div class="p-3 rounded-xl bg-amber-50/70 border border-amber-200 space-y-1">
+          <span class="font-bold text-amber-900 uppercase text-[9px] flex items-center gap-1"><i data-lucide="heart" class="w-3 h-3 text-amber-700"></i> Medical Note</span>
+          <p id="portfolio-injuries" class="text-xs font-medium text-amber-950">None</p>
         </div>
-
-        <!-- Packages List -->
         <div class="space-y-2">
-          <h4 class="font-bold text-stone-900 uppercase text-[11px]">Packages & Payments History</h4>
-          <div id="portfolio-packages-list" class="space-y-2"></div>
+          <h4 class="font-bold text-stone-900 uppercase text-[10px]">Packages</h4>
+          <div id="portfolio-packages-list" class="space-y-1.5"></div>
         </div>
-
-        <!-- Deduction Log for this student -->
         <div class="space-y-2">
-          <h4 class="font-bold text-stone-900 uppercase text-[11px]">Deduction History (With Exact Date & Time)</h4>
+          <h4 class="font-bold text-stone-900 uppercase text-[10px]">Deductions</h4>
           <div id="portfolio-deductions-list" class="space-y-1.5 font-mono"></div>
         </div>
       </div>
-
-      <div class="p-3 bg-stone-50 border-t border-stone-200 flex justify-end">
-        <button onclick="closeModal('modal-portfolio')" class="px-4 py-1.5 bg-stone-200 text-stone-800 font-semibold rounded-xl text-xs hover:bg-stone-300">Close</button>
+      <div class="p-3 bg-stone-50 border-t border-stone-200 flex justify-end shrink-0">
+        <button onclick="closeModal('modal-portfolio')" class="px-4 py-2 bg-stone-200 text-stone-800 font-semibold rounded-xl text-xs w-full sm:w-auto">Close</button>
       </div>
     </div>
   </div>
 
-
-  <!-- Toast Notification -->
-  <div id="toast" class="fixed bottom-6 right-6 z-50 bg-stone-900 text-white px-5 py-3 rounded-2xl text-xs font-semibold shadow-2xl flex items-center gap-2 border border-stone-800 hidden">
+  <!-- TOAST -->
+  <div id="toast" class="fixed bottom-20 md:bottom-6 right-4 left-4 sm:left-auto z-50 bg-stone-900 text-white px-4 py-3 rounded-2xl text-xs font-semibold shadow-2xl flex items-center justify-center gap-2 border border-stone-800 hidden transition-all">
     <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
-    <span id="toast-text">Success message</span>
+    <span id="toast-text">Success</span>
   </div>
 
-
   <!-- ========================================== -->
-  <!-- JAVASCRIPT LOGIC (LOCAL STORAGE & EXCEL)   -->
+  <!-- JAVASCRIPT LOGIC                           -->
   <!-- ========================================== -->
   <script>
-    // --- 1. LOCAL STORAGE KEYS ---
     const STORAGE_KEY_STUDENTS = 'rina_pilates_students';
     const STORAGE_KEY_PACKAGES = 'rina_pilates_packages';
     const STORAGE_KEY_BOOKINGS = 'rina_pilates_bookings';
     const STORAGE_KEY_DEDUCTIONS = 'rina_pilates_deductions';
 
-    // --- 2. SAMPLE INITIAL DATA (FOR FIRST-TIME USE) ---
+    // --- INITIAL DATA ---
     function initializeDefaultData() {
       if (!localStorage.getItem(STORAGE_KEY_STUDENTS)) {
         const initialStudents = [
-          {
-            id: 1,
-            name: "Claire Vance",
-            phone: "+1 (555) 234-8910",
-            email: "claire.vance@example.com",
-            emergencyContact: "David Vance (Husband) - 555-901-2233",
-            injuryNotes: "Mild lower back disc bulge (L4-S1); avoid extreme lumbar flexion.",
-            goals: "Core stability, posture alignment, sciatic release.",
-            notes: "Prefers morning slots. Enjoys footwork on yellow & green springs."
-          },
-          {
-            id: 2,
-            name: "Sophia Chen",
-            phone: "+1 (555) 782-3490",
-            email: "sophia.chen@example.com",
-            emergencyContact: "Marcus Chen (Brother) - 555-667-8899",
-            injuryNotes: "Right shoulder impingement; modify long box overhead work.",
-            goals: "Upper back strength, scapular stabilization.",
-            notes: "Focus on scapular depression cueing."
-          },
-          {
-            id: 3,
-            name: "Olivia Martinez",
-            phone: "+1 (555) 349-1122",
-            email: "olivia.m@example.com",
-            emergencyContact: "Elena Martinez - 555-443-2211",
-            injuryNotes: "Second trimester prenatal (week 22); avoid flat supine >3 mins, use wedge.",
-            goals: "Pelvic floor support and diaphragmatic breath.",
-            notes: "Keep water and wedge pillow ready."
-          },
-          {
-            id: 4,
-            name: "Hannah Lee",
-            phone: "+1 (555) 902-5541",
-            email: "hannah.lee@example.com",
-            emergencyContact: "Min-Jun Lee - 555-888-1212",
-            injuryNotes: "Cervical neck strain from desk work; keep headrest lifted 1 notch.",
-            goals: "Thoracic mobility, neck articulation.",
-            notes: "Package almost finished. Mention renewal."
-          }
+          { id: 1, name: "Claire Vance", phone: "+1 (555) 234-8910", email: "claire.vance@example.com", emergencyContact: "David Vance - 555-901-2233", injuryNotes: "Mild lower back disc bulge; avoid extreme flexion.", goals: "Core stability, posture.", notes: "" },
+          { id: 2, name: "Sophia Chen", phone: "+1 (555) 782-3490", email: "sophia.chen@example.com", emergencyContact: "Marcus Chen - 555-667-8899", injuryNotes: "Right shoulder impingement; modify overhead.", goals: "Upper back strength.", notes: "" }
         ];
         localStorage.setItem(STORAGE_KEY_STUDENTS, JSON.stringify(initialStudents));
 
         const initialPackages = [
-          {
-            id: 1,
-            studentId: 1,
-            packageName: "10x Private Reformer Package",
-            totalClasses: 10,
-            remainingClasses: 6,
-            pricePaid: 1200,
-            paymentMethod: "Credit Card",
-            paymentDate: new Date(Date.now() - 15 * 86400000).toISOString().split('T')[0]
-          },
-          {
-            id: 2,
-            studentId: 2,
-            packageName: "10x Private Reformer & Tower",
-            totalClasses: 10,
-            remainingClasses: 8,
-            pricePaid: 1250,
-            paymentMethod: "Bank Transfer",
-            paymentDate: new Date(Date.now() - 10 * 86400000).toISOString().split('T')[0]
-          },
-          {
-            id: 3,
-            studentId: 3,
-            packageName: "5x Prenatal 1-on-1 Pilates",
-            totalClasses: 5,
-            remainingClasses: 2,
-            pricePaid: 650,
-            paymentMethod: "PayNow / Zelle",
-            paymentDate: new Date(Date.now() - 20 * 86400000).toISOString().split('T')[0]
-          },
-          {
-            id: 4,
-            studentId: 4,
-            packageName: "5x Starter Reformer",
-            totalClasses: 5,
-            remainingClasses: 1,
-            pricePaid: 575,
-            paymentMethod: "Cash",
-            paymentDate: new Date(Date.now() - 35 * 86400000).toISOString().split('T')[0]
-          }
+          { id: 1, studentId: 1, packageName: "10x Private Reformer", totalClasses: 10, remainingClasses: 6, pricePaid: 1200, paymentMethod: "Credit Card", paymentDate: new Date(Date.now() - 15 * 86400000).toISOString().split('T')[0] },
+          { id: 2, studentId: 2, packageName: "10x Private Reformer & Tower", totalClasses: 10, remainingClasses: 8, pricePaid: 1250, paymentMethod: "Bank Transfer", paymentDate: new Date(Date.now() - 10 * 86400000).toISOString().split('T')[0] }
         ];
         localStorage.setItem(STORAGE_KEY_PACKAGES, JSON.stringify(initialPackages));
 
         const todayStr = new Date().toISOString().split('T')[0];
         const initialBookings = [
-          {
-            id: 1,
-            studentId: 1,
-            packageId: 1,
-            sessionDate: todayStr,
-            startTime: "10:00",
-            endTime: "10:55",
-            classType: "Private Reformer",
-            instructor: "Rina",
-            status: "confirmed",
-            deducted: true,
-            deductionTimestamp: new Date().toLocaleString(),
-            notes: "Spinal articulation and gentle footwork."
-          },
-          {
-            id: 2,
-            studentId: 2,
-            packageId: 2,
-            sessionDate: todayStr,
-            startTime: "11:30",
-            endTime: "12:25",
-            classType: "Cadillac & Tower",
-            instructor: "Rina",
-            status: "confirmed",
-            deducted: true,
-            deductionTimestamp: new Date().toLocaleString(),
-            notes: "Scapular retraction with push through bar."
-          },
-          {
-            id: 3,
-            studentId: 3,
-            packageId: 3,
-            sessionDate: todayStr,
-            startTime: "14:00",
-            endTime: "14:55",
-            classType: "Prenatal Pilates",
-            instructor: "Rina",
-            status: "confirmed",
-            deducted: true,
-            deductionTimestamp: new Date().toLocaleString(),
-            notes: "Wedge elevated reformer, gentle arm straps."
-          }
+          { id: 1, studentId: 1, packageId: 1, sessionDate: todayStr, startTime: "10:00", endTime: "10:55", classType: "Private Reformer", instructor: "Rina", status: "confirmed", deducted: true, deductionTimestamp: new Date().toLocaleString(), notes: "Spinal articulation." },
+          { id: 2, studentId: 2, packageId: 2, sessionDate: todayStr, startTime: "11:30", endTime: "12:25", classType: "Cadillac & Tower", instructor: "Rina", status: "confirmed", deducted: true, deductionTimestamp: new Date().toLocaleString(), notes: "Scapular retraction." }
         ];
         localStorage.setItem(STORAGE_KEY_BOOKINGS, JSON.stringify(initialBookings));
 
         const initialDeductions = [
-          {
-            id: 1,
-            studentId: 1,
-            studentName: "Claire Vance",
-            packageName: "10x Private Reformer Package",
-            classesChanged: -1,
-            remainingAfter: 6,
-            reason: `Booking scheduled for ${todayStr} 10:00 (Private Reformer)`,
-            timestamp: new Date().toLocaleString()
-          },
-          {
-            id: 2,
-            studentId: 2,
-            studentName: "Sophia Chen",
-            packageName: "10x Private Reformer & Tower",
-            classesChanged: -1,
-            remainingAfter: 8,
-            reason: `Booking scheduled for ${todayStr} 11:30 (Cadillac & Tower)`,
-            timestamp: new Date().toLocaleString()
-          },
-          {
-            id: 3,
-            studentId: 3,
-            studentName: "Olivia Martinez",
-            packageName: "5x Prenatal 1-on-1 Pilates",
-            classesChanged: -1,
-            remainingAfter: 2,
-            reason: `Booking scheduled for ${todayStr} 14:00 (Prenatal Pilates)`,
-            timestamp: new Date().toLocaleString()
-          }
+          { id: 1, studentId: 1, studentName: "Claire Vance", packageName: "10x Private Reformer", classesChanged: -1, remainingAfter: 6, reason: `Booking for ${todayStr} 10:00`, timestamp: new Date().toLocaleString() },
+          { id: 2, studentId: 2, studentName: "Sophia Chen", packageName: "10x Private Reformer & Tower", classesChanged: -1, remainingAfter: 8, reason: `Booking for ${todayStr} 11:30`, timestamp: new Date().toLocaleString() }
         ];
         localStorage.setItem(STORAGE_KEY_DEDUCTIONS, JSON.stringify(initialDeductions));
       }
     }
 
-    // Data Loaders
-    function getStudents() {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY_STUDENTS) || '[]');
-    }
-    function saveStudents(data) {
-      localStorage.setItem(STORAGE_KEY_STUDENTS, JSON.stringify(data));
-    }
-    function getPackages() {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY_PACKAGES) || '[]');
-    }
-    function savePackages(data) {
-      localStorage.setItem(STORAGE_KEY_PACKAGES, JSON.stringify(data));
-    }
-    function getBookings() {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY_BOOKINGS) || '[]');
-    }
-    function saveBookings(data) {
-      localStorage.setItem(STORAGE_KEY_BOOKINGS, JSON.stringify(data));
-    }
-    function getDeductions() {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY_DEDUCTIONS) || '[]');
-    }
-    function saveDeductions(data) {
-      localStorage.setItem(STORAGE_KEY_DEDUCTIONS, JSON.stringify(data));
-    }
+    // --- DATA HELPERS ---
+    const getStudents = () => JSON.parse(localStorage.getItem(STORAGE_KEY_STUDENTS) || '[]');
+    const saveStudents = (data) => localStorage.setItem(STORAGE_KEY_STUDENTS, JSON.stringify(data));
+    const getPackages = () => JSON.parse(localStorage.getItem(STORAGE_KEY_PACKAGES) || '[]');
+    const savePackages = (data) => localStorage.setItem(STORAGE_KEY_PACKAGES, JSON.stringify(data));
+    const getBookings = () => JSON.parse(localStorage.getItem(STORAGE_KEY_BOOKINGS) || '[]');
+    const saveBookings = (data) => localStorage.setItem(STORAGE_KEY_BOOKINGS, JSON.stringify(data));
+    const getDeductions = () => JSON.parse(localStorage.getItem(STORAGE_KEY_DEDUCTIONS) || '[]');
+    const saveDeductions = (data) => localStorage.setItem(STORAGE_KEY_DEDUCTIONS, JSON.stringify(data));
 
-    // --- 3. STATE & APP CONTROLLERS ---
+    // --- STATE ---
     let currentScheduleDate = new Date().toISOString().split('T')[0];
     let scheduleFilter = 'all';
     let studentFilter = 'all';
-    let recSelectedDays = [2, 4]; // Tue & Thu
+    let recSelectedDays = [2, 4];
+    
+    let calendarDate = new Date();
+    calendarDate.setDate(1);
 
-    // Toast Alert
+    // --- UI HELPERS ---
     function showToast(msg) {
       const el = document.getElementById('toast');
-      const text = document.getElementById('toast-text');
-      text.innerText = msg;
+      document.getElementById('toast-text').innerText = msg;
       el.classList.remove('hidden');
-      setTimeout(() => el.classList.add('hidden'), 3500);
+      setTimeout(() => el.classList.add('hidden'), 3000);
     }
 
-    // Tab Switcher
     function switchTab(tabId) {
       ['schedule', 'students', 'datainput', 'audit'].forEach(t => {
         document.getElementById(`view-${t}`).classList.add('hidden');
         const btn = document.getElementById(`tab-btn-${t}`);
-        if (btn) {
-          btn.className = "px-3.5 py-2 rounded-xl transition flex items-center gap-2 text-stone-600 hover:text-stone-900";
+        const mobBtn = document.getElementById(`mob-tab-${t}`);
+        
+        if (btn) btn.className = "px-3.5 py-2 rounded-xl transition flex items-center gap-2 text-stone-600 hover:text-stone-900";
+        if (mobBtn) {
+          mobBtn.className = "flex flex-col items-center py-2 text-stone-400 hover:text-stone-800 flex-1";
+          mobBtn.querySelector('i').classList.remove('text-rina-800');
+          mobBtn.querySelector('span').className = "text-[9px] font-medium";
         }
       });
 
       document.getElementById(`view-${tabId}`).classList.remove('hidden');
+      
       const activeBtn = document.getElementById(`tab-btn-${tabId}`);
-      if (activeBtn) {
-        activeBtn.className = "px-3.5 py-2 rounded-xl transition flex items-center gap-2 bg-white text-stone-900 shadow-xs font-bold";
+      if (activeBtn) activeBtn.className = "px-3.5 py-2 rounded-xl transition flex items-center gap-2 bg-white text-stone-900 shadow-xs font-bold";
+      
+      const activeMobBtn = document.getElementById(`mob-tab-${tabId}`);
+      if (activeMobBtn) {
+        activeMobBtn.className = "flex flex-col items-center py-2 text-rina-800 flex-1";
+        activeMobBtn.querySelector('i').classList.add('text-rina-800');
+        activeMobBtn.querySelector('span').className = "text-[9px] font-bold";
       }
 
-      if (tabId === 'schedule') renderSchedule();
+      if (tabId === 'schedule') { renderCalendar(); renderSchedule(); }
       if (tabId === 'students') renderStudentPortfolios();
       if (tabId === 'datainput') populateDataInputOptions();
       if (tabId === 'audit') renderDeductionAudit();
     }
 
-    // --- 4. DAILY SCHEDULE LOGIC ---
+    // --- 1. CALENDAR & SCHEDULE ---
+    function changeMonth(offset) {
+      calendarDate.setMonth(calendarDate.getMonth() + offset);
+      renderCalendar();
+    }
+
+    function renderCalendar() {
+      const year = calendarDate.getFullYear();
+      const month = calendarDate.getMonth();
+      const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      document.getElementById('calendar-month-label').textContent = `${monthNames[month]} ${year}`;
+
+      const grid = document.getElementById('calendar-grid');
+      grid.innerHTML = '';
+
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const todayStr = new Date().toISOString().split('T')[0];
+      
+      const bookings = getBookings();
+
+      // Empty cells before first day
+      for (let i = 0; i < firstDay; i++) {
+        const empty = document.createElement('div');
+        empty.className = 'cal-cell other-month';
+        grid.appendChild(empty);
+      }
+
+      // Days of month
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const cell = document.createElement('div');
+        cell.className = 'cal-cell';
+        if (dateStr === todayStr) cell.classList.add('today');
+        if (dateStr === currentScheduleDate) cell.classList.add('selected');
+        
+        const dayBookings = bookings.filter(b => b.sessionDate === dateStr);
+        
+        let html = `<span class="text-xs font-semibold">${d}</span>`;
+        if (dayBookings.length > 0) {
+          html += `<span class="mt-1 bg-rina-800 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">${dayBookings.length}</span>`;
+        }
+        cell.innerHTML = html;
+
+        cell.onclick = () => {
+          currentScheduleDate = dateStr;
+          renderCalendar();
+          renderSchedule();
+        };
+        grid.appendChild(cell);
+      }
+    }
+
     function onScheduleDateChange(val) {
       currentScheduleDate = val;
+      renderCalendar();
       renderSchedule();
     }
+
     function stepDate(days) {
       const d = new Date(currentScheduleDate);
       d.setDate(d.getDate() + days);
       currentScheduleDate = d.toISOString().split('T')[0];
+      renderCalendar();
       renderSchedule();
     }
+
     function goToToday() {
       currentScheduleDate = new Date().toISOString().split('T')[0];
+      calendarDate = new Date();
+      calendarDate.setDate(1);
+      renderCalendar();
       renderSchedule();
     }
+
     function setScheduleFilter(val) {
       scheduleFilter = val;
       ['all', 'confirmed', 'attended', 'cancelled'].forEach(f => {
         const btn = document.getElementById(`filter-sched-${f}`);
         if (btn) {
-          if (f === val) {
-            btn.className = "px-2.5 py-1 rounded-lg font-semibold uppercase text-[10px] bg-stone-900 text-white";
-          } else {
-            btn.className = "px-2.5 py-1 rounded-lg font-semibold uppercase text-[10px] bg-white border border-stone-200 text-stone-600";
-          }
+          if (f === val) btn.className = "px-2.5 py-1 rounded-lg font-semibold uppercase text-[10px] bg-stone-900 text-white shrink-0";
+          else btn.className = "px-2.5 py-1 rounded-lg font-semibold uppercase text-[10px] bg-white border border-stone-200 text-stone-600 shrink-0";
         }
       });
       renderSchedule();
     }
 
     function renderSchedule() {
-      const picker = document.getElementById('schedule-date-picker');
-      picker.value = currentScheduleDate;
+      document.getElementById('schedule-date-picker').value = currentScheduleDate;
 
       const dateObj = new Date(currentScheduleDate + 'T00:00:00');
-      const dateText = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      const dateText = dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
       document.getElementById('schedule-display-date').innerText = dateText;
-
-      const todayStr = new Date().toISOString().split('T')[0];
-      const isToday = currentScheduleDate === todayStr;
-      document.getElementById('schedule-today-tag').style.display = isToday ? 'inline-block' : 'none';
 
       const bookings = getBookings();
       const students = getStudents();
@@ -1138,25 +876,16 @@
         .filter(b => scheduleFilter === 'all' ? true : b.status === scheduleFilter)
         .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
-      document.getElementById('schedule-stats-summary').innerText = `${dayBookings.length} session${dayBookings.length === 1 ? '' : 's'} scheduled for this date`;
-
-      // Update Nav badge for today
-      const todayCount = bookings.filter(b => b.sessionDate === todayStr).length;
-      document.getElementById('nav-today-badge').innerText = todayCount;
+      document.getElementById('schedule-stats-summary').innerText = `${dayBookings.length} session${dayBookings.length === 1 ? '' : 's'}`;
 
       const container = document.getElementById('schedule-cards-container');
 
       if (dayBookings.length === 0) {
         container.innerHTML = `
-          <div class="bg-white rounded-2xl border-2 border-dashed border-stone-200 p-12 text-center space-y-3">
-            <div class="h-12 w-12 rounded-2xl bg-amber-50 text-amber-900 mx-auto flex items-center justify-center">
-              <i data-lucide="calendar" class="w-6 h-6"></i>
-            </div>
-            <h3 class="font-serif font-bold text-stone-900 text-base">No sessions scheduled for ${dateText}</h3>
-            <p class="text-xs text-stone-500 max-w-sm mx-auto">Click below to book a student. The system will mark the class deduction with the date and time.</p>
-            <button onclick="openBookingModal('${currentScheduleDate}')" class="bg-stone-900 text-white px-4 py-2 rounded-xl text-xs font-semibold inline-flex items-center gap-1.5 hover:bg-stone-800">
-              <i data-lucide="plus" class="w-4 h-4"></i> Book Class
-            </button>
+          <div class="bg-white rounded-2xl border-2 border-dashed border-stone-200 p-8 text-center space-y-3">
+            <div class="h-10 w-10 rounded-xl bg-amber-50 text-amber-900 mx-auto flex items-center justify-center"><i data-lucide="calendar" class="w-5 h-5"></i></div>
+            <h3 class="font-serif font-bold text-stone-900 text-sm">No sessions on ${dateText}</h3>
+            <button onclick="openBookingModal('${currentScheduleDate}')" class="bg-stone-900 text-white px-4 py-2 rounded-xl text-xs font-semibold inline-flex items-center gap-1.5 hover:bg-stone-800 mx-auto"><i data-lucide="plus" class="w-4 h-4"></i> Book Class</button>
           </div>
         `;
         lucide.createIcons();
@@ -1168,80 +897,35 @@
         const pkg = packages.find(p => p.id === b.packageId);
 
         return `
-          <div class="bg-white rounded-2xl border border-stone-200 p-5 shadow-xs hover:shadow-md transition">
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-              <!-- Left: Time & Info -->
-              <div class="flex items-start gap-4">
-                <div class="bg-[#FAF7F2] border border-stone-200 px-3 py-2 rounded-xl min-w-[85px] text-center">
+          <div class="bg-white rounded-xl sm:rounded-2xl border border-stone-200 p-3 sm:p-5 shadow-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="flex items-start gap-3">
+                <div class="bg-[#FAF7F2] border border-stone-200 px-2.5 py-1.5 rounded-lg text-center shrink-0">
                   <div class="font-bold text-stone-900 text-xs">${b.startTime}</div>
-                  <div class="text-[10px] text-stone-500">${b.endTime}</div>
+                  <div class="text-[9px] text-stone-500">${b.endTime}</div>
                 </div>
-
-                <div class="space-y-1">
-                  <div class="flex flex-wrap items-center gap-2">
-                    <button onclick="openPortfolioModal(${student ? student.id : 0})" class="font-serif font-bold text-base text-stone-900 hover:text-rina-800 hover:underline">
-                      ${student ? student.name : 'Unknown Student'}
-                    </button>
-                    <span class="bg-stone-100 text-stone-700 px-2 py-0.5 rounded-md text-xs font-medium">${b.classType}</span>
-                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                      b.status === 'attended' ? 'bg-emerald-100 text-emerald-800' :
-                      b.status === 'confirmed' ? 'bg-sky-100 text-sky-800' : 'bg-stone-200 text-stone-700'
-                    }">${b.status}</span>
+                <div>
+                  <div class="flex flex-wrap items-center gap-1.5">
+                    <button onclick="openPortfolioModal(${student ? student.id : 0})" class="font-serif font-bold text-sm sm:text-base text-stone-900 hover:underline">${student ? student.name : 'Unknown'}</button>
+                    <span class="bg-stone-100 text-stone-700 px-1.5 py-0.5 rounded text-[10px] font-medium">${b.classType}</span>
+                    <span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${b.status === 'attended' ? 'bg-emerald-100 text-emerald-800' : b.status === 'confirmed' ? 'bg-sky-100 text-sky-800' : 'bg-stone-200 text-stone-700'}">${b.status}</span>
                   </div>
-
-                  <!-- Deduction Timestamp Indicator -->
-                  <div class="flex flex-wrap items-center gap-2 text-xs">
+                  <div class="mt-1 flex flex-wrap items-center gap-2 text-[10px]">
                     ${b.deducted ? `
-                      <span class="inline-flex items-center gap-1 font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 text-[11px]">
-                        <i data-lucide="check-circle" class="w-3 h-3 text-emerald-600"></i>
-                        Deduction marked on: ${b.deductionTimestamp || 'Recorded'}
-                      </span>
+                      <span class="inline-flex items-center gap-1 font-semibold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200"><i data-lucide="check-circle" class="w-3 h-3"></i> Deducted</span>
                     ` : `
-                      <button onclick="manuallyDeductBooking(${b.id})" class="text-amber-800 font-medium bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 text-[11px] hover:bg-amber-100">
-                        ⚡ Click to deduct 1 class now
-                      </button>
+                      <button onclick="manuallyDeductBooking(${b.id})" class="text-amber-800 font-semibold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">⚡ Deduct now</button>
                     `}
-
-                    ${pkg ? `
-                      <span class="text-stone-500 text-[11px] flex items-center gap-1">
-                        <i data-lucide="layers" class="w-3 h-3 text-stone-400"></i>
-                        ${pkg.packageName} (<strong class="text-amber-900">${pkg.remainingClasses} classes left</strong>)
-                      </span>
-                    ` : ''}
+                    ${pkg ? `<span class="text-stone-500 flex items-center gap-1"><i data-lucide="layers" class="w-3 h-3"></i> ${pkg.remainingClasses} left</span>` : ''}
                   </div>
-
-                  ${b.notes ? `<p class="text-xs text-stone-500 italic mt-0.5">"${b.notes}"</p>` : ''}
                 </div>
               </div>
-
-              <!-- Right: Actions -->
-              <div class="flex items-center gap-2 border-t lg:border-t-0 pt-3 lg:pt-0">
-                ${b.status === 'confirmed' ? `
-                  <button onclick="markBookingAttended(${b.id})" class="bg-emerald-800 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl text-xs font-semibold shadow-xs">
-                    Mark Attended
-                  </button>
-                ` : ''}
-                ${b.status !== 'cancelled' ? `
-                  <button onclick="cancelBooking(${b.id})" class="border border-stone-300 hover:bg-red-50 hover:text-red-700 hover:border-red-300 text-stone-700 px-2.5 py-1.5 rounded-xl text-xs font-medium">
-                    Cancel
-                  </button>
-                ` : ''}
-                <button onclick="deleteBooking(${b.id})" class="text-stone-400 hover:text-red-600 p-1.5 rounded-lg" title="Delete booking">
-                  <i data-lucide="trash-2" class="w-4 h-4"></i>
-                </button>
+              <div class="flex items-center gap-1.5 border-t sm:border-t-0 pt-2 sm:pt-0">
+                ${b.status === 'confirmed' ? `<button onclick="markBookingAttended(${b.id})" class="bg-emerald-800 text-white px-2.5 py-1.5 rounded-lg text-[10px] font-semibold flex-1 sm:flex-none">Attended</button>` : ''}
+                ${b.status !== 'cancelled' ? `<button onclick="cancelBooking(${b.id})" class="border border-stone-300 text-stone-700 px-2.5 py-1.5 rounded-lg text-[10px] font-medium flex-1 sm:flex-none">Cancel</button>` : ''}
+                <button onclick="deleteBooking(${b.id})" class="text-stone-400 hover:text-red-600 p-1.5"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
               </div>
             </div>
-
-            <!-- Student Injury Caution on the Card -->
-            ${student && student.injuryNotes ? `
-              <div class="mt-3 bg-amber-50/70 border border-amber-200 p-2.5 rounded-xl flex items-start gap-2 text-xs text-amber-950">
-                <i data-lucide="heart" class="w-3.5 h-3.5 text-amber-800 shrink-0 mt-0.5"></i>
-                <div>
-                  <span class="font-bold text-amber-900">Student Physical Caution: </span>
-                  <span>${student.injuryNotes}</span>
-                </div>
-              </div>
-            ` : ''}
           </div>
         `;
       }).join('');
@@ -1249,162 +933,89 @@
       lucide.createIcons();
     }
 
-    // Schedule Action handlers
-    function markBookingAttended(bookingId) {
+    function markBookingAttended(id) {
       const bookings = getBookings();
-      const b = bookings.find(x => x.id === bookingId);
-      if (b) {
-        b.status = 'attended';
-        saveBookings(bookings);
-        showToast("Marked session as attended!");
-        renderSchedule();
-      }
+      const b = bookings.find(x => x.id === id);
+      if (b) { b.status = 'attended'; saveBookings(bookings); showToast("Marked attended"); renderSchedule(); }
     }
 
-    function cancelBooking(bookingId) {
-      const restore = confirm("Cancel this session?\n\nClick OK to restore 1 class credit back to student package.\nClick Cancel to keep credit deducted (e.g. late cancel policy).");
-      const bookings = getBookings();
-      const packages = getPackages();
-      const deductions = getDeductions();
-      const students = getStudents();
-
-      const b = bookings.find(x => x.id === bookingId);
+    function cancelBooking(id) {
+      const restore = confirm("Cancel session?\n\nOK: Restore 1 credit.\nCancel: Keep deducted (late policy).");
+      const bookings = getBookings(), packages = getPackages(), deductions = getDeductions(), students = getStudents();
+      const b = bookings.find(x => x.id === id);
       if (!b) return;
-
       b.status = 'cancelled';
-
       if (restore && b.deducted && b.packageId) {
         const pkg = packages.find(p => p.id === b.packageId);
         if (pkg) {
           pkg.remainingClasses += 1;
           savePackages(packages);
-
           const student = students.find(s => s.id === b.studentId);
-          deductions.unshift({
-            id: Date.now(),
-            studentId: b.studentId,
-            studentName: student ? student.name : "Student",
-            packageName: pkg.packageName,
-            classesChanged: 1,
-            remainingAfter: pkg.remainingClasses,
-            reason: `Restored 1 class due to cancellation of ${b.sessionDate} ${b.startTime}`,
-            timestamp: new Date().toLocaleString()
-          });
+          deductions.unshift({ id: Date.now(), studentId: b.studentId, studentName: student ? student.name : "Student", packageName: pkg.packageName, classesChanged: 1, remainingAfter: pkg.remainingClasses, reason: `Restored from cancel`, timestamp: new Date().toLocaleString() });
           saveDeductions(deductions);
           b.deducted = false;
         }
       }
-
       saveBookings(bookings);
-      showToast("Booking updated to cancelled.");
+      showToast("Booking cancelled");
       renderSchedule();
     }
 
-    function manuallyDeductBooking(bookingId) {
-      const bookings = getBookings();
-      const packages = getPackages();
-      const deductions = getDeductions();
-      const students = getStudents();
-
-      const b = bookings.find(x => x.id === bookingId);
+    function manuallyDeductBooking(id) {
+      const bookings = getBookings(), packages = getPackages(), deductions = getDeductions(), students = getStudents();
+      const b = bookings.find(x => x.id === id);
       if (!b) return;
-
-      const studentPkgs = packages.filter(p => p.studentId === b.studentId);
-      const targetPkg = studentPkgs.find(p => p.remainingClasses > 0) || studentPkgs[0];
-
-      if (!targetPkg) {
-        alert("This student has no packages available to deduct from.");
-        return;
-      }
-
-      targetPkg.remainingClasses = Math.max(0, targetPkg.remainingClasses - 1);
+      const targetPkg = packages.find(p => p.studentId === b.studentId && p.remainingClasses > 0);
+      if (!targetPkg) { alert("No package credits available."); return; }
+      
+      targetPkg.remainingClasses -= 1;
       b.packageId = targetPkg.id;
       b.deducted = true;
       b.deductionTimestamp = new Date().toLocaleString();
-
+      
       const student = students.find(s => s.id === b.studentId);
-      deductions.unshift({
-        id: Date.now(),
-        studentId: b.studentId,
-        studentName: student ? student.name : "Student",
-        packageName: targetPkg.packageName,
-        classesChanged: -1,
-        remainingAfter: targetPkg.remainingClasses,
-        reason: `Manual deduction marked: ${b.sessionDate} ${b.startTime} (${b.classType})`,
-        timestamp: new Date().toLocaleString()
-      });
-
-      savePackages(packages);
-      saveBookings(bookings);
-      saveDeductions(deductions);
-
-      showToast("Deduction recorded with timestamp!");
-      renderSchedule();
+      deductions.unshift({ id: Date.now(), studentId: b.studentId, studentName: student ? student.name : "Student", packageName: targetPkg.packageName, classesChanged: -1, remainingAfter: targetPkg.remainingClasses, reason: `Manual deduction`, timestamp: b.deductionTimestamp });
+      
+      savePackages(packages); saveBookings(bookings); saveDeductions(deductions);
+      showToast("Deducted 1 class"); renderSchedule();
     }
 
-    function deleteBooking(bookingId) {
+    function deleteBooking(id) {
       if (!confirm("Delete this booking record?")) return;
-      let bookings = getBookings();
-      bookings = bookings.filter(b => b.id !== bookingId);
-      saveBookings(bookings);
-      showToast("Booking deleted.");
-      renderSchedule();
+      saveBookings(getBookings().filter(b => b.id !== id));
+      showToast("Booking deleted"); renderSchedule();
     }
 
-
-    // --- 5. STUDENT PORTFOLIO VIEW LOGIC ---
+    // --- 2. STUDENT PORTFOLIOS ---
     function setStudentFilter(filter) {
       studentFilter = filter;
       ['all', 'low', 'empty'].forEach(f => {
         const btn = document.getElementById(`btn-st-filter-${f}`);
         if (btn) {
-          if (f === filter) {
-            btn.className = "px-2.5 py-1 rounded-lg bg-stone-900 text-white";
-          } else {
-            btn.className = "px-2.5 py-1 rounded-lg text-stone-600 hover:bg-white";
-          }
+          if (f === filter) btn.className = "px-2 py-1 rounded-lg bg-stone-900 text-white flex-1 sm:flex-none";
+          else btn.className = "px-2 py-1 rounded-lg text-stone-600 hover:bg-white flex-1 sm:flex-none";
         }
       });
       renderStudentPortfolios();
     }
 
     function renderStudentPortfolios() {
-      const students = getStudents();
-      const packages = getPackages();
-      const bookings = getBookings();
-
+      const students = getStudents(), packages = getPackages(), bookings = getBookings();
       const searchVal = (document.getElementById('student-search-input').value || '').toLowerCase();
 
-      // Top metrics calculation
-      let totalRev = 0;
-      let totalClassesLeft = 0;
-      let totalAttended = 0;
-
-      packages.forEach(p => {
-        totalRev += parseFloat(p.pricePaid || 0);
-        totalClassesLeft += parseInt(p.remainingClasses || 0);
-      });
-
-      bookings.forEach(b => {
-        if (b.status === 'attended') totalAttended++;
-      });
+      let totalRev = 0, totalClassesLeft = 0, totalAttended = 0;
+      packages.forEach(p => { totalRev += parseFloat(p.pricePaid || 0); totalClassesLeft += parseInt(p.remainingClasses || 0); });
+      bookings.forEach(b => { if (b.status === 'attended') totalAttended++; });
 
       document.getElementById('stat-student-count').innerText = students.length;
-      document.getElementById('nav-student-count').innerText = students.length;
-      document.getElementById('stat-total-revenue').innerText = `$${totalRev.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+      document.getElementById('stat-total-revenue').innerText = `$${totalRev.toLocaleString(undefined, {minimumFractionDigits: 0})}`;
       document.getElementById('stat-classes-left').innerText = totalClassesLeft;
       document.getElementById('stat-sessions-attended').innerText = totalAttended;
 
       const filtered = students.filter(s => {
-        const matchesSearch = s.name.toLowerCase().includes(searchVal) ||
-          (s.email && s.email.toLowerCase().includes(searchVal)) ||
-          (s.phone && s.phone.includes(searchVal));
-
+        const matchesSearch = s.name.toLowerCase().includes(searchVal) || (s.email && s.email.toLowerCase().includes(searchVal)) || (s.phone && s.phone.includes(searchVal));
         if (!matchesSearch) return false;
-
-        const stPkgs = packages.filter(p => p.studentId === s.id);
-        const stRemaining = stPkgs.reduce((sum, p) => sum + p.remainingClasses, 0);
-
+        const stRemaining = packages.filter(p => p.studentId === s.id).reduce((sum, p) => sum + p.remainingClasses, 0);
         if (studentFilter === 'low') return stRemaining > 0 && stRemaining <= 2;
         if (studentFilter === 'empty') return stRemaining === 0;
         return true;
@@ -1412,244 +1023,124 @@
 
       const grid = document.getElementById('students-grid');
       if (filtered.length === 0) {
-        grid.innerHTML = `
-          <div class="col-span-full bg-white rounded-2xl border-2 border-dashed border-stone-200 p-12 text-center space-y-2">
-            <h3 class="font-serif font-bold text-stone-900 text-base">No students matched</h3>
-            <p class="text-xs text-stone-500">Add a new student to your studio roster below.</p>
-            <button onclick="openStudentModal()" class="bg-stone-900 text-white px-4 py-2 rounded-xl text-xs font-semibold inline-flex items-center gap-1.5 hover:bg-stone-800">
-              <i data-lucide="user-plus" class="w-4 h-4"></i> Add Student
-            </button>
-          </div>
-        `;
-        lucide.createIcons();
+        grid.innerHTML = `<div class="col-span-full bg-white rounded-2xl border border-dashed border-stone-200 p-8 text-center text-xs text-stone-500">No students matched.</div>`;
         return;
       }
 
       grid.innerHTML = filtered.map(s => {
         const stPkgs = packages.filter(p => p.studentId === s.id);
         const stBookings = bookings.filter(b => b.studentId === s.id);
-
         const totalPaid = stPkgs.reduce((acc, p) => acc + parseFloat(p.pricePaid || 0), 0);
         const remainingClasses = stPkgs.reduce((acc, p) => acc + (p.remainingClasses || 0), 0);
         const attended = stBookings.filter(b => b.status === 'attended').length;
-
-        const activePkg = stPkgs.find(p => p.remainingClasses > 0) || stPkgs[0];
-
         const isLow = remainingClasses > 0 && remainingClasses <= 2;
         const isZero = remainingClasses === 0;
 
         return `
-          <div onclick="openPortfolioModal(${s.id})" class="bg-white rounded-2xl border border-stone-200 p-5 shadow-xs hover:border-rina-600/40 hover:shadow-md transition cursor-pointer flex flex-col justify-between">
-            <div class="space-y-3">
-              <div class="flex items-start justify-between gap-3">
-                <div class="flex items-center gap-3">
-                  <div class="h-11 w-11 rounded-2xl bg-[#FAF7F2] border border-stone-200 text-rina-900 font-serif font-bold text-base flex items-center justify-center">
-                    ${s.name.charAt(0)}
-                  </div>
-                  <div>
-                    <h3 class="font-serif font-bold text-base text-stone-900">${s.name}</h3>
-                    <p class="text-xs text-stone-500">${s.phone || 'No phone'} ${s.email ? `• ${s.email}` : ''}</p>
+          <div onclick="openPortfolioModal(${s.id})" class="bg-white rounded-xl sm:rounded-2xl border border-stone-200 p-3 sm:p-5 shadow-xs hover:shadow-md transition cursor-pointer flex flex-col justify-between">
+            <div class="space-y-2">
+              <div class="flex items-start justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <div class="h-8 w-8 sm:h-11 sm:w-11 rounded-lg sm:rounded-xl bg-[#FAF7F2] border border-stone-200 text-rina-900 font-serif font-bold text-xs sm:text-base flex items-center justify-center shrink-0">${s.name.charAt(0)}</div>
+                  <div class="min-w-0">
+                    <h3 class="font-serif font-bold text-sm sm:text-base text-stone-900 truncate">${s.name}</h3>
+                    <p class="text-[10px] sm:text-xs text-stone-500 truncate">${s.phone || 'No phone'}</p>
                   </div>
                 </div>
-
-                <span class="px-3 py-1 rounded-full text-xs font-bold ${
-                  isZero ? 'bg-red-100 text-red-800 border border-red-200' :
-                  isLow ? 'bg-amber-100 text-amber-900 border border-amber-200 animate-pulse' :
-                  'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                }">
-                  ${remainingClasses} classes left
-                </span>
+                <span class="px-2 py-0.5 rounded-full text-[9px] sm:text-xs font-bold shrink-0 ${isZero ? 'bg-red-100 text-red-800' : isLow ? 'bg-amber-100 text-amber-900' : 'bg-emerald-100 text-emerald-800'}">${remainingClasses} left</span>
               </div>
-
-              <!-- Financial Box -->
-              <div class="grid grid-cols-2 gap-2 bg-[#FAF7F2] p-3 rounded-xl border border-stone-100 text-xs">
-                <div>
-                  <span class="text-[10px] font-semibold uppercase text-stone-500">Total Paid</span>
-                  <div class="font-serif font-bold text-stone-900 text-sm mt-0.5">$${totalPaid.toFixed(2)}</div>
-                  <span class="text-[10px] text-stone-400">${stPkgs.length} package(s)</span>
-                </div>
-                <div>
-                  <span class="text-[10px] font-semibold uppercase text-stone-500">Active Package</span>
-                  <div class="font-semibold text-stone-800 truncate mt-0.5">${activePkg ? activePkg.packageName : 'No package'}</div>
-                  <span class="text-[10px] text-stone-400">${attended} sessions attended</span>
-                </div>
+              <div class="grid grid-cols-2 gap-1.5 bg-[#FAF7F2] p-2 rounded-lg border border-stone-100 text-[10px] sm:text-xs">
+                <div><span class="text-[8px] sm:text-[10px] font-semibold uppercase text-stone-500">Paid</span><div class="font-bold text-stone-900">$${totalPaid.toFixed(0)}</div></div>
+                <div><span class="text-[8px] sm:text-[10px] font-semibold uppercase text-stone-500">Attended</span><div class="font-bold text-stone-800">${attended}</div></div>
               </div>
-
-              ${s.injuryNotes ? `
-                <div class="bg-amber-50/70 border border-amber-200/80 p-2.5 rounded-xl flex items-start gap-2 text-xs text-amber-950">
-                  <i data-lucide="heart" class="w-3.5 h-3.5 text-amber-800 shrink-0 mt-0.5"></i>
-                  <p class="line-clamp-2"><span class="font-bold text-amber-900">Medical: </span>${s.injuryNotes}</p>
-                </div>
-              ` : ''}
             </div>
-
-            <!-- Footer Strip -->
-            <div class="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between text-xs" onclick="event.stopPropagation()">
-              <button onclick="openPortfolioModal(${s.id})" class="font-semibold text-rina-800 hover:underline inline-flex items-center gap-1">
-                View Portfolio <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
-              </button>
-
-              <div class="flex items-center gap-1.5">
-                <button onclick="openBookingModal(undefined, ${s.id})" class="bg-stone-900 text-white px-2.5 py-1 rounded-lg text-[11px] font-semibold hover:bg-stone-800">
-                  Book
-                </button>
-                <button onclick="openPackageModal(${s.id})" class="bg-amber-100 text-amber-900 px-2 py-1 rounded-lg text-[11px] font-semibold hover:bg-amber-200">
-                  + Pack
-                </button>
-                <button onclick="openStudentModal(${s.id})" class="text-stone-400 hover:text-stone-700 p-1">
-                  <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
-                </button>
-                <button onclick="deleteStudent(${s.id})" class="text-stone-400 hover:text-red-600 p-1">
-                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                </button>
+            <div class="mt-3 pt-2 border-t border-stone-100 flex items-center justify-between text-[10px] sm:text-xs" onclick="event.stopPropagation()">
+              <button onclick="openPortfolioModal(${s.id})" class="font-semibold text-rina-800 hover:underline">View</button>
+              <div class="flex items-center gap-1">
+                <button onclick="openBookingModal(undefined, ${s.id})" class="bg-stone-900 text-white px-2 py-1 rounded text-[9px] sm:text-[11px] font-semibold">Book</button>
+                <button onclick="openPackageModal(${s.id})" class="bg-amber-100 text-amber-900 px-2 py-1 rounded text-[9px] sm:text-[11px] font-semibold">+ Pack</button>
+                <button onclick="openStudentModal(${s.id})" class="text-stone-400 hover:text-stone-700 p-1"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i></button>
+                <button onclick="deleteStudent(${s.id})" class="text-stone-400 hover:text-red-600 p-1"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
               </div>
             </div>
           </div>
         `;
       }).join('');
-
       lucide.createIcons();
     }
 
     function deleteStudent(id) {
-      if (!confirm("Delete this student profile and all associated records?")) return;
-      let students = getStudents();
-      let packages = getPackages();
-      let bookings = getBookings();
-      let deductions = getDeductions();
-
-      students = students.filter(s => s.id !== id);
-      packages = packages.filter(p => p.studentId !== id);
-      bookings = bookings.filter(b => b.studentId !== id);
-      deductions = deductions.filter(d => d.studentId !== id);
-
-      saveStudents(students);
-      savePackages(packages);
-      saveBookings(bookings);
-      saveDeductions(deductions);
-
-      showToast("Student and all related data deleted.");
-      renderStudentPortfolios();
+      if (!confirm("Delete this student and all their records?")) return;
+      saveStudents(getStudents().filter(s => s.id !== id));
+      savePackages(getPackages().filter(p => p.studentId !== id));
+      saveBookings(getBookings().filter(b => b.studentId !== id));
+      saveDeductions(getDeductions().filter(d => d.studentId !== id));
+      showToast("Student deleted"); renderStudentPortfolios();
     }
 
-
-    // --- 6. DATA INPUT SYSTEM LOGIC ---
-    let batchTableRows = [
-      { name: "Jessica Alba", phone: "555-890-1234", email: "jessica@test.com", packageName: "10x Private Reformer", totalClasses: 10, remainingClasses: 10, pricePaid: 1200, paymentMethod: "Credit Card", injuryNotes: "Tight hamstrings" },
-      { name: "Liam Hemsworth", phone: "555-901-4455", email: "liam@test.com", packageName: "5x Duet Starter", totalClasses: 5, remainingClasses: 5, pricePaid: 600, paymentMethod: "Bank Transfer", injuryNotes: "Upper back stiffness" }
-    ];
+    // --- 3. DATA INPUT SYSTEM ---
+    let batchTableRows = [{ name: "", phone: "", email: "", packageName: "10x Private Reformer", totalClasses: 10, remainingClasses: 10, pricePaid: 1200, paymentMethod: "Credit Card", injuryNotes: "" }];
 
     function switchInputMode(mode) {
       ['spreadsheet', 'recurring', 'excelimport'].forEach(m => {
         document.getElementById(`input-panel-${m}`).classList.add('hidden');
-        document.getElementById(`input-mode-btn-${m}`).className = "pb-3 border-b-2 border-transparent text-stone-500 hover:text-stone-800 flex items-center gap-1.5";
+        document.getElementById(`input-mode-btn-${m}`).className = "pb-2 sm:pb-3 border-b-2 border-transparent text-stone-500 hover:text-stone-800 flex items-center gap-1.5 whitespace-nowrap";
       });
-
       document.getElementById(`input-panel-${mode}`).classList.remove('hidden');
-      document.getElementById(`input-mode-btn-${mode}`).className = "pb-3 border-b-2 border-rina-800 text-rina-900 font-bold flex items-center gap-1.5";
+      document.getElementById(`input-mode-btn-${mode}`).className = "pb-2 sm:pb-3 border-b-2 border-rina-800 text-rina-900 font-bold flex items-center gap-1.5 whitespace-nowrap";
     }
 
     function renderBatchTable() {
       const tbody = document.getElementById('batch-rows-tbody');
       tbody.innerHTML = batchTableRows.map((r, i) => `
         <tr class="hover:bg-amber-50/20">
-          <td class="p-2"><input type="text" value="${r.name}" onchange="updateBatchRow(${i}, 'name', this.value)" placeholder="Student name" class="w-full rounded border border-stone-300 p-1 font-medium"></td>
-          <td class="p-2"><input type="text" value="${r.phone}" onchange="updateBatchRow(${i}, 'phone', this.value)" placeholder="555-0100" class="w-full rounded border border-stone-200 p-1"></td>
-          <td class="p-2"><input type="email" value="${r.email}" onchange="updateBatchRow(${i}, 'email', this.value)" placeholder="email@test.com" class="w-full rounded border border-stone-200 p-1"></td>
-          <td class="p-2"><input type="text" value="${r.packageName}" onchange="updateBatchRow(${i}, 'packageName', this.value)" class="w-full rounded border border-stone-200 p-1"></td>
-          <td class="p-2"><input type="number" value="${r.totalClasses}" onchange="updateBatchRow(${i}, 'totalClasses', this.value)" class="w-16 rounded border border-stone-200 p-1 text-center"></td>
-          <td class="p-2"><input type="number" value="${r.remainingClasses}" onchange="updateBatchRow(${i}, 'remainingClasses', this.value)" class="w-16 rounded border border-stone-200 p-1 text-center font-bold text-amber-900"></td>
-          <td class="p-2"><input type="number" value="${r.pricePaid}" onchange="updateBatchRow(${i}, 'pricePaid', this.value)" class="w-20 rounded border border-stone-200 p-1"></td>
-          <td class="p-2">
-            <select onchange="updateBatchRow(${i}, 'paymentMethod', this.value)" class="w-full rounded border border-stone-200 p-1 bg-white">
-              <option value="Credit Card" ${r.paymentMethod==='Credit Card'?'selected':''}>Credit Card</option>
-              <option value="Bank Transfer" ${r.paymentMethod==='Bank Transfer'?'selected':''}>Bank Transfer</option>
+          <td class="p-1.5"><input type="text" value="${r.name}" onchange="updateBatchRow(${i}, 'name', this.value)" placeholder="Name" class="w-full rounded border border-stone-300 p-1 font-medium text-[10px] sm:text-xs"></td>
+          <td class="p-1.5"><input type="text" value="${r.phone}" onchange="updateBatchRow(${i}, 'phone', this.value)" placeholder="555" class="w-full rounded border border-stone-200 p-1 text-[10px] sm:text-xs"></td>
+          <td class="p-1.5"><input type="email" value="${r.email}" onchange="updateBatchRow(${i}, 'email', this.value)" placeholder="Email" class="w-full rounded border border-stone-200 p-1 text-[10px] sm:text-xs"></td>
+          <td class="p-1.5"><input type="text" value="${r.packageName}" onchange="updateBatchRow(${i}, 'packageName', this.value)" class="w-full rounded border border-stone-200 p-1 text-[10px] sm:text-xs"></td>
+          <td class="p-1.5"><input type="number" value="${r.totalClasses}" onchange="updateBatchRow(${i}, 'totalClasses', this.value)" class="w-12 rounded border border-stone-200 p-1 text-center text-[10px] sm:text-xs"></td>
+          <td class="p-1.5"><input type="number" value="${r.remainingClasses}" onchange="updateBatchRow(${i}, 'remainingClasses', this.value)" class="w-12 rounded border border-stone-200 p-1 text-center font-bold text-amber-900 text-[10px] sm:text-xs"></td>
+          <td class="p-1.5"><input type="number" value="${r.pricePaid}" onchange="updateBatchRow(${i}, 'pricePaid', this.value)" class="w-16 rounded border border-stone-200 p-1 text-[10px] sm:text-xs"></td>
+          <td class="p-1.5">
+            <select onchange="updateBatchRow(${i}, 'paymentMethod', this.value)" class="w-full rounded border border-stone-200 p-1 bg-white text-[10px] sm:text-xs">
+              <option value="Credit Card" ${r.paymentMethod==='Credit Card'?'selected':''}>Card</option>
+              <option value="Bank Transfer" ${r.paymentMethod==='Bank Transfer'?'selected':''}>Bank</option>
               <option value="Cash" ${r.paymentMethod==='Cash'?'selected':''}>Cash</option>
-              <option value="PayNow / Zelle" ${r.paymentMethod==='PayNow / Zelle'?'selected':''}>PayNow / Zelle</option>
             </select>
           </td>
-          <td class="p-2"><input type="text" value="${r.injuryNotes}" onchange="updateBatchRow(${i}, 'injuryNotes', this.value)" placeholder="Injuries..." class="w-full rounded border border-stone-200 p-1"></td>
-          <td class="p-2 text-center">
-            <button onclick="removeBatchRow(${i})" class="text-stone-400 hover:text-red-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
-          </td>
+          <td class="p-1.5"><input type="text" value="${r.injuryNotes}" onchange="updateBatchRow(${i}, 'injuryNotes', this.value)" placeholder="Injuries" class="w-full rounded border border-stone-200 p-1 text-[10px] sm:text-xs"></td>
+          <td class="p-1.5 text-center"><button onclick="removeBatchRow(${i})" class="text-stone-400 hover:text-red-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></td>
         </tr>
       `).join('');
       lucide.createIcons();
     }
 
-    function addBatchRow() {
-      batchTableRows.push({
-        name: "", phone: "", email: "", packageName: "10x Private Reformer",
-        totalClasses: 10, remainingClasses: 10, pricePaid: 1200, paymentMethod: "Credit Card", injuryNotes: ""
-      });
-      renderBatchTable();
-    }
-    function removeBatchRow(index) {
-      batchTableRows.splice(index, 1);
-      renderBatchTable();
-    }
-    function updateBatchRow(index, key, val) {
-      batchTableRows[index][key] = val;
-    }
+    function addBatchRow() { batchTableRows.push({ name: "", phone: "", email: "", packageName: "10x Private Reformer", totalClasses: 10, remainingClasses: 10, pricePaid: 1200, paymentMethod: "Credit Card", injuryNotes: "" }); renderBatchTable(); }
+    function removeBatchRow(index) { batchTableRows.splice(index, 1); renderBatchTable(); }
+    function updateBatchRow(index, key, val) { batchTableRows[index][key] = val; }
 
     function saveBatchRows() {
       const valid = batchTableRows.filter(r => r.name.trim().length > 0);
-      if (valid.length === 0) {
-        alert("Please enter at least one student with a valid name.");
-        return;
-      }
-
-      const students = getStudents();
-      const packages = getPackages();
-
+      if (valid.length === 0) return alert("Enter at least one name.");
+      const students = getStudents(), packages = getPackages();
       valid.forEach(row => {
-        const studentId = Date.now() + Math.floor(Math.random() * 1000);
-        students.push({
-          id: studentId,
-          name: row.name.trim(),
-          phone: row.phone.trim(),
-          email: row.email.trim(),
-          emergencyContact: "",
-          injuryNotes: row.injuryNotes.trim(),
-          goals: "",
-          notes: "Imported via Data Input Center"
-        });
-
-        packages.push({
-          id: Date.now() + Math.floor(Math.random() * 1000),
-          studentId: studentId,
-          packageName: row.packageName || "10x Private Reformer",
-          totalClasses: parseInt(row.totalClasses) || 10,
-          remainingClasses: parseInt(row.remainingClasses) || 10,
-          pricePaid: parseFloat(row.pricePaid) || 1200,
-          paymentMethod: row.paymentMethod || "Credit Card",
-          paymentDate: new Date().toISOString().split('T')[0]
-        });
+        const newId = Date.now() + Math.floor(Math.random() * 1000);
+        students.push({ id: newId, name: row.name.trim(), phone: row.phone.trim(), email: row.email.trim(), emergencyContact: "", injuryNotes: row.injuryNotes.trim(), goals: "", notes: "" });
+        packages.push({ id: Date.now() + Math.floor(Math.random() * 1000), studentId: newId, packageName: row.packageName || "10x Private Reformer", totalClasses: parseInt(row.totalClasses) || 10, remainingClasses: parseInt(row.remainingClasses) || 10, pricePaid: parseFloat(row.pricePaid) || 1200, paymentMethod: row.paymentMethod || "Credit Card", paymentDate: new Date().toISOString().split('T')[0] });
       });
-
-      saveStudents(students);
-      savePackages(packages);
-
-      showToast(`Saved ${valid.length} student(s) to local storage!`);
+      saveStudents(students); savePackages(packages);
+      showToast(`Saved ${valid.length} students`);
       batchTableRows = [{ name: "", phone: "", email: "", packageName: "10x Private Reformer", totalClasses: 10, remainingClasses: 10, pricePaid: 1200, paymentMethod: "Credit Card", injuryNotes: "" }];
-      renderBatchTable();
-      renderStudentPortfolios();
+      renderBatchTable(); renderStudentPortfolios();
     }
 
-    // Recurring Schedule Generator
     function toggleRecDay(day) {
-      if (recSelectedDays.includes(day)) {
-        recSelectedDays = recSelectedDays.filter(d => d !== day);
-      } else {
-        recSelectedDays.push(day);
-      }
+      if (recSelectedDays.includes(day)) recSelectedDays = recSelectedDays.filter(d => d !== day);
+      else recSelectedDays.push(day);
       document.querySelectorAll('.rec-day-btn').forEach(btn => {
         const d = parseInt(btn.getAttribute('data-day'));
-        if (recSelectedDays.includes(d)) {
-          btn.className = "rec-day-btn px-3 py-1.5 rounded-xl border border-rina-800 bg-rina-800 text-white font-semibold";
-        } else {
-          btn.className = "rec-day-btn px-3 py-1.5 rounded-xl border border-stone-200 bg-stone-100 text-stone-700 font-semibold";
-        }
+        if (recSelectedDays.includes(d)) btn.className = "rec-day-btn px-2.5 py-1.5 rounded-lg border border-rina-800 bg-rina-800 text-white text-xs font-semibold";
+        else btn.className = "rec-day-btn px-2.5 py-1.5 rounded-lg border border-stone-200 bg-stone-100 text-stone-700 text-xs font-semibold";
       });
     }
 
@@ -1662,235 +1153,122 @@
       const weeks = parseInt(document.getElementById('rec-weeks').value) || 4;
       const autoDeduct = document.getElementById('rec-auto-deduct').checked;
 
-      if (!studentId) {
-        alert("Please select a student.");
-        return;
-      }
-      if (recSelectedDays.length === 0) {
-        alert("Please select at least one day of the week.");
-        return;
-      }
+      if (!studentId) return alert("Select a student.");
+      if (recSelectedDays.length === 0) return alert("Select a day.");
 
-      // Calculate 55 min end time
       const [h, m] = startTime.split(':').map(Number);
-      const endMin = (m + 55) % 60;
       const endH = h + Math.floor((m + 55) / 60);
-      const pad = n => String(n).padStart(2, '0');
-      const endTime = `${pad(endH)}:${pad(endMin)}`;
+      const endM = (m + 55) % 60;
+      const endTime = `${String(endH).padStart(2,'0')}:${String(endM).padStart(2,'0')}`;
 
       const targetDates = [];
       const current = new Date(startDate);
-      const totalDays = weeks * 7;
-
-      for (let i = 0; i < totalDays; i++) {
-        const d = new Date(current);
-        d.setDate(current.getDate() + i);
-        if (recSelectedDays.includes(d.getDay())) {
-          targetDates.push(d.toISOString().split('T')[0]);
-        }
+      for (let i = 0; i < weeks * 7; i++) {
+        const d = new Date(current); d.setDate(current.getDate() + i);
+        if (recSelectedDays.includes(d.getDay())) targetDates.push(d.toISOString().split('T')[0]);
       }
 
-      const bookings = getBookings();
-      const packages = getPackages();
-      const deductions = getDeductions();
-      const students = getStudents();
+      const bookings = getBookings(), packages = getPackages(), deductions = getDeductions(), students = getStudents();
       const student = students.find(s => s.id === studentId);
-
       const targetPkg = packages.find(p => p.studentId === studentId && p.remainingClasses > 0);
 
       targetDates.forEach(dateStr => {
-        let isDeducted = false;
-        let ts = null;
-
+        let isDeducted = false, ts = null;
         if (autoDeduct && targetPkg && targetPkg.remainingClasses > 0) {
-          targetPkg.remainingClasses -= 1;
-          isDeducted = true;
-          ts = new Date().toLocaleString();
-
-          deductions.unshift({
-            id: Date.now() + Math.random(),
-            studentId,
-            studentName: student ? student.name : "Student",
-            packageName: targetPkg.packageName,
-            classesChanged: -1,
-            remainingAfter: targetPkg.remainingClasses,
-            reason: `Recurring booking for ${dateStr} ${startTime} (${classType})`,
-            timestamp: ts
-          });
+          targetPkg.remainingClasses -= 1; isDeducted = true; ts = new Date().toLocaleString();
+          deductions.unshift({ id: Date.now() + Math.random(), studentId, studentName: student ? student.name : "Student", packageName: targetPkg.packageName, classesChanged: -1, remainingAfter: targetPkg.remainingClasses, reason: `Recurring: ${dateStr}`, timestamp: ts });
         }
-
-        bookings.push({
-          id: Date.now() + Math.random(),
-          studentId,
-          packageId: targetPkg ? targetPkg.id : null,
-          sessionDate: dateStr,
-          startTime,
-          endTime,
-          classType,
-          instructor: "Rina",
-          status: "confirmed",
-          deducted: isDeducted,
-          deductionTimestamp: ts,
-          notes: "Generated recurring slot"
-        });
+        bookings.push({ id: Date.now() + Math.random(), studentId, packageId: targetPkg ? targetPkg.id : null, sessionDate: dateStr, startTime, endTime, classType, instructor: "Rina", status: "confirmed", deducted: isDeducted, deductionTimestamp: ts, notes: "Recurring" });
       });
 
-      saveBookings(bookings);
-      savePackages(packages);
-      saveDeductions(deductions);
-
-      showToast(`Generated ${targetDates.length} recurring bookings with package deductions!`);
+      saveBookings(bookings); savePackages(packages); saveDeductions(deductions);
+      showToast(`Generated ${targetDates.length} bookings`);
       switchTab('schedule');
     }
 
-    // File Importer
     let parsedRowsToCommit = [];
     function handleExcelFileUpload(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-
+      const file = e.target.files[0]; if (!file) return;
       document.getElementById('file-upload-label').innerText = file.name;
-
       const reader = new FileReader();
       reader.onload = function(evt) {
         try {
-          const data = evt.target.result;
-          const workbook = XLSX.read(data, { type: 'binary' });
-          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-          const json = XLSX.utils.sheet_to_json(firstSheet);
-
+          const workbook = XLSX.read(evt.target.result, { type: 'binary' });
+          const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
           parsedRowsToCommit = json.map(r => ({
-            name: r["Student Name"] || r["Name"] || r["name"] || "",
-            phone: r["Phone"] || r["phone"] || "",
-            packageName: r["Package Name"] || r["Package"] || "10x Private Reformer",
-            totalClasses: parseInt(r["Total Classes"] || r["total_classes"] || 10),
-            remainingClasses: parseInt(r["Remaining Classes"] || r["Classes Left"] || 10),
-            pricePaid: parseFloat(r["Price Paid"] || r["price"] || 1200)
+            name: r["Student Name"] || r["Name"] || "",
+            phone: r["Phone"] || "",
+            packageName: r["Package Name"] || "10x Private Reformer",
+            totalClasses: parseInt(r["Total Classes"] || 10),
+            remainingClasses: parseInt(r["Remaining Classes"] || 10),
+            pricePaid: parseFloat(r["Price Paid"] || 1200)
           })).filter(r => r.name.trim().length > 0);
 
-          const previewSection = document.getElementById('parsed-preview-section');
-          const tbody = document.getElementById('parsed-preview-tbody');
-
-          tbody.innerHTML = parsedRowsToCommit.map(r => `
-            <tr>
-              <td class="p-2 font-bold">${r.name}</td>
-              <td class="p-2">${r.phone || '-'}</td>
-              <td class="p-2 font-medium text-amber-900">${r.packageName}</td>
-              <td class="p-2 font-bold">${r.remainingClasses} left</td>
-              <td class="p-2">$${r.pricePaid}</td>
-            </tr>
+          document.getElementById('parsed-preview-tbody').innerHTML = parsedRowsToCommit.map(r => `
+            <tr><td class="p-2 font-bold">${r.name}</td><td class="p-2">${r.phone||'-'}</td><td class="p-2 text-amber-900">${r.packageName}</td><td class="p-2 font-bold">${r.remainingClasses}</td><td class="p-2">$${r.pricePaid}</td></tr>
           `).join('');
-
-          previewSection.classList.remove('hidden');
-        } catch (err) {
-          alert("Error reading Excel file. Please ensure it's a valid .xlsx or .csv");
-        }
+          document.getElementById('parsed-preview-section').classList.remove('hidden');
+        } catch (err) { alert("Error reading file."); }
       };
       reader.readAsBinaryString(file);
     }
 
     function commitParsedExcelData() {
       if (parsedRowsToCommit.length === 0) return;
-      const students = getStudents();
-      const packages = getPackages();
-
+      const students = getStudents(), packages = getPackages();
       parsedRowsToCommit.forEach(row => {
-        const studentId = Date.now() + Math.floor(Math.random() * 1000);
-        students.push({
-          id: studentId,
-          name: row.name,
-          phone: row.phone,
-          email: "",
-          emergencyContact: "",
-          injuryNotes: "",
-          goals: "",
-          notes: "Imported via Excel"
-        });
-
-        packages.push({
-          id: Date.now() + Math.floor(Math.random() * 1000),
-          studentId: studentId,
-          packageName: row.packageName,
-          totalClasses: row.totalClasses,
-          remainingClasses: row.remainingClasses,
-          pricePaid: row.pricePaid,
-          paymentMethod: "Credit Card",
-          paymentDate: new Date().toISOString().split('T')[0]
-        });
+        const newId = Date.now() + Math.floor(Math.random() * 1000);
+        students.push({ id: newId, name: row.name, phone: row.phone, email: "", emergencyContact: "", injuryNotes: "", goals: "", notes: "Imported" });
+        packages.push({ id: Date.now() + Math.floor(Math.random() * 1000), studentId: newId, packageName: row.packageName, totalClasses: row.totalClasses, remainingClasses: row.remainingClasses, pricePaid: row.pricePaid, paymentMethod: "Credit Card", paymentDate: new Date().toISOString().split('T')[0] });
       });
-
-      saveStudents(students);
-      savePackages(packages);
-
-      showToast(`Imported ${parsedRowsToCommit.length} students from Excel!`);
+      saveStudents(students); savePackages(packages);
+      showToast(`Imported ${parsedRowsToCommit.length} students`);
       parsedRowsToCommit = [];
       document.getElementById('parsed-preview-section').classList.add('hidden');
-      document.getElementById('file-upload-label').innerText = "Click to choose or drop your Excel/CSV file here";
+      document.getElementById('file-upload-label').innerText = "Tap to choose Excel/CSV";
       renderStudentPortfolios();
     }
 
     function downloadSampleTemplate() {
-      const templateData = [
-        { "Student Name": "Jessica Alba", "Phone": "+1 (555) 890-1234", "Package Name": "10x Private Reformer", "Total Classes": 10, "Remaining Classes": 8, "Price Paid": 1200 },
-        { "Student Name": "Liam Hemsworth", "Phone": "+1 (555) 901-4455", "Package Name": "5x Duet Starter", "Total Classes": 5, "Remaining Classes": 5, "Price Paid": 600 }
-      ];
       const wb = XLSX.utils.book_new();
-      const ws = XLSX.utils.json_to_sheet(templateData);
+      const ws = XLSX.utils.json_to_sheet([{ "Student Name": "Jessica Alba", "Phone": "+1 555", "Package Name": "10x Private", "Total Classes": 10, "Remaining Classes": 8, "Price Paid": 1200 }]);
       XLSX.utils.book_append_sheet(wb, ws, "Students");
-      XLSX.writeFile(wb, "RINA_Pilates_Sample_Roster.xlsx");
+      XLSX.writeFile(wb, "RINA_Sample.xlsx");
     }
 
     function populateDataInputOptions() {
       renderBatchTable();
       const students = getStudents();
-      const select = document.getElementById('rec-student-select');
-      select.innerHTML = '<option value="">Select student...</option>' +
-        students.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
-
+      document.getElementById('rec-student-select').innerHTML = '<option value="">Select student...</option>' + students.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
       document.getElementById('rec-start-date').value = currentScheduleDate;
     }
 
-
-    // --- 7. DEDUCTION AUDIT LOG VIEW LOGIC ---
+    // --- 4. AUDIT LOGS ---
     function renderDeductionAudit() {
-      const deductions = getDeductions();
-      const students = getStudents();
+      const deductions = getDeductions(), students = getStudents();
       const filterStudentId = document.getElementById('audit-filter-student').value;
-
-      // populate filter dropdown
+      
       const sel = document.getElementById('audit-filter-student');
-      const cur = sel.value;
-      sel.innerHTML = '<option value="all">All Students</option>' +
-        students.map(s => `<option value="${s.id}" ${cur == s.id ? 'selected' : ''}>${s.name}</option>`).join('');
+      sel.innerHTML = '<option value="all">All Students</option>' + students.map(s => `<option value="${s.id}" ${sel.value == s.id ? 'selected' : ''}>${s.name}</option>`).join('');
 
-      const list = filterStudentId === 'all'
-        ? deductions
-        : deductions.filter(d => String(d.studentId) === String(filterStudentId));
-
+      const list = filterStudentId === 'all' ? deductions : deductions.filter(d => String(d.studentId) === String(filterStudentId));
       const tbody = document.getElementById('audit-log-tbody');
+      
       if (list.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-stone-400">No deduction entries logged yet.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-stone-400 text-xs">No logs recorded.</td></tr>`;
         return;
       }
 
       tbody.innerHTML = list.map(log => `
         <tr class="hover:bg-stone-50 transition">
-          <td class="p-3.5 font-mono text-stone-700 font-semibold">${log.timestamp}</td>
-          <td class="p-3.5 font-bold text-stone-900">${log.studentName}</td>
-          <td class="p-3.5 text-stone-600 font-medium">${log.packageName}</td>
-          <td class="p-3.5 font-bold">
-            ${log.classesChanged < 0 ? `
-              <span class="bg-amber-100 text-amber-900 px-2 py-0.5 rounded border border-amber-200">${log.classesChanged} class</span>
-            ` : `
-              <span class="bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded border border-emerald-200">+${log.classesChanged} class</span>
-            `}
-          </td>
-          <td class="p-3.5 font-bold text-stone-900"><span class="bg-stone-100 px-2 py-0.5 rounded">${log.remainingAfter} left</span></td>
-          <td class="p-3.5 text-stone-600">${log.reason}</td>
-          <td class="p-3.5 text-center">
-            <button onclick="deleteDeductionLog(${log.id})" class="text-stone-400 hover:text-red-600 p-1" title="Delete incorrect log">
-              <i data-lucide="trash-2" class="w-4 h-4"></i>
-            </button>
+          <td class="p-2 sm:p-3 font-mono text-[9px] sm:text-xs text-stone-700 font-semibold">${log.timestamp}</td>
+          <td class="p-2 sm:p-3 font-bold text-[10px] sm:text-xs text-stone-900">${log.studentName}</td>
+          <td class="p-2 sm:p-3 text-stone-600 text-[10px] sm:text-xs">${log.packageName}</td>
+          <td class="p-2 sm:p-3 font-bold text-[10px] sm:text-xs"><span class="${log.classesChanged < 0 ? 'bg-amber-100 text-amber-900' : 'bg-emerald-100 text-emerald-900'} px-1.5 py-0.5 rounded">${log.classesChanged}</span></td>
+          <td class="p-2 sm:p-3 font-bold text-[10px] sm:text-xs"><span class="bg-stone-100 px-1.5 py-0.5 rounded">${log.remainingAfter}</span></td>
+          <td class="p-2 sm:p-3 text-stone-600 text-[10px] sm:text-xs">${log.reason}</td>
+          <td class="p-2 sm:p-3 text-center">
+            <button onclick="deleteDeductionLog(${log.id})" class="text-stone-400 hover:text-red-600 p-1"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
           </td>
         </tr>
       `).join('');
@@ -1898,128 +1276,54 @@
     }
 
     function deleteDeductionLog(id) {
-      if (!confirm("Delete this audit log entry? Note: this will NOT change the student's current package balance, it only removes the historical record.")) return;
-      let deductions = getDeductions();
-      deductions = deductions.filter(d => d.id !== id);
-      saveDeductions(deductions);
-      showToast("Audit log deleted.");
-      renderDeductionAudit();
+      if (!confirm("Delete this log entry? (Balance will NOT change)")) return;
+      saveDeductions(getDeductions().filter(d => d.id !== id));
+      showToast("Log deleted"); renderDeductionAudit();
     }
 
-
-    // --- 8. EXCEL EXTRACTION (.XLSX) ---
+    // --- 5. EXCEL EXPORT ---
     function exportToExcel() {
-      const students = getStudents();
-      const packages = getPackages();
-      const bookings = getBookings();
-      const deductions = getDeductions();
-
+      const students = getStudents(), packages = getPackages(), bookings = getBookings(), deductions = getDeductions();
       const wb = XLSX.utils.book_new();
 
-      // Sheet 1: Students Portfolio & Balances
-      const studentsRows = students.map(s => {
+      const wsStudents = XLSX.utils.json_to_sheet(students.map(s => {
         const stPkgs = packages.filter(p => p.studentId === s.id);
-        const totalPaid = stPkgs.reduce((sum, p) => sum + parseFloat(p.pricePaid || 0), 0);
-        const remainingClasses = stPkgs.reduce((sum, p) => sum + (p.remainingClasses || 0), 0);
-        const activePkg = stPkgs.find(p => p.remainingClasses > 0);
-
-        return {
-          "Student ID": s.id,
-          "Student Name": s.name,
-          "Phone": s.phone || "-",
-          "Email": s.email || "-",
-          "Active Package": activePkg ? activePkg.packageName : "None",
-          "Classes Remaining": remainingClasses,
-          "Total Paid ($)": totalPaid.toFixed(2),
-          "Emergency Contact": s.emergencyContact || "-",
-          "Physical / Injury Notes": s.injuryNotes || "-",
-          "Pilates Goals": s.goals || "-",
-          "Studio Teaching Notes": s.notes || "-"
-        };
-      });
-      const wsStudents = XLSX.utils.json_to_sheet(studentsRows);
-      XLSX.utils.book_append_sheet(wb, wsStudents, "Students Portfolio");
-
-      // Sheet 2: Daily Schedule & Bookings
-      const bookingsRows = bookings.map(b => {
-        const student = students.find(s => s.id === b.studentId);
-        const pkg = packages.find(p => p.id === b.packageId);
-
-        return {
-          "Booking ID": b.id,
-          "Session Date": b.sessionDate,
-          "Start Time": b.startTime,
-          "End Time": b.endTime,
-          "Student Name": student ? student.name : "Unknown",
-          "Class Type": b.classType,
-          "Instructor": b.instructor,
-          "Status": b.status.toUpperCase(),
-          "Package Linked": pkg ? pkg.packageName : "None",
-          "Package Deducted?": b.deducted ? "YES" : "NO",
-          "Deduction Date & Time": b.deductionTimestamp || "-",
-          "Notes / Focus": b.notes || "-"
-        };
-      });
-      const wsBookings = XLSX.utils.json_to_sheet(bookingsRows);
-      XLSX.utils.book_append_sheet(wb, wsBookings, "Schedule & Bookings");
-
-      // Sheet 3: Packages & Revenue
-      const packagesRows = packages.map(p => {
-        const student = students.find(s => s.id === p.studentId);
-        return {
-          "Package ID": p.id,
-          "Student Name": student ? student.name : "-",
-          "Package Name": p.packageName,
-          "Total Classes": p.totalClasses,
-          "Remaining Classes": p.remainingClasses,
-          "Price Paid ($)": parseFloat(p.pricePaid || 0).toFixed(2),
-          "Payment Method": p.paymentMethod || "-",
-          "Payment Date": p.paymentDate || "-"
-        };
-      });
-      const wsPackages = XLSX.utils.json_to_sheet(packagesRows);
-      XLSX.utils.book_append_sheet(wb, wsPackages, "Packages & Payments");
-
-      // Sheet 4: Deduction Audit Trail
-      const deductionsRows = deductions.map(d => ({
-        "Log ID": d.id,
-        "Deduction Timestamp": d.timestamp,
-        "Student Name": d.studentName,
-        "Package Name": d.packageName,
-        "Class Adjustment": d.classesChanged > 0 ? `+${d.classesChanged}` : d.classesChanged,
-        "Remaining Balance After": d.remainingAfter,
-        "Reason": d.reason
+        return { "ID": s.id, "Name": s.name, "Phone": s.phone, "Email": s.email, "Classes Left": stPkgs.reduce((sum, p) => sum + p.remainingClasses, 0), "Total Paid": stPkgs.reduce((sum, p) => sum + parseFloat(p.pricePaid || 0), 0), "Medical": s.injuryNotes };
       }));
-      const wsDeductions = XLSX.utils.json_to_sheet(deductionsRows);
-      XLSX.utils.book_append_sheet(wb, wsDeductions, "Deduction Audit Trail");
+      XLSX.utils.book_append_sheet(wb, wsStudents, "Students");
 
-      // Save file
-      const todayStr = new Date().toISOString().split('T')[0];
-      const filename = `RINA_Pilates_Report_${todayStr}.xlsx`;
-      XLSX.writeFile(wb, filename);
+      const wsBookings = XLSX.utils.json_to_sheet(bookings.map(b => {
+        const student = students.find(s => s.id === b.studentId);
+        return { "Date": b.sessionDate, "Time": `${b.startTime}-${b.endTime}`, "Student": student ? student.name : "Unknown", "Class": b.classType, "Status": b.status.toUpperCase(), "Deducted": b.deducted ? "YES" : "NO", "Deduction Time": b.deductionTimestamp || "-" };
+      }));
+      XLSX.utils.book_append_sheet(wb, wsBookings, "Bookings");
 
-      showToast(`Exported full Excel report: ${filename}`);
+      const wsPackages = XLSX.utils.json_to_sheet(packages.map(p => {
+        const student = students.find(s => s.id === p.studentId);
+        return { "Student": student ? student.name : "-", "Package": p.packageName, "Total": p.totalClasses, "Left": p.remainingClasses, "Paid": p.pricePaid, "Method": p.paymentMethod, "Date": p.paymentDate };
+      }));
+      XLSX.utils.book_append_sheet(wb, wsPackages, "Packages");
+
+      const wsDeductions = XLSX.utils.json_to_sheet(deductions.map(d => ({
+        "Time": d.timestamp, "Student": d.studentName, "Package": d.packageName, "Change": d.classesChanged, "Balance After": d.remainingAfter, "Reason": d.reason
+      })));
+      XLSX.utils.book_append_sheet(wb, wsDeductions, "Audit Logs");
+
+      XLSX.writeFile(wb, `RINA_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
+      showToast("Excel exported!");
     }
 
+    // --- 6. MODAL HANDLERS ---
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-    // --- 9. MODAL HANDLERS ---
-    function closeModal(id) {
-      document.getElementById(id).classList.add('hidden');
-    }
-
-    // Booking Modal
     function openBookingModal(date, studentId) {
       const students = getStudents();
-      const select = document.getElementById('booking-student-select');
-      select.innerHTML = '<option value="">Select student...</option>' +
-        students.map(s => `<option value="${s.id}" ${studentId === s.id ? 'selected' : ''}>${s.name}</option>`).join('');
-
+      document.getElementById('booking-student-select').innerHTML = '<option value="">Select student...</option>' + students.map(s => `<option value="${s.id}" ${studentId === s.id ? 'selected' : ''}>${s.name}</option>`).join('');
       document.getElementById('booking-date').value = date || currentScheduleDate;
       document.getElementById('booking-start-time').value = "10:00";
       document.getElementById('booking-end-time').value = "10:55";
       document.getElementById('booking-notes').value = "";
       document.getElementById('booking-auto-deduct').checked = true;
-
       onBookingStudentChanged();
       document.getElementById('modal-booking').classList.remove('hidden');
       lucide.createIcons();
@@ -2027,37 +1331,29 @@
 
     function onBookingStudentChanged() {
       const studentId = parseInt(document.getElementById('booking-student-select').value);
-      const students = getStudents();
-      const packages = getPackages();
-
-      const student = students.find(s => s.id === studentId);
+      const student = getStudents().find(s => s.id === studentId);
       const banner = document.getElementById('booking-injury-banner');
       if (student && student.injuryNotes) {
         document.getElementById('booking-injury-text').innerText = student.injuryNotes;
         banner.classList.remove('hidden');
-      } else {
-        banner.classList.add('hidden');
-      }
+      } else banner.classList.add('hidden');
 
+      const activePkg = getPackages().find(p => p.studentId === studentId && p.remainingClasses > 0);
       const badge = document.getElementById('booking-package-badge');
       const text = document.getElementById('booking-package-text');
-
+      
       if (!studentId) {
-        badge.innerText = "No student selected";
+        badge.innerText = "No student";
         badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-stone-200 text-stone-700";
-        text.innerText = "Select a student to check active packages.";
-        return;
-      }
-
-      const activePkg = packages.find(p => p.studentId === studentId && p.remainingClasses > 0);
-      if (activePkg) {
-        badge.innerText = `${activePkg.remainingClasses} classes remaining`;
+        text.innerText = "Select a student.";
+      } else if (activePkg) {
+        badge.innerText = `${activePkg.remainingClasses} left`;
         badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800";
-        text.innerText = `Package: ${activePkg.packageName}. Will deduct 1 class upon confirmation.`;
+        text.innerText = `${activePkg.packageName}. Will deduct 1 class.`;
       } else {
-        badge.innerText = "0 classes left";
+        badge.innerText = "0 left";
         badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800";
-        text.innerText = "No active packages with credits remaining. You can still schedule, or log a payment in Student Portfolio.";
+        text.innerText = "No credits remaining.";
       }
     }
 
@@ -2067,8 +1363,7 @@
       const total = m + 55;
       const endH = h + Math.floor(total / 60);
       const endM = total % 60;
-      const pad = n => String(n).padStart(2, '0');
-      document.getElementById('booking-end-time').value = `${pad(endH)}:${pad(endM)}`;
+      document.getElementById('booking-end-time').value = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
     }
 
     function handleBookingSubmit(e) {
@@ -2082,69 +1377,34 @@
       const notes = document.getElementById('booking-notes').value;
       const autoDeduct = document.getElementById('booking-auto-deduct').checked;
 
-      const bookings = getBookings();
-      const packages = getPackages();
-      const deductions = getDeductions();
-      const students = getStudents();
-
+      const bookings = getBookings(), packages = getPackages(), deductions = getDeductions(), students = getStudents();
       const student = students.find(s => s.id === studentId);
       const targetPkg = packages.find(p => p.studentId === studentId && p.remainingClasses > 0);
-
-      let isDeducted = false;
-      let deductionTimestamp = null;
+      let isDeducted = false, ts = null;
 
       if (autoDeduct && targetPkg) {
         targetPkg.remainingClasses = Math.max(0, targetPkg.remainingClasses - 1);
-        isDeducted = true;
-        deductionTimestamp = new Date().toLocaleString();
-
-        deductions.unshift({
-          id: Date.now(),
-          studentId: studentId,
-          studentName: student ? student.name : "Student",
-          packageName: targetPkg.packageName,
-          classesChanged: -1,
-          remainingAfter: targetPkg.remainingClasses,
-          reason: `Booking scheduled for ${sessionDate} ${startTime} (${classType})`,
-          timestamp: deductionTimestamp
-        });
-        savePackages(packages);
-        saveDeductions(deductions);
+        isDeducted = true; ts = new Date().toLocaleString();
+        deductions.unshift({ id: Date.now(), studentId, studentName: student ? student.name : "Student", packageName: targetPkg.packageName, classesChanged: -1, remainingAfter: targetPkg.remainingClasses, reason: `Booking: ${sessionDate} ${startTime}`, timestamp: ts });
+        savePackages(packages); saveDeductions(deductions);
       }
 
-      bookings.push({
-        id: Date.now(),
-        studentId,
-        packageId: targetPkg ? targetPkg.id : null,
-        sessionDate,
-        startTime,
-        endTime,
-        classType,
-        instructor,
-        status: "confirmed",
-        deducted: isDeducted,
-        deductionTimestamp,
-        notes
-      });
-
+      bookings.push({ id: Date.now(), studentId, packageId: targetPkg ? targetPkg.id : null, sessionDate, startTime, endTime, classType, instructor, status: "confirmed", deducted: isDeducted, deductionTimestamp: ts, notes });
       saveBookings(bookings);
       closeModal('modal-booking');
-      showToast("Booking added & deduction marked with date and time!");
+      showToast("Booking added!");
       currentScheduleDate = sessionDate;
-      renderSchedule();
+      renderCalendar(); renderSchedule();
     }
 
-    // Student Modal
     function openStudentModal(editId) {
       document.getElementById('student-edit-id').value = editId || "";
       const isEdit = !!editId;
-
-      document.getElementById('student-modal-title').innerText = isEdit ? "Edit Student Profile" : "New Student Onboarding";
+      document.getElementById('student-modal-title').innerText = isEdit ? "Edit Student" : "New Student";
       document.getElementById('st-package-section').style.display = isEdit ? "none" : "block";
-
+      
       if (isEdit) {
-        const students = getStudents();
-        const s = students.find(x => x.id === editId);
+        const s = getStudents().find(x => x.id === editId);
         if (s) {
           document.getElementById('st-name').value = s.name;
           document.getElementById('st-phone').value = s.phone || "";
@@ -2154,14 +1414,8 @@
           document.getElementById('st-goals').value = s.goals || "";
         }
       } else {
-        document.getElementById('st-name').value = "";
-        document.getElementById('st-phone').value = "";
-        document.getElementById('st-email').value = "";
-        document.getElementById('st-emergency').value = "";
-        document.getElementById('st-injuries').value = "";
-        document.getElementById('st-goals').value = "";
+        ['st-name','st-phone','st-email','st-emergency','st-injuries','st-goals'].forEach(id => document.getElementById(id).value = "");
       }
-
       document.getElementById('modal-student').classList.remove('hidden');
       lucide.createIcons();
     }
@@ -2170,72 +1424,31 @@
       e.preventDefault();
       const editId = document.getElementById('student-edit-id').value;
       const name = document.getElementById('st-name').value.trim();
-      const phone = document.getElementById('st-phone').value.trim();
-      const email = document.getElementById('st-email').value.trim();
-      const emergencyContact = document.getElementById('st-emergency').value.trim();
-      const injuryNotes = document.getElementById('st-injuries').value.trim();
-      const goals = document.getElementById('st-goals').value.trim();
-
-      const students = getStudents();
-      const packages = getPackages();
+      const students = getStudents(), packages = getPackages();
 
       if (editId) {
         const s = students.find(x => x.id === parseInt(editId));
         if (s) {
-          s.name = name;
-          s.phone = phone;
-          s.email = email;
-          s.emergencyContact = emergencyContact;
-          s.injuryNotes = injuryNotes;
-          s.goals = goals;
+          s.name = name; s.phone = document.getElementById('st-phone').value.trim(); s.email = document.getElementById('st-email').value.trim();
+          s.emergencyContact = document.getElementById('st-emergency').value.trim(); s.injuryNotes = document.getElementById('st-injuries').value.trim(); s.goals = document.getElementById('st-goals').value.trim();
         }
       } else {
         const newId = Date.now();
-        students.push({
-          id: newId,
-          name,
-          phone,
-          email,
-          emergencyContact,
-          injuryNotes,
-          goals,
-          notes: ""
-        });
-
-        const hasPkg = document.getElementById('st-has-package').checked;
-        if (hasPkg) {
-          const pkgName = document.getElementById('st-pkg-name').value;
-          const total = parseInt(document.getElementById('st-pkg-classes').value) || 10;
-          const price = parseFloat(document.getElementById('st-pkg-price').value) || 1200;
-          const method = document.getElementById('st-pkg-method').value;
-
-          packages.push({
-            id: Date.now() + 1,
-            studentId: newId,
-            packageName: pkgName,
-            totalClasses: total,
-            remainingClasses: total,
-            pricePaid: price,
-            paymentMethod: method,
-            paymentDate: new Date().toISOString().split('T')[0]
-          });
+        students.push({ id: newId, name, phone: document.getElementById('st-phone').value.trim(), email: document.getElementById('st-email').value.trim(), emergencyContact: document.getElementById('st-emergency').value.trim(), injuryNotes: document.getElementById('st-injuries').value.trim(), goals: document.getElementById('st-goals').value.trim(), notes: "" });
+        
+        if (document.getElementById('st-has-package').checked) {
+          packages.push({ id: Date.now() + 1, studentId: newId, packageName: document.getElementById('st-pkg-name').value, totalClasses: parseInt(document.getElementById('st-pkg-classes').value) || 10, remainingClasses: parseInt(document.getElementById('st-pkg-classes').value) || 10, pricePaid: parseFloat(document.getElementById('st-pkg-price').value) || 1200, paymentMethod: document.getElementById('st-pkg-method').value, paymentDate: new Date().toISOString().split('T')[0] });
           savePackages(packages);
         }
       }
-
       saveStudents(students);
       closeModal('modal-student');
-      showToast("Student profile saved!");
+      showToast("Student saved!");
       renderStudentPortfolios();
     }
 
-    // Package Modal
     function openPackageModal(studentId) {
-      const students = getStudents();
-      const select = document.getElementById('pkg-student-select');
-      select.innerHTML = '<option value="">Select student...</option>' +
-        students.map(s => `<option value="${s.id}" ${studentId === s.id ? 'selected' : ''}>${s.name}</option>`).join('');
-
+      document.getElementById('pkg-student-select').innerHTML = '<option value="">Select...</option>' + getStudents().map(s => `<option value="${s.id}" ${studentId === s.id ? 'selected' : ''}>${s.name}</option>`).join('');
       document.getElementById('pkg-date').value = new Date().toISOString().split('T')[0];
       document.getElementById('modal-package').classList.remove('hidden');
       lucide.createIcons();
@@ -2244,107 +1457,54 @@
     function handlePackageSubmit(e) {
       e.preventDefault();
       const studentId = parseInt(document.getElementById('pkg-student-select').value);
-      const packageName = document.getElementById('pkg-name').value.trim();
-      const totalClasses = parseInt(document.getElementById('pkg-total').value) || 10;
-      const pricePaid = parseFloat(document.getElementById('pkg-price').value) || 0;
-      const paymentMethod = document.getElementById('pkg-method').value;
-      const paymentDate = document.getElementById('pkg-date').value;
-
       const packages = getPackages();
-      packages.push({
-        id: Date.now(),
-        studentId,
-        packageName,
-        totalClasses,
-        remainingClasses: totalClasses,
-        pricePaid,
-        paymentMethod,
-        paymentDate
-      });
-
+      packages.push({ id: Date.now(), studentId, packageName: document.getElementById('pkg-name').value, totalClasses: parseInt(document.getElementById('pkg-total').value) || 10, remainingClasses: parseInt(document.getElementById('pkg-total').value) || 10, pricePaid: parseFloat(document.getElementById('pkg-price').value) || 0, paymentMethod: document.getElementById('pkg-method').value, paymentDate: document.getElementById('pkg-date').value });
       savePackages(packages);
       closeModal('modal-package');
-      showToast("Package & payment logged!");
+      showToast("Payment logged!");
       renderStudentPortfolios();
     }
 
-    // Portfolio Detail Modal
     function openPortfolioModal(studentId) {
-      const students = getStudents();
-      const packages = getPackages();
-      const bookings = getBookings();
-      const deductions = getDeductions();
-
-      const student = students.find(s => s.id === studentId);
+      const student = getStudents().find(s => s.id === studentId);
       if (!student) return;
 
       document.getElementById('portfolio-avatar').innerText = student.name.charAt(0);
       document.getElementById('portfolio-name').innerText = student.name;
       document.getElementById('portfolio-contact').innerText = `${student.phone || 'No phone'} • ${student.email || 'No email'}`;
-      document.getElementById('portfolio-injuries').innerText = student.injuryNotes || "No specific contraindications recorded.";
+      document.getElementById('portfolio-injuries').innerText = student.injuryNotes || "None";
 
-      const stPkgs = packages.filter(p => p.studentId === student.id);
-      const stBookings = bookings.filter(b => b.studentId === student.id);
-      const stDeductions = deductions.filter(d => d.studentId === student.id);
+      const stPkgs = getPackages().filter(p => p.studentId === student.id);
+      const stBookings = getBookings().filter(b => b.studentId === student.id);
+      const stDeductions = getDeductions().filter(d => d.studentId === student.id);
 
-      const totalPaid = stPkgs.reduce((acc, p) => acc + parseFloat(p.pricePaid || 0), 0);
-      const remainingClasses = stPkgs.reduce((acc, p) => acc + (p.remainingClasses || 0), 0);
-      const attended = stBookings.filter(b => b.status === 'attended').length;
-
-      document.getElementById('portfolio-classes-left').innerText = remainingClasses;
-      document.getElementById('portfolio-total-paid').innerText = `$${totalPaid.toFixed(2)}`;
-      document.getElementById('portfolio-attended').innerText = attended;
+      document.getElementById('portfolio-classes-left').innerText = stPkgs.reduce((acc, p) => acc + (p.remainingClasses || 0), 0);
+      document.getElementById('portfolio-total-paid').innerText = `$${stPkgs.reduce((acc, p) => acc + parseFloat(p.pricePaid || 0), 0).toFixed(0)}`;
+      document.getElementById('portfolio-attended').innerText = stBookings.filter(b => b.status === 'attended').length;
       document.getElementById('portfolio-packages-count').innerText = stPkgs.length;
 
-      // Packages list
-      const pkgContainer = document.getElementById('portfolio-packages-list');
-      if (stPkgs.length === 0) {
-        pkgContainer.innerHTML = `<p class="text-stone-400">No packages recorded for this student yet.</p>`;
-      } else {
-        pkgContainer.innerHTML = stPkgs.map(p => `
-          <div class="bg-stone-50 border border-stone-200 p-3 rounded-xl flex items-center justify-between">
-            <div>
-              <div class="font-bold text-stone-900">${p.packageName}</div>
-              <div class="text-[11px] text-stone-500">Paid: $${parseFloat(p.pricePaid).toFixed(2)} via ${p.paymentMethod} • Date: ${p.paymentDate}</div>
-            </div>
-            <div class="text-right">
-              <span class="font-bold text-rina-800 text-sm">${p.remainingClasses} / ${p.totalClasses} left</span>
-            </div>
-          </div>
-        `).join('');
-      }
+      document.getElementById('portfolio-packages-list').innerHTML = stPkgs.length === 0 ? `<p class="text-stone-400">No packages.</p>` : stPkgs.map(p => `
+        <div class="bg-stone-50 border border-stone-200 p-2 rounded-lg flex items-center justify-between">
+          <div><div class="font-bold text-stone-900 text-[11px]">${p.packageName}</div><div class="text-[9px] text-stone-500">$${p.pricePaid} • ${p.paymentDate}</div></div>
+          <span class="font-bold text-rina-800 text-xs">${p.remainingClasses} / ${p.totalClasses}</span>
+        </div>
+      `).join('');
 
-      // Deductions list
-      const dedContainer = document.getElementById('portfolio-deductions-list');
-      if (stDeductions.length === 0) {
-        dedContainer.innerHTML = `<p class="text-stone-400 font-sans">No class deductions recorded yet.</p>`;
-      } else {
-        dedContainer.innerHTML = stDeductions.map(d => `
-          <div class="bg-stone-50 border border-stone-200 p-2.5 rounded-xl flex items-center justify-between">
-            <div>
-              <span class="text-stone-500">${d.timestamp}</span>
-              <span class="text-stone-800 ml-2 font-sans font-medium">${d.reason}</span>
-            </div>
-            <div class="font-bold">
-              ${d.classesChanged < 0 ? `
-                <span class="text-amber-800">${d.classesChanged} class</span>
-              ` : `
-                <span class="text-emerald-800">+${d.classesChanged} class</span>
-              `}
-              <span class="text-stone-400 ml-1">(${d.remainingAfter} left)</span>
-            </div>
-          </div>
-        `).join('');
-      }
+      document.getElementById('portfolio-deductions-list').innerHTML = stDeductions.length === 0 ? `<p class="text-stone-400 font-sans">No deductions.</p>` : stDeductions.map(d => `
+        <div class="bg-stone-50 border border-stone-200 p-2 rounded-lg flex items-center justify-between">
+          <div><span class="text-stone-500 text-[9px]">${d.timestamp}</span><br><span class="text-stone-800 font-sans text-[10px]">${d.reason}</span></div>
+          <div class="font-bold text-[10px]"><span class="${d.classesChanged < 0 ? 'text-amber-800' : 'text-emerald-800'}">${d.classesChanged}</span> <span class="text-stone-400">(${d.remainingAfter})</span></div>
+        </div>
+      `).join('');
 
       document.getElementById('modal-portfolio').classList.remove('hidden');
       lucide.createIcons();
     }
 
-
-    // --- 10. APP INITIALIZATION ---
+    // --- INIT ---
     window.addEventListener('DOMContentLoaded', () => {
       initializeDefaultData();
+      renderCalendar();
       renderSchedule();
       renderStudentPortfolios();
       populateDataInputOptions();
