@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#c9a9a0">
+    <title>RINA Pilates Studio · CMS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { background: #f7f4f2; color: #2e2e2e; padding: 0.75rem; min-height: 100vh; font-size: 16px; }
+        .app-container { max-width: 1400px; margin: 0 auto; background: white; border-radius: 1.25rem; box-shadow: 0 10px 30px rgba(0,0,0,0.08); padding: 1rem; border: 1px solid #f0e3de; }
+        h1 { font-size: 1.4rem; font-weight: 500; color: #6b4f4f; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem; }
+        h1 i { color: #c9a9a0; font-size: 1.3rem; }
+        .subhead { color: #9b7b74; margin-bottom: 1rem; font-size: 0.8rem; border-left: 3px solid #dfc8c2; padding-left: 0.6rem; }
+        .grid { display: flex; flex-direction: column; gap: 1rem; }
+        .card { background: #fdfbfa; border-radius: 1rem; padding: 1rem; border: 1px solid #ede0db; }
+        .card h2 { font-size: 1rem; font-weight: 600; color: #7a5e58; margin-bottom: 0.9rem; display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px dashed #e3d3cd; padding-bottom: 0.5rem; }
+        .card h2 i { color: #c3a39b; font-size: 0.95rem; }
+        label { font-size: 0.8rem; font-weight: 600; color: #7a5e58; display: block; margin-bottom: 0.3rem; }
+        input, select { font-size: 1rem; padding: 0.75rem 0.9rem; border-radius: 0.75rem; border: 1px solid #ddd0ca; background: white; width: 100%; color: #2e2e2e; -webkit-appearance: none; appearance: none; outline: none; }
+        input:focus, select:focus { border-color: #c9a9a0; box-shadow: 0 0 0 3px rgba(201, 169, 160, 0.2); }
+        select { background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237a5e58' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 16px; padding-right: 2.2rem; }
+        .form-group { margin-bottom: 0.85rem; }
+        .inline-fields { display: flex; gap: 0.6rem; }
+        .inline-fields .form-group { flex: 1; }
+        button { font-size: 1rem; font-family: inherit; padding: 0.85rem 1rem; border-radius: 0.75rem; border: none; background: #c9a9a0; color: white; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.4rem; width: 100%; margin-top: 0.4rem; min-height: 48px; touch-action: manipulation; -webkit-user-select: none; user-select: none; position: relative; z-index: 1; }
+        button:active { background: #b48f85; }
+        button.secondary { background: #e5d9d4; color: #5c4340; }
+        button.export { background: #5f7a6b; }
+        .student-list { max-height: 50vh; overflow-y: auto; border-radius: 0.75rem; background: #fff; border: 1px solid #efe4e0; margin-top: 0.75rem; -webkit-overflow-scrolling: touch; }
+        .student-row { display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 0.9rem; border-bottom: 1px solid #f3eae6; cursor: pointer; min-height: 60px; touch-action: manipulation; }
+        .student-row:last-child { border-bottom: none; }
+        .student-info { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+        .student-name { font-weight: 600; color: #4f3a36; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .student-meta { font-size: 0.7rem; color: #a48b84; display: flex; gap: 0.7rem; margin-top: 0.2rem; flex-wrap: wrap; }
+        .badge { background: #f3e7e3; border-radius: 1rem; padding: 0.2rem 0.6rem; font-size: 0.7rem; font-weight: 600; color: #6e544e; white-space: nowrap; margin-left: 0.5rem; }
+        .badge.paid { background: #d9e6dd; color: #2e5e3e; }
+        .badge.zero { background: #f5dad5; color: #a13e2e; }
+        .history-list { margin-top: 0.75rem; max-height: 180px; overflow-y: auto; background: #fcf8f6; border-radius: 0.75rem; padding: 0.4rem 0.2rem; font-size: 0.8rem; -webkit-overflow-scrolling: touch; }
+        .history-item { display: flex; justify-content: space-between; padding: 0.5rem 0.6rem; border-bottom: 1px solid #f0e3de; color: #5a4540; gap: 0.5rem; }
+        .history-item:last-child { border-bottom: none; }
+        .history-item .deduct { color: #b35e4a; font-weight: 500; font-size: 0.75rem; }
+        .history-item .date { color: #b09892; font-size: 0.7rem; white-space: nowrap; }
+        .empty-message { padding: 1rem; text-align: center; color: #bda8a2; font-style: italic; font-size: 0.8rem; }
+        .toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: #4f3a36; color: white; padding: 0.75rem 1.4rem; border-radius: 2rem; font-size: 0.85rem; box-shadow: 0 8px 16px rgba(0,0,0,0.15); opacity: 0; transition: opacity 0.2s, bottom 0.2s; pointer-events: none; z-index: 9999; max-width: 90vw; text-align: center; }
+        .toast.show { opacity: 1; bottom: 2rem; }
+        .mt-1 { margin-top: 0.75rem; } .mt-2 { margin-top: 1rem; } .text-muted { color: #b09892; font-size: 0.75rem; } .w-100 { width: 100%; }
+        .calendar-header { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 0.75rem; }
+        .calendar-header h2 { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }
+        .calendar-nav { display: flex; gap: 0.4rem; align-items: center; }
+        .calendar-nav button { flex: 0 0 auto; width: auto; padding: 0.55rem 0.75rem; margin: 0; font-size: 0.75rem; min-height: 40px; min-width: 44px; }
+        .calendar-month-label { flex: 1; font-weight: 600; font-size: 0.9rem; color: #6b4f4f; text-align: center; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+        .calendar-weekday { text-align: center; font-size: 0.6rem; font-weight: 600; color: #a48b84; padding: 0.4rem 0; text-transform: uppercase; }
+        .calendar-day { background: #fdfbfa; border: 1px solid #f0e3de; border-radius: 0.5rem; min-height: 56px; padding: 0.25rem; cursor: pointer; display: flex; flex-direction: column; position: relative; min-width: 0; touch-action: manipulation; }
+        .calendar-day.other-month { background: #faf7f5; opacity: 0.55; }
+        .calendar-day.today { border: 2px solid #c9a9a0; background: #fdf5f1; }
+        .calendar-day.selected { background: #f5e8e2; border-color: #b48f85; box-shadow: 0 0 0 2px rgba(201,169,160,0.3); }
+        .day-number { font-weight: 600; font-size: 0.75rem; color: #5a4540; margin-bottom: 0.1rem; }
+        .calendar-day.today .day-number { color: #b35e4a; }
+        .day-bookings-count { position: absolute; top: 2px; right: 2px; background: #b35e4a; color: white; border-radius: 50%; min-width: 15px; height: 15px; font-size: 0.55rem; font-weight: 700; display: flex; align-items: center; justify-content: center; padding: 0 3px; }
+        .booking-pill { background: #c9a9a0; color: white; border-radius: 0.25rem; padding: 0.1rem 0.2rem; font-size: 0.5rem; font-weight: 500; margin-top: 0.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
+        .booking-pill.more { background: #e5d9d4; color: #6e544e; text-align: center; }
+        .calendar-legend { display: flex; gap: 0.75rem; margin-top: 0.6rem; font-size: 0.65rem; color: #a48b84; flex-wrap: wrap; }
+        .calendar-legend span { display: flex; align-items: center; gap: 0.3rem; }
+        .legend-dot { width: 8px; height: 8px; border-radius: 2px; background: #c9a9a0; }
+        .legend-dot.today { background: white; border: 2px solid #c9a9a0; }
+        .day-detail-panel { margin-top: 0.75rem; background: #faf5f2; border-radius: 0.75rem; padding: 0.75rem 0.9rem; border: 1px solid #ede0db; }
+        .day-detail-panel h3 { font-size: 0.85rem; font-weight: 600; color: #6b4f4f; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem; }
+        .day-detail-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #f0e3de; font-size: 0.85rem; gap: 0.5rem; }
+        .day-detail-item:last-child { border-bottom: none; }
+        .day-detail-item .student-name-tag { font-weight: 600; color: #4f3a36; }
+        .day-detail-item .time-tag { background: #c9a9a0; color: white; padding: 0.15rem 0.5rem; border-radius: 0.4rem; font-size: 0.7rem; font-weight: 600; white-space: nowrap; }
+        @media (min-width: 900px) {
+            body { padding: 1.5rem; } .app-container { padding: 2rem; border-radius: 2rem; }
+            h1 { font-size: 2.2rem; } h1 i { font-size: 2rem; } .subhead { font-size: 1rem; margin-bottom: 2rem; border-left: 4px solid #dfc8c2; padding-left: 1rem; }
+            .grid { display: grid; grid-template-columns: 1fr 1.8fr; gap: 2rem; } .grid > .card:last-child { grid-column: 1 / -1; }
+            .card { padding: 1.5rem; border-radius: 1.5rem; } .card h2 { font-size: 1.2rem; margin-bottom: 1.2rem; }
+            input, select { font-size: 0.95rem; padding: 0.7rem 1rem; border-radius: 2rem; } button { font-size: 0.95rem; padding: 0.7rem 1rem; border-radius: 2rem; min-height: auto; }
+            .calendar-header { flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+            .calendar-nav button { padding: 0.4rem 1rem; font-size: 0.85rem; min-height: auto; min-width: auto; }
+            .calendar-month-label { font-size: 1.1rem; flex: 0 0 auto; min-width: 160px; }
+            .calendar-grid { gap: 4px; } .calendar-weekday { font-size: 0.75rem; padding: 0.5rem 0; }
+            .calendar-day { min-height: 90px; padding: 0.4rem 0.5rem; border-radius: 0.75rem; } .day-number { font-size: 0.9rem; margin-bottom: 0.25rem; }
+            .day-bookings-count { top: 0.3rem; right: 0.4rem; min-width: 18px; height: 18px; font-size: 0.65rem; }
+            .booking-pill { font-size: 0.65rem; padding: 0.15rem 0.4rem; border-radius: 0.5rem; margin-top: 0.15rem; }
+            .calendar-legend { font-size: 0.75rem; gap: 1.5rem; } .legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+            .day-detail-panel { padding: 1rem 1.25rem; margin-top: 1.5rem; } .day-detail-panel h3 { font-size: 0.95rem; }
+            .day-detail-item { font-size: 0.9rem; } .day-detail-item .time-tag { font-size: 0.75rem; padding: 0.15rem 0.6rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <h1><i class="fas fa-circle-nodes"></i> RINA · Pilates</h1>
+        <div class="subhead">bookings · packages · payments</div>
+
+        <div class="grid">
+            <div>
+                <div class="card">
+                    <h2><i class="fas fa-user-plus"></i> New student</h2>
+                    <div class="form-group">
+                        <label>Full name</label>
+                        <input type="text" id="studentName" placeholder="e.g. Maya Chen" autocomplete="off">
+                    </div>
+                    <div class="inline-fields">
+                        <div class="form-group">
+                            <label>Classes</label>
+                            <input type="number" id="studentPackage" min="0" value="10" step="1" inputmode="numeric">
+                        </div>
+                        <div class="form-group">
+                            <label>Paid (HKD)</label>
+                            <input type="number" id="studentPaid" min="0" value="1800" step="100" inputmode="decimal">
+                        </div>
+                    </div>
+                    <button type="button" id="addStudentBtn"><i class="fas fa-plus"></i> Add student</button>
+                </div>
+
+                <div class="card mt-2">
+                    <h2><i class="fas fa-users"></i> Students</h2>
+                    <div id="studentListContainer">
+                        <div class="empty-message" id="noStudentsMsg">No students yet.</div>
+                        <div class="student-list" id="studentList"></div>
+                    </div>
+                </div>
+
+                <div class="mt-2">
+                    <button type="button" class="export w-100" id="exportExcelBtn"><i class="fas fa-file-excel"></i> Export to Excel (CSV)</button>
+                </div>
+            </div>
+
+            <div>
+                <div class="card">
+                    <h2><i class="fas fa-calendar-check"></i> Add booking</h2>
+                    <div class="form-group">
+                        <label>Student</label>
+                        <select id="bookingStudentSelect"><option value="">— choose —</option></select>
+                    </div>
+                    <div class="inline-fields">
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="bookingDate">
+                        </div>
+                        <div class="form-group">
+                            <label>Time</label>
+                            <input type="time" id="bookingTime" value="10:00">
+                        </div>
+                    </div>
+                    <button type="button" id="addBookingBtn"><i class="fas fa-check-circle"></i> Deduct 1 class</button>
+                    <p class="text-muted mt-1"><i class="fas fa-info-circle"></i> each booking deducts 1 class</p>
+                </div>
+
+                <div class="card mt-2">
+                    <h2><i class="fas fa-clock-rotate-left"></i> History</h2>
+                    <div id="selectedStudentDisplay" style="font-weight:500; color:#7a5e58; margin-bottom:0.5rem; font-size:0.85rem;">No student selected</div>
+                    <div class="history-list" id="historyList"><div class="empty-message" style="padding:0.5rem;">select a student</div></div>
+                </div>
+
+                <div class="card mt-2" id="quickStatsCard" style="background:#faf3f0;">
+                    <h2><i class="fas fa-chart-simple"></i> Package</h2>
+                    <div id="statsContent" style="font-size:0.9rem; line-height:1.7; color:#4f3a36;"><span class="text-muted">— no student —</span></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="calendar-header">
+                    <h2><i class="fas fa-calendar-days"></i> Calendar</h2>
+                    <div class="calendar-nav">
+                        <button type="button" class="secondary" id="calPrevBtn" aria-label="Previous month"><i class="fas fa-chevron-left"></i></button>
+                        <span class="calendar-month-label" id="calMonthLabel">—</span>
+                        <button type="button" class="secondary" id="calNextBtn" aria-label="Next month"><i class="fas fa-chevron-right"></i></button>
+                        <button type="button" class="secondary" id="calTodayBtn">Today</button>
+                    </div>
+                </div>
+                <div class="calendar-grid" id="calendarWeekdays"></div>
+                <div class="calendar-grid" id="calendarGrid" style="margin-top:3px;"></div>
+                <div class="calendar-legend">
+                    <span><span class="legend-dot"></span> bookings</span>
+                    <span><span class="legend-dot today"></span> today</span>
+                    <span><i class="fas fa-hand-pointer"></i> tap a day</span>
+                </div>
+                <div class="day-detail-panel" id="dayDetailPanel">
+                    <h3><i class="fas fa-list"></i> <span id="dayDetailTitle">Select a day</span></h3>
+                    <div id="dayDetailContent"><span class="text-muted" style="font-size:0.8rem;">Tap any day to see bookings.</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">message</div>
+
+    <script>
+        (function() {
+            const STORAGE_KEY = 'rina_pilates_cms';
+            function getInitialData() {
+                return {
+                    students: [
+                        { id:'s1', name:'Maya Chen', packageTotal:10, packageLeft:6, paid:1800, bookings:[{ date:'2025-02-10', time:'10:00', deducted:1, note:'reformer' },{ date:'2025-02-14', time:'09:30', deducted:1, note:'mat' },{ date:'2025-02-17', time:'11:00', deducted:1, note:'reformer' },{ date:'2025-02-21', time:'10:00', deducted:1, note:'reformer' }]},
+                        { id:'s2', name:'Elena Wong', packageTotal:8, packageLeft:3, paid:1440, bookings:[{ date:'2025-02-09', time:'08:00', deducted:1, note:'private' },{ date:'2025-02-12', time:'08:00', deducted:1, note:'private' },{ date:'2025-02-16', time:'09:00', deducted:1, note:'private' },{ date:'2025-02-19', time:'08:30', deducted:1, note:'private' },{ date:'2025-02-23', time:'10:00', deducted:1, note:'private' }]}
+                    ],
+                    selectedStudentId: 's1'
+                };
+            }
+            let data = loadData();
+            function loadData() { const stored = localStorage.getItem(STORAGE_KEY); if (stored) { try { return JSON.parse(stored); } catch(e){ return getInitialData(); } } return getInitialData(); }
+            function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+            function generateId() { return 's' + Date.now() + Math.floor(Math.random()*1000); }
+            function getStudentById(id) { return data.students.find(s => s.id === id); }
+            function formatDisplayDate(d) { if (!d) return '—'; try { return new Date(d+'T00:00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); } catch(e){ return d; } }
+            function escapeHtml(t) { if (!t) return ''; const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+
+            const studentListEl = document.getElementById('studentList');
+            const studentSelectEl = document.getElementById('bookingStudentSelect');
+            const noStudentsMsg = document.getElementById('noStudentsMsg');
+            const historyListEl = document.getElementById('historyList');
+            const selectedStudentDisplay = document.getElementById('selectedStudentDisplay');
+            const statsContent = document.getElementById('statsContent');
+            const toastEl = document.getElementById('toast');
+
+            function showToast(msg, duration = 2200) { toastEl.textContent = msg; toastEl.classList.add('show'); clearTimeout(window.toastTimeout); window.toastTimeout = setTimeout(() => toastEl.classList.remove('show'), duration); }
+
+            let calendarDate = new Date(); calendarDate.setDate(1); calendarDate.setHours(0,0,0,0);
+            let selectedDayStr = null;
+
+            function renderStudentList() {
+                const students = data.students; studentListEl.innerHTML = '';
+                if (students.length === 0) { noStudentsMsg.style.display = 'block'; studentSelectEl.innerHTML = '<option value="">— no students —</option>'; return; }
+                noStudentsMsg.style.display = 'none';
+                students.forEach(student => {
+                    const row = document.createElement('div'); row.className = 'student-row';
+                    if (data.selectedStudentId === student.id) row.style.background = '#f7efe9';
+                    const leftDiv = document.createElement('div'); leftDiv.className = 'student-info';
+                    leftDiv.innerHTML = `<span class="student-name">${escapeHtml(student.name)}</span><span class="student-meta"><span><i class="fas fa-tag"></i> ${student.packageLeft}/${student.packageTotal}</span><span><i class="fas fa-coins"></i> $${student.paid}</span></span>`;
+                    const badge = document.createElement('span'); badge.className = `badge ${student.packageLeft <= 1 ? 'zero' : 'paid'}`; badge.textContent = `${student.packageLeft} left`;
+                    row.appendChild(leftDiv); row.appendChild(badge);
+                    row.addEventListener('click', () => setSelectedStudent(student.id));
+                    studentListEl.appendChild(row);
+                });
+                studentSelectEl.innerHTML = '<option value="">— choose —</option>';
+                students.forEach(s => { const opt = document.createElement('option'); opt.value = s.id; opt.textContent = `${s.name} (${s.packageLeft} left)`; if (data.selectedStudentId === s.id) opt.selected = true; studentSelectEl.appendChild(opt); });
+            }
+
+            function renderSelectedStudentSection() {
+                const student = getStudentById(data.selectedStudentId);
+                if (!student) { selectedStudentDisplay.textContent = 'No student selected'; historyListEl.innerHTML = '<div class="empty-message" style="padding:0.5rem;">select a student</div>'; statsContent.innerHTML = '<span class="text-muted">— no student —</span>'; return; }
+                selectedStudentDisplay.textContent = `${student.name} · ${student.packageLeft} left · $${student.paid}`;
+                const bookings = student.bookings || [];
+                if (bookings.length === 0) { historyListEl.innerHTML = '<div class="empty-message" style="padding:0.5rem;">No bookings yet.</div>'; }
+                else { const sorted = [...bookings].sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time)); historyListEl.innerHTML = sorted.map(b => `<div class="history-item"><span class="deduct"><i class="fas fa-minus-circle"></i> 1 class</span><span class="date">${formatDisplayDate(b.date)} ${b.time||''}</span></div>`).join(''); }
+                statsContent.innerHTML = `<div style="display:flex; justify-content:space-between;"><span>Package:</span><strong>${student.packageTotal} total</strong></div><div style="display:flex; justify-content:space-between;"><span>Remaining:</span><strong style="color:${student.packageLeft<=1?'#b35e4a':'#2e5e3e'}">${student.packageLeft}</strong></div><div style="display:flex; justify-content:space-between;"><span>Paid:</span><strong>HK$${student.paid}</strong></div><div style="display:flex; justify-content:space-between;"><span>Used:</span><strong>${student.packageTotal - student.packageLeft}</strong></div>`;
+            }
+
+            function setSelectedStudent(id) { if (id && !getStudentById(id)) return; data.selectedStudentId = id || null; saveData(); renderStudentList(); renderSelectedStudentSection(); if (studentSelectEl) studentSelectEl.value = id || ''; }
+
+            function buildBookingsMap() {
+                const map = {};
+                data.students.forEach(student => { (student.bookings || []).forEach(b => { if (!b.date) return; if (!map[b.date]) map[b.date] = []; map[b.date].push({ studentId: student.id, studentName: student.name, time: b.time||'', note: b.note||'' }); }); });
+                Object.keys(map).forEach(d => map[d].sort((a,b)=>(a.time||'').localeCompare(b.time||'')));
+                return map;
+            }
+            function toDateStr(d) { const y = d.getFullYear(); const m = String(d.getMonth()+1).padStart(2,'0'); const day = String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
+
+            function renderCalendar() {
+                const year = calendarDate.getFullYear(); const month = calendarDate.getMonth();
+                const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                document.getElementById('calMonthLabel').textContent = `${monthNames[month]} ${year}`;
+                const weekdaysEl = document.getElementById('calendarWeekdays'); weekdaysEl.innerHTML = '';
+                ['M','T','W','T','F','S','S'].forEach((wd,i) => { const el = document.createElement('div'); el.className = 'calendar-weekday'; el.textContent = wd; if (i === 5 || i === 6) el.style.color = '#c9a9a0'; weekdaysEl.appendChild(el); });
+                const gridEl = document.getElementById('calendarGrid'); gridEl.innerHTML = ''; const bookingsMap = buildBookingsMap();
+                const firstOfMonth = new Date(year, month, 1); let startOffset = firstOfMonth.getDay(); startOffset = (startOffset === 0) ? 6 : startOffset - 1;
+                const daysInMonth = new Date(year, month+1, 0).getDate(); const todayStr = toDateStr(new Date());
+                const prevMonthDays = new Date(year, month, 0).getDate();
+                for (let i = startOffset - 1; i >= 0; i--) gridEl.appendChild(createDayCell(new Date(year, month-1, prevMonthDays - i), true, bookingsMap, todayStr));
+                for (let d = 1; d <= daysInMonth; d++) gridEl.appendChild(createDayCell(new Date(year, month, d), false, bookingsMap, todayStr));
+                const totalCells = startOffset + daysInMonth; const remaining = (7 - (totalCells % 7)) % 7;
+                for (let i = 1; i <= remaining; i++) gridEl.appendChild(createDayCell(new Date(year, month+1, i), true, bookingsMap, todayStr));
+                renderDayDetail();
+            }
+
+            function createDayCell(cellDate, isOtherMonth, bookingsMap, todayStr) {
+                const dateStr = toDateStr(cellDate); const dayNum = cellDate.getDate(); const bookings = bookingsMap[dateStr] || [];
+                const cell = document.createElement('div'); cell.className = 'calendar-day';
+                if (isOtherMonth) cell.classList.add('other-month'); if (dateStr === todayStr) cell.classList.add('today'); if (dateStr === selectedDayStr) cell.classList.add('selected');
+                const numEl = document.createElement('div'); numEl.className = 'day-number'; numEl.textContent = dayNum; cell.appendChild(numEl);
+                if (bookings.length > 0) {
+                    const badge = document.createElement('div'); badge.className = 'day-bookings-count'; badge.textContent = bookings.length; cell.appendChild(badge);
+                    const maxPills = window.innerWidth < 900 ? 1 : 2;
+                    bookings.slice(0, maxPills).forEach(b => { const pill = document.createElement('div'); pill.className = 'booking-pill'; pill.textContent = window.innerWidth < 900 ? b.time : `${b.time} ${b.studentName}`; cell.appendChild(pill); });
+                    if (bookings.length > maxPills) { const more = document.createElement('div'); more.className = 'booking-pill more'; more.textContent = `+${bookings.length - maxPills}`; cell.appendChild(more); }
+                }
+                cell.addEventListener('click', () => { if (isOtherMonth) calendarDate = new Date(cellDate.getFullYear(), cellDate.getMonth(), 1); selectedDayStr = dateStr; renderCalendar(); });
+                return cell;
+            }
+
+            function renderDayDetail() {
+                const titleEl = document.getElementById('dayDetailTitle'); const contentEl = document.getElementById('dayDetailContent');
+                if (!selectedDayStr) { titleEl.textContent = 'Select a day'; contentEl.innerHTML = '<span class="text-muted" style="font-size:0.8rem;">Tap any day to see bookings.</span>'; return; }
+                const bookingsMap = buildBookingsMap(); const dayBookings = bookingsMap[selectedDayStr] || []; let friendlyDate = selectedDayStr;
+                try { friendlyDate = new Date(selectedDayStr+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}); } catch(e){}
+                titleEl.textContent = friendlyDate;
+                if (dayBookings.length === 0) { contentEl.innerHTML = '<span class="text-muted" style="font-size:0.8rem;">No bookings this day.</span>'; return; }
+                contentEl.innerHTML = dayBookings.map(b => `<div class="day-detail-item"><span><span class="student-name-tag">${escapeHtml(b.studentName)}</span></span><span class="time-tag">${b.time||'—'}</span></div>`).join('');
+            }
+
+            function addStudent() {
+                const nameInput = document.getElementById('studentName'); const packageInput = document.getElementById('studentPackage'); const paidInput = document.getElementById('studentPaid');
+                const name = nameInput.value.trim(); if (!name) { showToast('Enter a student name.'); return; }
+                const packageTotal = parseInt(packageInput.value, 10); if (isNaN(packageTotal) || packageTotal < 0) { showToast('Package must be a number.'); return; }
+                const paid = parseFloat(paidInput.value); if (isNaN(paid) || paid < 0) { showToast('Paid must be a number.'); return; }
+                const newStudent = { id: generateId(), name, packageTotal, packageLeft: packageTotal, paid, bookings: [] };
+                data.students.push(newStudent); saveData(); nameInput.value = ''; packageInput.value = '10'; paidInput.value = '1800';
+                setSelectedStudent(newStudent.id); renderCalendar(); showToast(`Added ${name}.`);
+            }
+
+            function addBooking() {
+                const studentId = studentSelectEl.value; if (!studentId) { showToast('Select a student.'); return; }
+                const student = getStudentById(studentId); if (!student) return; if (student.packageLeft <= 0) { showToast(`⚠️ ${student.name} has no classes left.`); return; }
+                const dateInput = document.getElementById('bookingDate'); const timeInput = document.getElementById('bookingTime');
+                let date = dateInput.value, time = timeInput.value;
+                if (!date) { date = new Date().toISOString().split('T')[0]; dateInput.value = date; }
+                if (!time) { time = '10:00'; timeInput.value = time; }
+                student.packageLeft -= 1; if (!student.bookings) student.bookings = [];
+                student.bookings.push({ date, time, deducted: 1, note: '' }); saveData(); setSelectedStudent(student.id); renderCalendar(); renderSelectedStudentSection();
+                showToast(`✅ 1 class deducted. Remaining: ${student.packageLeft}`);
+            }
+
+            function exportToExcel() {
+                const students = data.students; if (students.length === 0) { showToast('No data to export.'); return; }
+                const rows = [['Student Name','Package Total','Package Left','Paid (HKD)','Booking Date','Booking Time','Class Deducted','Notes']];
+                students.forEach(student => { const bookings = student.bookings || []; if (bookings.length === 0) rows.push([student.name, student.packageTotal, student.packageLeft, student.paid, '', '', '', '']); else bookings.forEach(b => rows.push([student.name, student.packageTotal, student.packageLeft, student.paid, b.date||'', b.time||'', 1, b.note||''])); });
+                const csvContent = rows.map(row => row.map(cell => { const s = String(cell); if (s.includes(',') || s.includes('"') || s.includes('\n')) return `"${s.replace(/"/g, '""')}"`; return s; }).join(',')).join('\n');
+                const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement('a'); const url = URL.createObjectURL(blob);
+                link.href = url; link.setAttribute('download', `RINA_pilates_${new Date().toISOString().split('T')[0]}.csv`);
+                document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url); showToast('📊 CSV downloaded.');
+            }
+
+            function init() {
+                document.getElementById('bookingDate').value = new Date().toISOString().split('T')[0];
+                renderStudentList(); if (data.selectedStudentId) setSelectedStudent(data.selectedStudentId); else if (data.students.length > 0) setSelectedStudent(data.students[0].id); else renderSelectedStudentSection(); renderCalendar();
+                document.getElementById('addStudentBtn').addEventListener('click', function(e){ e.preventDefault(); addStudent(); });
+                document.getElementById('addBookingBtn').addEventListener('click', function(e){ e.preventDefault(); addBooking(); });
+                document.getElementById('exportExcelBtn').addEventListener('click', function(e){ e.preventDefault(); exportToExcel(); });
+                studentSelectEl.addEventListener('change', (e) => { setSelectedStudent(e.target.value || null); });
+                document.getElementById('calPrevBtn').addEventListener('click', function(e){ e.preventDefault(); calendarDate.setMonth(calendarDate.getMonth() - 1); renderCalendar(); });
+                document.getElementById('calNextBtn').addEventListener('click', function(e){ e.preventDefault(); calendarDate.setMonth(calendarDate.getMonth() + 1); renderCalendar(); });
+                document.getElementById('calTodayBtn').addEventListener('click', function(e){ e.preventDefault(); calendarDate = new Date(); calendarDate.setDate(1); calendarDate.setHours(0,0,0,0); renderCalendar(); });
+                let resizeTimer; window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(renderCalendar, 200); });
+            }
+            init();
+        })();
+    </script>
+</body>
+</html>
