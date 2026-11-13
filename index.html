@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -666,7 +667,6 @@
     const STORAGE_KEY_BOOKINGS = 'rina_pilates_bookings';
     const STORAGE_KEY_DEDUCTIONS = 'rina_pilates_deductions';
 
-    // --- INITIAL DATA ---
     function initializeDefaultData() {
       if (!localStorage.getItem(STORAGE_KEY_STUDENTS)) {
         const initialStudents = [
@@ -696,7 +696,6 @@
       }
     }
 
-    // --- DATA HELPERS ---
     const getStudents = () => JSON.parse(localStorage.getItem(STORAGE_KEY_STUDENTS) || '[]');
     const saveStudents = (data) => localStorage.setItem(STORAGE_KEY_STUDENTS, JSON.stringify(data));
     const getPackages = () => JSON.parse(localStorage.getItem(STORAGE_KEY_PACKAGES) || '[]');
@@ -706,7 +705,6 @@
     const getDeductions = () => JSON.parse(localStorage.getItem(STORAGE_KEY_DEDUCTIONS) || '[]');
     const saveDeductions = (data) => localStorage.setItem(STORAGE_KEY_DEDUCTIONS, JSON.stringify(data));
 
-    // --- STATE ---
     let currentScheduleDate = new Date().toISOString().split('T')[0];
     let scheduleFilter = 'all';
     let studentFilter = 'all';
@@ -715,7 +713,6 @@
     let calendarDate = new Date();
     calendarDate.setDate(1);
 
-    // --- UI HELPERS ---
     function showToast(msg) {
       const el = document.getElementById('toast');
       document.getElementById('toast-text').innerText = msg;
@@ -776,14 +773,12 @@
       
       const bookings = getBookings();
 
-      // Empty cells before first day
       for (let i = 0; i < firstDay; i++) {
         const empty = document.createElement('div');
         empty.className = 'cal-cell other-month';
         grid.appendChild(empty);
       }
 
-      // Days of month
       for (let d = 1; d <= daysInMonth; d++) {
         const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
         const cell = document.createElement('div');
@@ -983,7 +978,10 @@
 
     function renderStudentPortfolios() {
       const students = getStudents(), packages = getPackages(), bookings = getBookings();
-      const searchVal = (document.getElementById('student-search-input').value || '').toLowerCase();
+      
+      // Safe check for search input (fixes the blank page bug)
+      const searchInput = document.getElementById('student-search-input');
+      const searchVal = searchInput ? searchInput.value.toLowerCase() : '';
 
       let totalRev = 0, totalClassesLeft = 0, totalAttended = 0;
       packages.forEach(p => { totalRev += parseFloat(p.pricePaid || 0); totalClassesLeft += parseInt(p.remainingClasses || 0); });
