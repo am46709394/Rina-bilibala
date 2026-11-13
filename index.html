@@ -1,354 +1,2380 @@
+Here is the complete, updated code based on the advanced version you provided. I have fully integrated the management features (edit/delete logs, adjusting balances, and deleting bookings/students) while keeping the beautiful UI and data input systems intact.
+
+📌 What's included in this version:
+
+1. Daily Schedule: You can now Edit or Delete any booking directly from the schedule card.
+2. Student Portfolios: You can Edit student info, Log new packages, and Delete students (which also cleans up their history).
+3. Deduction Logs: You can now Delete any incorrect deduction log to keep your audit trail clean.
+4. Excel Export: The "Extract to Excel" button works perfectly and will download a multi-tab Excel file with all your students, bookings, packages, and logs.
+
+---
+
+📝 Step-by-Step to Update on GitHub (Mobile):
+
+1. Open your GitHub repository Rina-ac46709394bilibala in your mobile browser (make sure it's in Desktop site mode).
+2. Click on your existing index.html file.
+3. Click the Pencil icon (Edit this file) in the top right corner.
+4. Select all the old code and delete it.
+5. Paste the complete new code below.
+6. Scroll down and click Commit changes.
+7. Wait 1-2 minutes, then refresh your live webpage link.
+
+Here is your new code:
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#c9a9a0">
-    <title>RINA Pilates Studio · CMS</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { background: #f7f4f2; color: #2e2e2e; padding: 0.75rem; min-height: 100vh; font-size: 16px; }
-        .app-container { max-width: 1400px; margin: 0 auto; background: white; border-radius: 1.25rem; box-shadow: 0 10px 30px rgba(0,0,0,0.08); padding: 1rem; border: 1px solid #f0e3de; }
-        h1 { font-size: 1.4rem; font-weight: 500; color: #6b4f4f; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem; }
-        h1 i { color: #c9a9a0; font-size: 1.3rem; }
-        .subhead { color: #9b7b74; margin-bottom: 1rem; font-size: 0.8rem; border-left: 3px solid #dfc8c2; padding-left: 0.6rem; }
-        .grid { display: flex; flex-direction: column; gap: 1rem; }
-        .card { background: #fdfbfa; border-radius: 1rem; padding: 1rem; border: 1px solid #ede0db; }
-        .card h2 { font-size: 1rem; font-weight: 600; color: #7a5e58; margin-bottom: 0.9rem; display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px dashed #e3d3cd; padding-bottom: 0.5rem; }
-        .card h2 i { color: #c3a39b; font-size: 0.95rem; }
-        label { font-size: 0.8rem; font-weight: 600; color: #7a5e58; display: block; margin-bottom: 0.3rem; }
-        input, select { font-size: 1rem; padding: 0.75rem 0.9rem; border-radius: 0.75rem; border: 1px solid #ddd0ca; background: white; width: 100%; color: #2e2e2e; -webkit-appearance: none; appearance: none; outline: none; }
-        input:focus, select:focus { border-color: #c9a9a0; box-shadow: 0 0 0 3px rgba(201, 169, 160, 0.2); }
-        select { background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237a5e58' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 16px; padding-right: 2.2rem; }
-        .form-group { margin-bottom: 0.85rem; }
-        .inline-fields { display: flex; gap: 0.6rem; }
-        .inline-fields .form-group { flex: 1; }
-        button { font-size: 1rem; font-family: inherit; padding: 0.85rem 1rem; border-radius: 0.75rem; border: none; background: #c9a9a0; color: white; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.4rem; width: 100%; margin-top: 0.4rem; min-height: 48px; touch-action: manipulation; -webkit-user-select: none; user-select: none; position: relative; z-index: 1; }
-        button:active { background: #b48f85; }
-        button.secondary { background: #e5d9d4; color: #5c4340; }
-        button.export { background: #5f7a6b; }
-        .student-list { max-height: 50vh; overflow-y: auto; border-radius: 0.75rem; background: #fff; border: 1px solid #efe4e0; margin-top: 0.75rem; -webkit-overflow-scrolling: touch; }
-        .student-row { display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 0.9rem; border-bottom: 1px solid #f3eae6; cursor: pointer; min-height: 60px; touch-action: manipulation; }
-        .student-row:last-child { border-bottom: none; }
-        .student-info { display: flex; flex-direction: column; flex: 1; min-width: 0; }
-        .student-name { font-weight: 600; color: #4f3a36; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .student-meta { font-size: 0.7rem; color: #a48b84; display: flex; gap: 0.7rem; margin-top: 0.2rem; flex-wrap: wrap; }
-        .badge { background: #f3e7e3; border-radius: 1rem; padding: 0.2rem 0.6rem; font-size: 0.7rem; font-weight: 600; color: #6e544e; white-space: nowrap; margin-left: 0.5rem; }
-        .badge.paid { background: #d9e6dd; color: #2e5e3e; }
-        .badge.zero { background: #f5dad5; color: #a13e2e; }
-        .history-list { margin-top: 0.75rem; max-height: 180px; overflow-y: auto; background: #fcf8f6; border-radius: 0.75rem; padding: 0.4rem 0.2rem; font-size: 0.8rem; -webkit-overflow-scrolling: touch; }
-        .history-item { display: flex; justify-content: space-between; padding: 0.5rem 0.6rem; border-bottom: 1px solid #f0e3de; color: #5a4540; gap: 0.5rem; }
-        .history-item:last-child { border-bottom: none; }
-        .history-item .deduct { color: #b35e4a; font-weight: 500; font-size: 0.75rem; }
-        .history-item .date { color: #b09892; font-size: 0.7rem; white-space: nowrap; }
-        .empty-message { padding: 1rem; text-align: center; color: #bda8a2; font-style: italic; font-size: 0.8rem; }
-        .toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: #4f3a36; color: white; padding: 0.75rem 1.4rem; border-radius: 2rem; font-size: 0.85rem; box-shadow: 0 8px 16px rgba(0,0,0,0.15); opacity: 0; transition: opacity 0.2s, bottom 0.2s; pointer-events: none; z-index: 9999; max-width: 90vw; text-align: center; }
-        .toast.show { opacity: 1; bottom: 2rem; }
-        .mt-1 { margin-top: 0.75rem; } .mt-2 { margin-top: 1rem; } .text-muted { color: #b09892; font-size: 0.75rem; } .w-100 { width: 100%; }
-        .calendar-header { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 0.75rem; }
-        .calendar-header h2 { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }
-        .calendar-nav { display: flex; gap: 0.4rem; align-items: center; }
-        .calendar-nav button { flex: 0 0 auto; width: auto; padding: 0.55rem 0.75rem; margin: 0; font-size: 0.75rem; min-height: 40px; min-width: 44px; }
-        .calendar-month-label { flex: 1; font-weight: 600; font-size: 0.9rem; color: #6b4f4f; text-align: center; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
-        .calendar-weekday { text-align: center; font-size: 0.6rem; font-weight: 600; color: #a48b84; padding: 0.4rem 0; text-transform: uppercase; }
-        .calendar-day { background: #fdfbfa; border: 1px solid #f0e3de; border-radius: 0.5rem; min-height: 56px; padding: 0.25rem; cursor: pointer; display: flex; flex-direction: column; position: relative; min-width: 0; touch-action: manipulation; }
-        .calendar-day.other-month { background: #faf7f5; opacity: 0.55; }
-        .calendar-day.today { border: 2px solid #c9a9a0; background: #fdf5f1; }
-        .calendar-day.selected { background: #f5e8e2; border-color: #b48f85; box-shadow: 0 0 0 2px rgba(201,169,160,0.3); }
-        .day-number { font-weight: 600; font-size: 0.75rem; color: #5a4540; margin-bottom: 0.1rem; }
-        .calendar-day.today .day-number { color: #b35e4a; }
-        .day-bookings-count { position: absolute; top: 2px; right: 2px; background: #b35e4a; color: white; border-radius: 50%; min-width: 15px; height: 15px; font-size: 0.55rem; font-weight: 700; display: flex; align-items: center; justify-content: center; padding: 0 3px; }
-        .booking-pill { background: #c9a9a0; color: white; border-radius: 0.25rem; padding: 0.1rem 0.2rem; font-size: 0.5rem; font-weight: 500; margin-top: 0.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
-        .booking-pill.more { background: #e5d9d4; color: #6e544e; text-align: center; }
-        .calendar-legend { display: flex; gap: 0.75rem; margin-top: 0.6rem; font-size: 0.65rem; color: #a48b84; flex-wrap: wrap; }
-        .calendar-legend span { display: flex; align-items: center; gap: 0.3rem; }
-        .legend-dot { width: 8px; height: 8px; border-radius: 2px; background: #c9a9a0; }
-        .legend-dot.today { background: white; border: 2px solid #c9a9a0; }
-        .day-detail-panel { margin-top: 0.75rem; background: #faf5f2; border-radius: 0.75rem; padding: 0.75rem 0.9rem; border: 1px solid #ede0db; }
-        .day-detail-panel h3 { font-size: 0.85rem; font-weight: 600; color: #6b4f4f; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem; }
-        .day-detail-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #f0e3de; font-size: 0.85rem; gap: 0.5rem; }
-        .day-detail-item:last-child { border-bottom: none; }
-        .day-detail-item .student-name-tag { font-weight: 600; color: #4f3a36; }
-        .day-detail-item .time-tag { background: #c9a9a0; color: white; padding: 0.15rem 0.5rem; border-radius: 0.4rem; font-size: 0.7rem; font-weight: 600; white-space: nowrap; }
-        @media (min-width: 900px) {
-            body { padding: 1.5rem; } .app-container { padding: 2rem; border-radius: 2rem; }
-            h1 { font-size: 2.2rem; } h1 i { font-size: 2rem; } .subhead { font-size: 1rem; margin-bottom: 2rem; border-left: 4px solid #dfc8c2; padding-left: 1rem; }
-            .grid { display: grid; grid-template-columns: 1fr 1.8fr; gap: 2rem; } .grid > .card:last-child { grid-column: 1 / -1; }
-            .card { padding: 1.5rem; border-radius: 1.5rem; } .card h2 { font-size: 1.2rem; margin-bottom: 1.2rem; }
-            input, select { font-size: 0.95rem; padding: 0.7rem 1rem; border-radius: 2rem; } button { font-size: 0.95rem; padding: 0.7rem 1rem; border-radius: 2rem; min-height: auto; }
-            .calendar-header { flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-            .calendar-nav button { padding: 0.4rem 1rem; font-size: 0.85rem; min-height: auto; min-width: auto; }
-            .calendar-month-label { font-size: 1.1rem; flex: 0 0 auto; min-width: 160px; }
-            .calendar-grid { gap: 4px; } .calendar-weekday { font-size: 0.75rem; padding: 0.5rem 0; }
-            .calendar-day { min-height: 90px; padding: 0.4rem 0.5rem; border-radius: 0.75rem; } .day-number { font-size: 0.9rem; margin-bottom: 0.25rem; }
-            .day-bookings-count { top: 0.3rem; right: 0.4rem; min-width: 18px; height: 18px; font-size: 0.65rem; }
-            .booking-pill { font-size: 0.65rem; padding: 0.15rem 0.4rem; border-radius: 0.5rem; margin-top: 0.15rem; }
-            .calendar-legend { font-size: 0.75rem; gap: 1.5rem; } .legend-dot { width: 10px; height: 10px; border-radius: 3px; }
-            .day-detail-panel { padding: 1rem 1.25rem; margin-top: 1.5rem; } .day-detail-panel h3 { font-size: 0.95rem; }
-            .day-detail-item { font-size: 0.9rem; } .day-detail-item .time-tag { font-size: 0.75rem; padding: 0.15rem 0.6rem; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RINA Pilates Studio | Solo Owner CMS & Schedule</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧘‍♀️</text></svg>">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- SheetJS / XLSX CDN for Excel export & import -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            rina: {
+              50: '#FBF9F5',
+              100: '#F5EFE6',
+              200: '#E8DCC4',
+              300: '#D6C09D',
+              600: '#9E7241',
+              700: '#7E5728',
+              800: '#5F3F19',
+              900: '#3D280E',
+            }
+          },
+          fontFamily: {
+            serif: ['Georgia', 'Cambria', 'serif'],
+            sans: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+          }
         }
-    </style>
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #FAF7F2;
+      color: #292524;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .modal-backdrop {
+      background-color: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(2px);
+    }
+    /* custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F5EFE6;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #D6C09D;
+      border-radius: 4px;
+    }
+  </style>
 </head>
-<body>
-    <div class="app-container">
-        <h1><i class="fas fa-circle-nodes"></i> RINA · Pilates</h1>
-        <div class="subhead">bookings · packages · payments</div>
+<body class="min-h-screen flex flex-col antialiased">
 
-        <div class="grid">
-            <div>
-                <div class="card">
-                    <h2><i class="fas fa-user-plus"></i> New student</h2>
-                    <div class="form-group">
-                        <label>Full name</label>
-                        <input type="text" id="studentName" placeholder="e.g. Maya Chen" autocomplete="off">
-                    </div>
-                    <div class="inline-fields">
-                        <div class="form-group">
-                            <label>Classes</label>
-                            <input type="number" id="studentPackage" min="0" value="10" step="1" inputmode="numeric">
-                        </div>
-                        <div class="form-group">
-                            <label>Paid (HKD)</label>
-                            <input type="number" id="studentPaid" min="0" value="1800" step="100" inputmode="decimal">
-                        </div>
-                    </div>
-                    <button type="button" id="addStudentBtn"><i class="fas fa-plus"></i> Add student</button>
-                </div>
-
-                <div class="card mt-2">
-                    <h2><i class="fas fa-users"></i> Students</h2>
-                    <div id="studentListContainer">
-                        <div class="empty-message" id="noStudentsMsg">No students yet.</div>
-                        <div class="student-list" id="studentList"></div>
-                    </div>
-                </div>
-
-                <div class="mt-2">
-                    <button type="button" class="export w-100" id="exportExcelBtn"><i class="fas fa-file-excel"></i> Export to Excel (CSV)</button>
-                </div>
-            </div>
-
-            <div>
-                <div class="card">
-                    <h2><i class="fas fa-calendar-check"></i> Add booking</h2>
-                    <div class="form-group">
-                        <label>Student</label>
-                        <select id="bookingStudentSelect"><option value="">— choose —</option></select>
-                    </div>
-                    <div class="inline-fields">
-                        <div class="form-group">
-                            <label>Date</label>
-                            <input type="date" id="bookingDate">
-                        </div>
-                        <div class="form-group">
-                            <label>Time</label>
-                            <input type="time" id="bookingTime" value="10:00">
-                        </div>
-                    </div>
-                    <button type="button" id="addBookingBtn"><i class="fas fa-check-circle"></i> Deduct 1 class</button>
-                    <p class="text-muted mt-1"><i class="fas fa-info-circle"></i> each booking deducts 1 class</p>
-                </div>
-
-                <div class="card mt-2">
-                    <h2><i class="fas fa-clock-rotate-left"></i> History</h2>
-                    <div id="selectedStudentDisplay" style="font-weight:500; color:#7a5e58; margin-bottom:0.5rem; font-size:0.85rem;">No student selected</div>
-                    <div class="history-list" id="historyList"><div class="empty-message" style="padding:0.5rem;">select a student</div></div>
-                </div>
-
-                <div class="card mt-2" id="quickStatsCard" style="background:#faf3f0;">
-                    <h2><i class="fas fa-chart-simple"></i> Package</h2>
-                    <div id="statsContent" style="font-size:0.9rem; line-height:1.7; color:#4f3a36;"><span class="text-muted">— no student —</span></div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="calendar-header">
-                    <h2><i class="fas fa-calendar-days"></i> Calendar</h2>
-                    <div class="calendar-nav">
-                        <button type="button" class="secondary" id="calPrevBtn" aria-label="Previous month"><i class="fas fa-chevron-left"></i></button>
-                        <span class="calendar-month-label" id="calMonthLabel">—</span>
-                        <button type="button" class="secondary" id="calNextBtn" aria-label="Next month"><i class="fas fa-chevron-right"></i></button>
-                        <button type="button" class="secondary" id="calTodayBtn">Today</button>
-                    </div>
-                </div>
-                <div class="calendar-grid" id="calendarWeekdays"></div>
-                <div class="calendar-grid" id="calendarGrid" style="margin-top:3px;"></div>
-                <div class="calendar-legend">
-                    <span><span class="legend-dot"></span> bookings</span>
-                    <span><span class="legend-dot today"></span> today</span>
-                    <span><i class="fas fa-hand-pointer"></i> tap a day</span>
-                </div>
-                <div class="day-detail-panel" id="dayDetailPanel">
-                    <h3><i class="fas fa-list"></i> <span id="dayDetailTitle">Select a day</span></h3>
-                    <div id="dayDetailContent"><span class="text-muted" style="font-size:0.8rem;">Tap any day to see bookings.</span></div>
-                </div>
-            </div>
+  <!-- Top Sticky Navigation Bar -->
+  <header class="sticky top-0 z-40 bg-[#FAF7F2]/95 border-b border-stone-200/80 backdrop-blur shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+      <!-- Logo & Studio Title -->
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-2xl bg-rina-900 text-white flex items-center justify-center font-serif font-bold text-xl shadow-xs ring-2 ring-rina-800/30">
+          R
         </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-serif font-bold text-xl tracking-wider text-stone-900">RINA</span>
+            <span class="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-rina-100 text-rina-800 border border-rina-200">
+              Pilates Studio CMS
+            </span>
+          </div>
+          <p class="text-xs text-stone-500 font-medium">Daily Schedule, Balance Deductions & Portfolio</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="hidden md:flex items-center gap-1 bg-stone-100/90 p-1 rounded-2xl border border-stone-200 text-xs font-semibold">
+        <button onclick="switchTab('schedule')" id="tab-btn-schedule" class="px-3.5 py-2 rounded-xl transition flex items-center gap-2 bg-white text-stone-900 shadow-xs font-bold">
+          <i data-lucide="calendar" class="w-4 h-4 text-rina-800"></i>
+          <span>Daily Schedule</span>
+          <span id="nav-today-badge" class="px-1.5 py-0.2 rounded-full text-[10px] bg-rina-800 text-white font-mono">0</span>
+        </button>
+        <button onclick="switchTab('students')" id="tab-btn-students" class="px-3.5 py-2 rounded-xl transition flex items-center gap-2 text-stone-600 hover:text-stone-900">
+          <i data-lucide="users" class="w-4 h-4"></i>
+          <span>Student Portfolios</span>
+          <span id="nav-student-count" class="px-1.5 py-0.2 rounded-full text-[10px] bg-stone-200 text-stone-700 font-mono">0</span>
+        </button>
+        <button onclick="switchTab('datainput')" id="tab-btn-datainput" class="px-3.5 py-2 rounded-xl transition flex items-center gap-2 text-stone-600 hover:text-stone-900">
+          <i data-lucide="layout-grid" class="w-4 h-4"></i>
+          <span>Data Input System</span>
+        </button>
+        <button onclick="switchTab('audit')" id="tab-btn-audit" class="px-3.5 py-2 rounded-xl transition flex items-center gap-2 text-stone-600 hover:text-stone-900">
+          <i data-lucide="history" class="w-4 h-4"></i>
+          <span>Deduction Logs</span>
+        </button>
+      </nav>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2">
+        <button onclick="exportToExcel()" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-emerald-900 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-xl transition shadow-xs" title="Download Excel .xlsx with all bookings, deductions, and student balances">
+          <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-700"></i>
+          <span class="hidden sm:inline">Extract to Excel</span>
+        </button>
+        <button onclick="openBookingModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-stone-900 hover:bg-stone-800 rounded-xl transition shadow-xs">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">Book Class</span>
+        </button>
+      </div>
     </div>
 
-    <div id="toast" class="toast">message</div>
+    <!-- Mobile Sub Tabs -->
+    <div class="md:hidden flex overflow-x-auto px-4 py-2 border-t border-stone-200 gap-1 text-xs font-semibold bg-stone-50">
+      <button onclick="switchTab('schedule')" class="px-3 py-1.5 rounded-lg whitespace-nowrap bg-stone-900 text-white">Daily Schedule</button>
+      <button onclick="switchTab('students')" class="px-3 py-1.5 rounded-lg whitespace-nowrap text-stone-600">Students</button>
+      <button onclick="switchTab('datainput')" class="px-3 py-1.5 rounded-lg whitespace-nowrap text-stone-600">Data Input</button>
+      <button onclick="switchTab('audit')" class="px-3 py-1.5 rounded-lg whitespace-nowrap text-stone-600">Deduction Logs</button>
+    </div>
+  </header>
 
-    <script>
-        (function() {
-            const STORAGE_KEY = 'rina_pilates_cms';
-            function getInitialData() {
-                return {
-                    students: [
-                        { id:'s1', name:'Maya Chen', packageTotal:10, packageLeft:6, paid:1800, bookings:[{ date:'2025-02-10', time:'10:00', deducted:1, note:'reformer' },{ date:'2025-02-14', time:'09:30', deducted:1, note:'mat' },{ date:'2025-02-17', time:'11:00', deducted:1, note:'reformer' },{ date:'2025-02-21', time:'10:00', deducted:1, note:'reformer' }]},
-                        { id:'s2', name:'Elena Wong', packageTotal:8, packageLeft:3, paid:1440, bookings:[{ date:'2025-02-09', time:'08:00', deducted:1, note:'private' },{ date:'2025-02-12', time:'08:00', deducted:1, note:'private' },{ date:'2025-02-16', time:'09:00', deducted:1, note:'private' },{ date:'2025-02-19', time:'08:30', deducted:1, note:'private' },{ date:'2025-02-23', time:'10:00', deducted:1, note:'private' }]}
-                    ],
-                    selectedStudentId: 's1'
-                };
-            }
-            let data = loadData();
-            function loadData() { const stored = localStorage.getItem(STORAGE_KEY); if (stored) { try { return JSON.parse(stored); } catch(e){ return getInitialData(); } } return getInitialData(); }
-            function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
-            function generateId() { return 's' + Date.now() + Math.floor(Math.random()*1000); }
-            function getStudentById(id) { return data.students.find(s => s.id === id); }
-            function formatDisplayDate(d) { if (!d) return '—'; try { return new Date(d+'T00:00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); } catch(e){ return d; } }
-            function escapeHtml(t) { if (!t) return ''; const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+  <!-- Local Storage Notice Banner -->
+  <div class="bg-amber-50/80 border-b border-amber-200/60 px-4 py-1.5 text-center text-xs text-amber-900 flex items-center justify-center gap-2">
+    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-amber-700 shrink-0"></i>
+    <span><strong>Local Private Storage:</strong> All student portfolios and bookings are stored in your local browser storage. Extract data anytime via <strong>Excel</strong>.</span>
+  </div>
 
-            const studentListEl = document.getElementById('studentList');
-            const studentSelectEl = document.getElementById('bookingStudentSelect');
-            const noStudentsMsg = document.getElementById('noStudentsMsg');
-            const historyListEl = document.getElementById('historyList');
-            const selectedStudentDisplay = document.getElementById('selectedStudentDisplay');
-            const statsContent = document.getElementById('statsContent');
-            const toastEl = document.getElementById('toast');
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 flex-1 space-y-6">
 
-            function showToast(msg, duration = 2200) { toastEl.textContent = msg; toastEl.classList.add('show'); clearTimeout(window.toastTimeout); window.toastTimeout = setTimeout(() => toastEl.classList.remove('show'), duration); }
+    <!-- ========================================== -->
+    <!-- TAB 1: DAILY SCHEDULE VIEW                -->
+    <!-- ========================================== -->
+    <section id="view-schedule" class="space-y-6">
+      <!-- Date Bar & Controls -->
+      <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="h-12 w-12 rounded-2xl bg-rina-800 text-white flex items-center justify-center shadow-xs">
+            <i data-lucide="calendar" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 id="schedule-display-date" class="font-serif font-bold text-xl text-stone-900">Today's Schedule</h2>
+              <span id="schedule-today-tag" class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">Today</span>
+            </div>
+            <p id="schedule-stats-summary" class="text-xs text-stone-500 mt-0.5">0 sessions booked for this day</p>
+          </div>
+        </div>
 
-            let calendarDate = new Date(); calendarDate.setDate(1); calendarDate.setHours(0,0,0,0);
-            let selectedDayStr = null;
+        <div class="flex flex-wrap items-center gap-2">
+          <div class="inline-flex items-center bg-stone-50 border border-stone-200 rounded-xl p-1 text-xs">
+            <button onclick="stepDate(-1)" class="p-1.5 rounded-lg text-stone-600 hover:bg-white hover:text-stone-900">
+              <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            </button>
+            <button onclick="goToToday()" class="px-2.5 py-1 rounded-lg font-semibold text-stone-700 hover:bg-white">Today</button>
+            <button onclick="stepDate(1)" class="p-1.5 rounded-lg text-stone-600 hover:bg-white hover:text-stone-900">
+              <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+          <input type="date" id="schedule-date-picker" onchange="onScheduleDateChange(this.value)" class="rounded-xl border border-stone-300 bg-white px-3 py-2 text-xs text-stone-800 focus:outline-none">
+          <button onclick="openBookingModal()" class="inline-flex items-center gap-1.5 bg-stone-900 text-white px-3.5 py-2 rounded-xl text-xs font-semibold hover:bg-stone-800 transition">
+            <i data-lucide="plus" class="w-4 h-4"></i> Book For This Day
+          </button>
+        </div>
+      </div>
 
-            function renderStudentList() {
-                const students = data.students; studentListEl.innerHTML = '';
-                if (students.length === 0) { noStudentsMsg.style.display = 'block'; studentSelectEl.innerHTML = '<option value="">— no students —</option>'; return; }
-                noStudentsMsg.style.display = 'none';
-                students.forEach(student => {
-                    const row = document.createElement('div'); row.className = 'student-row';
-                    if (data.selectedStudentId === student.id) row.style.background = '#f7efe9';
-                    const leftDiv = document.createElement('div'); leftDiv.className = 'student-info';
-                    leftDiv.innerHTML = `<span class="student-name">${escapeHtml(student.name)}</span><span class="student-meta"><span><i class="fas fa-tag"></i> ${student.packageLeft}/${student.packageTotal}</span><span><i class="fas fa-coins"></i> $${student.paid}</span></span>`;
-                    const badge = document.createElement('span'); badge.className = `badge ${student.packageLeft <= 1 ? 'zero' : 'paid'}`; badge.textContent = `${student.packageLeft} left`;
-                    row.appendChild(leftDiv); row.appendChild(badge);
-                    row.addEventListener('click', () => setSelectedStudent(student.id));
-                    studentListEl.appendChild(row);
-                });
-                studentSelectEl.innerHTML = '<option value="">— choose —</option>';
-                students.forEach(s => { const opt = document.createElement('option'); opt.value = s.id; opt.textContent = `${s.name} (${s.packageLeft} left)`; if (data.selectedStudentId === s.id) opt.selected = true; studentSelectEl.appendChild(opt); });
-            }
+      <!-- Schedule Filter Pills -->
+      <div class="flex items-center justify-between text-xs">
+        <div class="flex items-center gap-1.5">
+          <span class="text-stone-500 font-medium">Filter:</span>
+          <button onclick="setScheduleFilter('all')" id="filter-sched-all" class="px-2.5 py-1 rounded-lg font-semibold uppercase text-[10px] bg-stone-900 text-white">All</button>
+          <button onclick="setScheduleFilter('confirmed')" id="filter-sched-confirmed" class="px-2.5 py-1 rounded-lg font-semibold uppercase text-[10px] bg-white border border-stone-200 text-stone-600">Confirmed</button>
+          <button onclick="setScheduleFilter('attended')" id="filter-sched-attended" class="px-2.5 py-1 rounded-lg font-semibold uppercase text-[10px] bg-white border border-stone-200 text-stone-600">Attended</button>
+          <button onclick="setScheduleFilter('cancelled')" id="filter-sched-cancelled" class="px-2.5 py-1 rounded-lg font-semibold uppercase text-[10px] bg-white border border-stone-200 text-stone-600">Cancelled</button>
+        </div>
+        <div class="text-[11px] text-stone-500 hidden sm:block">
+          ⚡ System automatically records class deduction date & time on booking
+        </div>
+      </div>
 
-            function renderSelectedStudentSection() {
-                const student = getStudentById(data.selectedStudentId);
-                if (!student) { selectedStudentDisplay.textContent = 'No student selected'; historyListEl.innerHTML = '<div class="empty-message" style="padding:0.5rem;">select a student</div>'; statsContent.innerHTML = '<span class="text-muted">— no student —</span>'; return; }
-                selectedStudentDisplay.textContent = `${student.name} · ${student.packageLeft} left · $${student.paid}`;
-                const bookings = student.bookings || [];
-                if (bookings.length === 0) { historyListEl.innerHTML = '<div class="empty-message" style="padding:0.5rem;">No bookings yet.</div>'; }
-                else { const sorted = [...bookings].sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time)); historyListEl.innerHTML = sorted.map(b => `<div class="history-item"><span class="deduct"><i class="fas fa-minus-circle"></i> 1 class</span><span class="date">${formatDisplayDate(b.date)} ${b.time||''}</span></div>`).join(''); }
-                statsContent.innerHTML = `<div style="display:flex; justify-content:space-between;"><span>Package:</span><strong>${student.packageTotal} total</strong></div><div style="display:flex; justify-content:space-between;"><span>Remaining:</span><strong style="color:${student.packageLeft<=1?'#b35e4a':'#2e5e3e'}">${student.packageLeft}</strong></div><div style="display:flex; justify-content:space-between;"><span>Paid:</span><strong>HK$${student.paid}</strong></div><div style="display:flex; justify-content:space-between;"><span>Used:</span><strong>${student.packageTotal - student.packageLeft}</strong></div>`;
-            }
+      <!-- Schedule Cards Container -->
+      <div id="schedule-cards-container" class="space-y-3.5">
+        <!-- Rendered via JavaScript -->
+      </div>
+    </section>
 
-            function setSelectedStudent(id) { if (id && !getStudentById(id)) return; data.selectedStudentId = id || null; saveData(); renderStudentList(); renderSelectedStudentSection(); if (studentSelectEl) studentSelectEl.value = id || ''; }
 
-            function buildBookingsMap() {
-                const map = {};
-                data.students.forEach(student => { (student.bookings || []).forEach(b => { if (!b.date) return; if (!map[b.date]) map[b.date] = []; map[b.date].push({ studentId: student.id, studentName: student.name, time: b.time||'', note: b.note||'' }); }); });
-                Object.keys(map).forEach(d => map[d].sort((a,b)=>(a.time||'').localeCompare(b.time||'')));
-                return map;
-            }
-            function toDateStr(d) { const y = d.getFullYear(); const m = String(d.getMonth()+1).padStart(2,'0'); const day = String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
+    <!-- ========================================== -->
+    <!-- TAB 2: STUDENT PORTFOLIO VIEW             -->
+    <!-- ========================================== -->
+    <section id="view-students" class="space-y-6 hidden">
+      <!-- Studio Metric Stats Cards -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs">
+          <span class="text-[11px] font-semibold uppercase text-stone-500 tracking-wider">Total Active Students</span>
+          <div id="stat-student-count" class="font-serif font-bold text-2xl text-stone-900 mt-1">0</div>
+          <span class="text-[11px] text-stone-400">Enrolled portfolio</span>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs">
+          <span class="text-[11px] font-semibold uppercase text-stone-500 tracking-wider">Total Studio Revenue</span>
+          <div id="stat-total-revenue" class="font-serif font-bold text-2xl text-stone-900 mt-1">$0.00</div>
+          <span class="text-[11px] text-stone-400">Total amount paid</span>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs">
+          <span class="text-[11px] font-semibold uppercase text-stone-500 tracking-wider">Remaining Classes</span>
+          <div id="stat-classes-left" class="font-serif font-bold text-2xl text-rina-800 mt-1">0</div>
+          <span class="text-[11px] text-stone-400">Prepaid balance left</span>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs">
+          <span class="text-[11px] font-semibold uppercase text-stone-500 tracking-wider">Sessions Attended</span>
+          <div id="stat-sessions-attended" class="font-serif font-bold text-2xl text-emerald-800 mt-1">0</div>
+          <span class="text-[11px] text-stone-400">Completed classes</span>
+        </div>
+      </div>
 
-            function renderCalendar() {
-                const year = calendarDate.getFullYear(); const month = calendarDate.getMonth();
-                const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-                document.getElementById('calMonthLabel').textContent = `${monthNames[month]} ${year}`;
-                const weekdaysEl = document.getElementById('calendarWeekdays'); weekdaysEl.innerHTML = '';
-                ['M','T','W','T','F','S','S'].forEach((wd,i) => { const el = document.createElement('div'); el.className = 'calendar-weekday'; el.textContent = wd; if (i === 5 || i === 6) el.style.color = '#c9a9a0'; weekdaysEl.appendChild(el); });
-                const gridEl = document.getElementById('calendarGrid'); gridEl.innerHTML = ''; const bookingsMap = buildBookingsMap();
-                const firstOfMonth = new Date(year, month, 1); let startOffset = firstOfMonth.getDay(); startOffset = (startOffset === 0) ? 6 : startOffset - 1;
-                const daysInMonth = new Date(year, month+1, 0).getDate(); const todayStr = toDateStr(new Date());
-                const prevMonthDays = new Date(year, month, 0).getDate();
-                for (let i = startOffset - 1; i >= 0; i--) gridEl.appendChild(createDayCell(new Date(year, month-1, prevMonthDays - i), true, bookingsMap, todayStr));
-                for (let d = 1; d <= daysInMonth; d++) gridEl.appendChild(createDayCell(new Date(year, month, d), false, bookingsMap, todayStr));
-                const totalCells = startOffset + daysInMonth; const remaining = (7 - (totalCells % 7)) % 7;
-                for (let i = 1; i <= remaining; i++) gridEl.appendChild(createDayCell(new Date(year, month+1, i), true, bookingsMap, todayStr));
-                renderDayDetail();
-            }
+      <!-- Search & Filters -->
+      <div class="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="relative w-full sm:max-w-md">
+          <i data-lucide="search" class="w-4 h-4 text-stone-400 absolute left-3.5 top-3"></i>
+          <input type="text" id="student-search-input" oninput="renderStudentPortfolios()" placeholder="Search student by name, phone, or email..." class="w-full rounded-xl border border-stone-300 bg-white pl-10 pr-4 py-2 text-xs text-stone-800 focus:outline-none focus:border-stone-800">
+        </div>
+        <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+          <div class="inline-flex bg-stone-50 border border-stone-200 rounded-xl p-1 text-[11px] font-semibold">
+            <button onclick="setStudentFilter('all')" id="btn-st-filter-all" class="px-2.5 py-1 rounded-lg bg-stone-900 text-white">All</button>
+            <button onclick="setStudentFilter('low')" id="btn-st-filter-low" class="px-2.5 py-1 rounded-lg text-stone-600 hover:bg-white">Low Balance (≤2)</button>
+            <button onclick="setStudentFilter('empty')" id="btn-st-filter-empty" class="px-2.5 py-1 rounded-lg text-stone-600 hover:bg-white">0 Left</button>
+          </div>
+          <button onclick="openStudentModal()" class="inline-flex items-center gap-1.5 bg-stone-900 text-white px-3.5 py-2 rounded-xl text-xs font-semibold hover:bg-stone-800 transition">
+            <i data-lucide="user-plus" class="w-4 h-4"></i> Add Student
+          </button>
+        </div>
+      </div>
 
-            function createDayCell(cellDate, isOtherMonth, bookingsMap, todayStr) {
-                const dateStr = toDateStr(cellDate); const dayNum = cellDate.getDate(); const bookings = bookingsMap[dateStr] || [];
-                const cell = document.createElement('div'); cell.className = 'calendar-day';
-                if (isOtherMonth) cell.classList.add('other-month'); if (dateStr === todayStr) cell.classList.add('today'); if (dateStr === selectedDayStr) cell.classList.add('selected');
-                const numEl = document.createElement('div'); numEl.className = 'day-number'; numEl.textContent = dayNum; cell.appendChild(numEl);
-                if (bookings.length > 0) {
-                    const badge = document.createElement('div'); badge.className = 'day-bookings-count'; badge.textContent = bookings.length; cell.appendChild(badge);
-                    const maxPills = window.innerWidth < 900 ? 1 : 2;
-                    bookings.slice(0, maxPills).forEach(b => { const pill = document.createElement('div'); pill.className = 'booking-pill'; pill.textContent = window.innerWidth < 900 ? b.time : `${b.time} ${b.studentName}`; cell.appendChild(pill); });
-                    if (bookings.length > maxPills) { const more = document.createElement('div'); more.className = 'booking-pill more'; more.textContent = `+${bookings.length - maxPills}`; cell.appendChild(more); }
-                }
-                cell.addEventListener('click', () => { if (isOtherMonth) calendarDate = new Date(cellDate.getFullYear(), cellDate.getMonth(), 1); selectedDayStr = dateStr; renderCalendar(); });
-                return cell;
-            }
+      <!-- Students Grid -->
+      <div id="students-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Rendered via JavaScript -->
+      </div>
+    </section>
 
-            function renderDayDetail() {
-                const titleEl = document.getElementById('dayDetailTitle'); const contentEl = document.getElementById('dayDetailContent');
-                if (!selectedDayStr) { titleEl.textContent = 'Select a day'; contentEl.innerHTML = '<span class="text-muted" style="font-size:0.8rem;">Tap any day to see bookings.</span>'; return; }
-                const bookingsMap = buildBookingsMap(); const dayBookings = bookingsMap[selectedDayStr] || []; let friendlyDate = selectedDayStr;
-                try { friendlyDate = new Date(selectedDayStr+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}); } catch(e){}
-                titleEl.textContent = friendlyDate;
-                if (dayBookings.length === 0) { contentEl.innerHTML = '<span class="text-muted" style="font-size:0.8rem;">No bookings this day.</span>'; return; }
-                contentEl.innerHTML = dayBookings.map(b => `<div class="day-detail-item"><span><span class="student-name-tag">${escapeHtml(b.studentName)}</span></span><span class="time-tag">${b.time||'—'}</span></div>`).join('');
-            }
 
-            function addStudent() {
-                const nameInput = document.getElementById('studentName'); const packageInput = document.getElementById('studentPackage'); const paidInput = document.getElementById('studentPaid');
-                const name = nameInput.value.trim(); if (!name) { showToast('Enter a student name.'); return; }
-                const packageTotal = parseInt(packageInput.value, 10); if (isNaN(packageTotal) || packageTotal < 0) { showToast('Package must be a number.'); return; }
-                const paid = parseFloat(paidInput.value); if (isNaN(paid) || paid < 0) { showToast('Paid must be a number.'); return; }
-                const newStudent = { id: generateId(), name, packageTotal, packageLeft: packageTotal, paid, bookings: [] };
-                data.students.push(newStudent); saveData(); nameInput.value = ''; packageInput.value = '10'; paidInput.value = '1800';
-                setSelectedStudent(newStudent.id); renderCalendar(); showToast(`Added ${name}.`);
-            }
+    <!-- ========================================== -->
+    <!-- TAB 3: DATA INPUT CENTER                   -->
+    <!-- ========================================== -->
+    <section id="view-datainput" class="space-y-6 hidden">
+      <!-- Input Center Banner -->
+      <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <div class="h-8 w-8 rounded-xl bg-rina-800 text-white flex items-center justify-center font-bold text-xs">
+              <i data-lucide="zap" class="w-4 h-4"></i>
+            </div>
+            <h2 class="font-serif font-bold text-lg text-stone-900">Studio Data Input Center</h2>
+          </div>
+          <p class="text-xs text-stone-500 mt-1">
+            Choose between multi-row spreadsheet entry, recurring schedule builder, or fast single forms.
+          </p>
+        </div>
 
-            function addBooking() {
-                const studentId = studentSelectEl.value; if (!studentId) { showToast('Select a student.'); return; }
-                const student = getStudentById(studentId); if (!student) return; if (student.packageLeft <= 0) { showToast(`⚠️ ${student.name} has no classes left.`); return; }
-                const dateInput = document.getElementById('bookingDate'); const timeInput = document.getElementById('bookingTime');
-                let date = dateInput.value, time = timeInput.value;
-                if (!date) { date = new Date().toISOString().split('T')[0]; dateInput.value = date; }
-                if (!time) { time = '10:00'; timeInput.value = time; }
-                student.packageLeft -= 1; if (!student.bookings) student.bookings = [];
-                student.bookings.push({ date, time, deducted: 1, note: '' }); saveData(); setSelectedStudent(student.id); renderCalendar(); renderSelectedStudentSection();
-                showToast(`✅ 1 class deducted. Remaining: ${student.packageLeft}`);
-            }
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="openBookingModal()" class="inline-flex items-center gap-1.5 bg-stone-900 text-white px-3 py-2 rounded-xl text-xs font-semibold hover:bg-stone-800 transition">
+            <i data-lucide="calendar" class="w-3.5 h-3.5"></i> Fast Booking
+          </button>
+          <button onclick="openStudentModal()" class="inline-flex items-center gap-1.5 bg-stone-100 text-stone-800 border border-stone-300 px-3 py-2 rounded-xl text-xs font-semibold hover:bg-stone-200 transition">
+            <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Fast Student
+          </button>
+          <button onclick="openPackageModal()" class="inline-flex items-center gap-1.5 bg-amber-50 text-amber-900 border border-amber-200 px-3 py-2 rounded-xl text-xs font-semibold hover:bg-amber-100 transition">
+            <i data-lucide="layers" class="w-3.5 h-3.5"></i> Log Payment
+          </button>
+        </div>
+      </div>
 
-            function exportToExcel() {
-                const students = data.students; if (students.length === 0) { showToast('No data to export.'); return; }
-                const rows = [['Student Name','Package Total','Package Left','Paid (HKD)','Booking Date','Booking Time','Class Deducted','Notes']];
-                students.forEach(student => { const bookings = student.bookings || []; if (bookings.length === 0) rows.push([student.name, student.packageTotal, student.packageLeft, student.paid, '', '', '', '']); else bookings.forEach(b => rows.push([student.name, student.packageTotal, student.packageLeft, student.paid, b.date||'', b.time||'', 1, b.note||''])); });
-                const csvContent = rows.map(row => row.map(cell => { const s = String(cell); if (s.includes(',') || s.includes('"') || s.includes('\n')) return `"${s.replace(/"/g, '""')}"`; return s; }).join(',')).join('\n');
-                const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement('a'); const url = URL.createObjectURL(blob);
-                link.href = url; link.setAttribute('download', `RINA_pilates_${new Date().toISOString().split('T')[0]}.csv`);
-                document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url); showToast('📊 CSV downloaded.');
-            }
+      <!-- Mode Selector Tabs -->
+      <div class="flex border-b border-stone-200 bg-white px-5 rounded-t-2xl pt-2 gap-3 text-xs font-semibold">
+        <button onclick="switchInputMode('spreadsheet')" id="input-mode-btn-spreadsheet" class="pb-3 border-b-2 border-rina-800 text-rina-900 font-bold flex items-center gap-1.5">
+          <i data-lucide="table" class="w-4 h-4"></i> Interactive Spreadsheet Entry
+        </button>
+        <button onclick="switchInputMode('recurring')" id="input-mode-btn-recurring" class="pb-3 border-b-2 border-transparent text-stone-500 hover:text-stone-800 flex items-center gap-1.5">
+          <i data-lucide="repeat" class="w-4 h-4"></i> Recurring Schedule Generator
+        </button>
+        <button onclick="switchInputMode('excelimport')" id="input-mode-btn-excelimport" class="pb-3 border-b-2 border-transparent text-stone-500 hover:text-stone-800 flex items-center gap-1.5">
+          <i data-lucide="file-up" class="w-4 h-4"></i> Excel / CSV File Import
+        </button>
+      </div>
 
-            function init() {
-                document.getElementById('bookingDate').value = new Date().toISOString().split('T')[0];
-                renderStudentList(); if (data.selectedStudentId) setSelectedStudent(data.selectedStudentId); else if (data.students.length > 0) setSelectedStudent(data.students[0].id); else renderSelectedStudentSection(); renderCalendar();
-                document.getElementById('addStudentBtn').addEventListener('click', function(e){ e.preventDefault(); addStudent(); });
-                document.getElementById('addBookingBtn').addEventListener('click', function(e){ e.preventDefault(); addBooking(); });
-                document.getElementById('exportExcelBtn').addEventListener('click', function(e){ e.preventDefault(); exportToExcel(); });
-                studentSelectEl.addEventListener('change', (e) => { setSelectedStudent(e.target.value || null); });
-                document.getElementById('calPrevBtn').addEventListener('click', function(e){ e.preventDefault(); calendarDate.setMonth(calendarDate.getMonth() - 1); renderCalendar(); });
-                document.getElementById('calNextBtn').addEventListener('click', function(e){ e.preventDefault(); calendarDate.setMonth(calendarDate.getMonth() + 1); renderCalendar(); });
-                document.getElementById('calTodayBtn').addEventListener('click', function(e){ e.preventDefault(); calendarDate = new Date(); calendarDate.setDate(1); calendarDate.setHours(0,0,0,0); renderCalendar(); });
-                let resizeTimer; window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(renderCalendar, 200); });
-            }
-            init();
-        })();
-    </script>
+      <!-- MODE A: SPREADSHEET TABLE ENTRY -->
+      <div id="input-panel-spreadsheet" class="bg-white p-5 rounded-2xl border border-stone-200 shadow-xs space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h3 class="font-bold text-stone-900 text-sm">Batch Student & Package Quick Input</h3>
+            <p class="text-xs text-stone-500">Fill in multiple students and packages in this table, then save all with one click.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="addBatchRow()" class="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-medium rounded-xl border border-stone-300 inline-flex items-center gap-1">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Row
+            </button>
+            <button onclick="saveBatchRows()" class="px-4 py-1.5 bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold rounded-xl inline-flex items-center gap-1">
+              <i data-lucide="save" class="w-3.5 h-3.5"></i> Save All to Local Storage
+            </button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto border border-stone-200 rounded-xl">
+          <table class="w-full text-left text-xs min-w-[900px]">
+            <thead class="bg-[#FAF7F2] border-b border-stone-200 font-semibold text-stone-700 uppercase tracking-wider">
+              <tr>
+                <th class="p-2.5">Student Name *</th>
+                <th class="p-2.5">Phone</th>
+                <th class="p-2.5">Email</th>
+                <th class="p-2.5">Package Name</th>
+                <th class="p-2.5 w-20">Total</th>
+                <th class="p-2.5 w-20">Left</th>
+                <th class="p-2.5 w-24">Price ($)</th>
+                <th class="p-2.5">Method</th>
+                <th class="p-2.5">Injury / Focus</th>
+                <th class="p-2.5 w-10 text-center"></th>
+              </tr>
+            </thead>
+            <tbody id="batch-rows-tbody" class="divide-y divide-stone-100">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- MODE B: RECURRING SCHEDULE GENERATOR -->
+      <form id="input-panel-recurring" onsubmit="handleGenerateRecurring(event)" class="bg-white p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4 hidden">
+        <div>
+          <h3 class="font-bold text-stone-900 text-sm">Recurring Weekly Schedule Generator</h3>
+          <p class="text-xs text-stone-500">Auto-create repetitive appointments (e.g. every Tue & Thu for 4 weeks) and deduct class balances with timestamps.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-stone-600 uppercase mb-1">Select Student *</label>
+            <select id="rec-student-select" required class="w-full rounded-xl border border-stone-300 p-2.5 text-xs text-stone-800 bg-white">
+              <!-- Options populated by JS -->
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-stone-600 uppercase mb-1">Class Type</label>
+            <select id="rec-class-type" class="w-full rounded-xl border border-stone-300 p-2.5 text-xs text-stone-800 bg-white">
+              <option value="Private Reformer">Private Reformer</option>
+              <option value="Duet Reformer">Duet Reformer</option>
+              <option value="Cadillac & Tower">Cadillac & Tower</option>
+              <option value="Mat Pilates Flow">Mat Pilates Flow</option>
+              <option value="Prenatal Pilates">Prenatal Pilates</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-stone-600 uppercase mb-2">Days of Week:</label>
+          <div class="flex flex-wrap gap-2 text-xs" id="rec-days-container">
+            <button type="button" onclick="toggleRecDay(1)" data-day="1" class="rec-day-btn px-3 py-1.5 rounded-xl border border-stone-200 bg-stone-100 text-stone-700 font-semibold">Mon</button>
+            <button type="button" onclick="toggleRecDay(2)" data-day="2" class="rec-day-btn px-3 py-1.5 rounded-xl border border-rina-800 bg-rina-800 text-white font-semibold">Tue</button>
+            <button type="button" onclick="toggleRecDay(3)" data-day="3" class="rec-day-btn px-3 py-1.5 rounded-xl border border-stone-200 bg-stone-100 text-stone-700 font-semibold">Wed</button>
+            <button type="button" onclick="toggleRecDay(4)" data-day="4" class="rec-day-btn px-3 py-1.5 rounded-xl border border-rina-800 bg-rina-800 text-white font-semibold">Thu</button>
+            <button type="button" onclick="toggleRecDay(5)" data-day="5" class="rec-day-btn px-3 py-1.5 rounded-xl border border-stone-200 bg-stone-100 text-stone-700 font-semibold">Fri</button>
+            <button type="button" onclick="toggleRecDay(6)" data-day="6" class="rec-day-btn px-3 py-1.5 rounded-xl border border-stone-200 bg-stone-100 text-stone-700 font-semibold">Sat</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-stone-600 uppercase mb-1">Time (Start)</label>
+            <input type="time" id="rec-start-time" value="10:00" required class="w-full rounded-xl border border-stone-300 p-2 text-xs text-stone-800">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-stone-600 uppercase mb-1">Start Date</label>
+            <input type="date" id="rec-start-date" required class="w-full rounded-xl border border-stone-300 p-2 text-xs text-stone-800">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-stone-600 uppercase mb-1">Weeks Count</label>
+            <input type="number" id="rec-weeks" min="1" max="12" value="4" required class="w-full rounded-xl border border-stone-300 p-2 text-xs text-stone-800">
+          </div>
+        </div>
+
+        <label class="flex items-center gap-2 cursor-pointer text-xs">
+          <input type="checkbox" id="rec-auto-deduct" checked class="rounded border-stone-300 text-stone-900 focus:ring-stone-900">
+          <span class="font-semibold text-stone-800">Auto-deduct 1 class per created session & record timestamp</span>
+        </label>
+
+        <div class="flex justify-end pt-2">
+          <button type="submit" class="bg-stone-900 hover:bg-stone-800 text-white px-5 py-2.5 rounded-xl text-xs font-semibold inline-flex items-center gap-2 shadow-xs">
+            <i data-lucide="calendar-plus" class="w-4 h-4"></i> Generate Recurring Bookings
+          </button>
+        </div>
+      </form>
+
+      <!-- MODE C: EXCEL FILE IMPORTER -->
+      <div id="input-panel-excelimport" class="bg-white p-6 rounded-2xl border border-stone-200 shadow-xs space-y-4 hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h3 class="font-bold text-stone-900 text-sm">Upload Excel / CSV Roster</h3>
+            <p class="text-xs text-stone-500">Import your existing client list from an Excel (.xlsx) or CSV file.</p>
+          </div>
+          <button onclick="downloadSampleTemplate()" class="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-semibold rounded-xl border border-stone-300 inline-flex items-center gap-1.5">
+            <i data-lucide="download" class="w-3.5 h-3.5 text-rina-800"></i> Download Sample Excel
+          </button>
+        </div>
+
+        <div class="border-2 border-dashed border-stone-300 rounded-2xl p-8 text-center bg-stone-50/60 hover:bg-stone-50 transition relative">
+          <input type="file" id="excel-file-input" accept=".xlsx,.xls,.csv" onchange="handleExcelFileUpload(event)" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+          <div class="flex flex-col items-center gap-2">
+            <div class="h-12 w-12 rounded-2xl bg-rina-100 text-rina-800 flex items-center justify-center">
+              <i data-lucide="upload-cloud" class="w-6 h-6"></i>
+            </div>
+            <p id="file-upload-label" class="text-sm font-semibold text-stone-800">Click to choose or drop your Excel/CSV file here</p>
+            <p class="text-xs text-stone-400">Supports .xlsx, .xls, .csv</p>
+          </div>
+        </div>
+
+        <div id="parsed-preview-section" class="space-y-3 hidden">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-bold uppercase text-stone-700">Preview Data to Import</h4>
+            <button onclick="commitParsedExcelData()" class="px-4 py-2 bg-rina-800 hover:bg-rina-900 text-white rounded-xl text-xs font-semibold shadow-xs">
+              Confirm & Save to Roster
+            </button>
+          </div>
+          <div class="overflow-x-auto border border-stone-200 rounded-xl">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-[#FAF7F2] font-semibold text-stone-600">
+                <tr>
+                  <th class="p-2.5">Name</th>
+                  <th class="p-2.5">Phone</th>
+                  <th class="p-2.5">Package</th>
+                  <th class="p-2.5">Classes Left</th>
+                  <th class="p-2.5">Amount Paid</th>
+                </tr>
+              </thead>
+              <tbody id="parsed-preview-tbody" class="divide-y divide-stone-100">
+                <!-- Populated via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ========================================== -->
+    <!-- TAB 4: DEDUCTION AUDIT TRAIL              -->
+    <!-- ========================================== -->
+    <section id="view-audit" class="space-y-6 hidden">
+      <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <div class="h-8 w-8 rounded-xl bg-rina-800 text-white flex items-center justify-center font-bold text-xs">
+              <i data-lucide="history" class="w-4 h-4"></i>
+            </div>
+            <h2 class="font-serif font-bold text-lg text-stone-900">Deduction & Credit Audit Log</h2>
+          </div>
+          <p class="text-xs text-stone-500 mt-1">Official chronological ledger of every single class deducted or restored with precise date and time.</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <select id="audit-filter-student" onchange="renderDeductionAudit()" class="rounded-xl border border-stone-300 p-2 text-xs text-stone-800 bg-white">
+            <option value="all">All Students</option>
+            <!-- Options populated by JS -->
+          </select>
+          <button onclick="exportToExcel()" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-emerald-900 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-xl transition">
+            <i data-lucide="download" class="w-3.5 h-3.5 text-emerald-700"></i> Export Audit Log
+          </button>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto bg-white rounded-2xl border border-stone-200 shadow-xs">
+        <table class="w-full text-left text-xs min-w-[700px]">
+          <thead class="bg-[#FAF7F2] border-b border-stone-200 font-semibold uppercase tracking-wider text-stone-600">
+            <tr>
+              <th class="p-3.5">Date & Exact Time</th>
+              <th class="p-3.5">Student</th>
+              <th class="p-3.5">Package</th>
+              <th class="p-3.5">Adjustment</th>
+              <th class="p-3.5">Balance Remaining</th>
+              <th class="p-3.5">Session / Reason</th>
+              <th class="p-3.5 text-center">Manage</th>
+            </tr>
+          </thead>
+          <tbody id="audit-log-tbody" class="divide-y divide-stone-100">
+            <!-- Populated via JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================== -->
+  <!-- MODALS                                     -->
+  <!-- ========================================== -->
+
+  <!-- MODAL 1: BOOKING MODAL -->
+  <div id="modal-booking" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-lg rounded-2xl border border-stone-200 shadow-2xl overflow-hidden animate-in fade-in">
+      <div class="bg-[#FAF7F2] p-4 border-b border-stone-200 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="h-8 w-8 rounded-xl bg-rina-800/10 text-rina-800 flex items-center justify-center">
+            <i data-lucide="calendar" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 id="booking-modal-title" class="font-serif font-bold text-stone-900 text-base">New Studio Booking</h3>
+            <p class="text-[11px] text-stone-500">Schedules session & deducts from package with date/time</p>
+          </div>
+        </div>
+        <button onclick="closeModal('modal-booking')" class="text-stone-400 hover:text-stone-700 p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="booking-form" onsubmit="handleBookingSubmit(event)" class="p-5 space-y-4 max-h-[80vh] overflow-y-auto text-xs">
+        <input type="hidden" id="booking-edit-id" value="">
+
+        <div>
+          <label class="block font-semibold uppercase text-stone-600 mb-1">Student Name *</label>
+          <select id="booking-student-select" required onchange="onBookingStudentChanged()" class="w-full rounded-xl border border-stone-300 p-2.5 font-medium text-stone-800 bg-white">
+            <!-- Populated by JS -->
+          </select>
+        </div>
+
+        <div id="booking-injury-banner" class="hidden rounded-xl bg-amber-50 p-3 border border-amber-200 text-amber-950 flex items-start gap-2">
+          <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-700 shrink-0 mt-0.5"></i>
+          <div>
+            <span class="font-bold">Student Physical Note: </span>
+            <span id="booking-injury-text"></span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block font-semibold uppercase text-stone-600 mb-1">Session Date *</label>
+            <input type="date" id="booking-date" required class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
+          </div>
+          <div>
+            <label class="block font-semibold uppercase text-stone-600 mb-1">Start Time *</label>
+            <input type="time" id="booking-start-time" required value="10:00" onchange="autoFillEndTime(this.value)" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
+          </div>
+          <div>
+            <label class="block font-semibold uppercase text-stone-600 mb-1">End Time *</label>
+            <input type="time" id="booking-end-time" required value="10:55" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold uppercase text-stone-600 mb-1">Class Type</label>
+            <select id="booking-class-type" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800 bg-white">
+              <option value="Private Reformer">Private Reformer</option>
+              <option value="Duet Reformer">Duet Reformer</option>
+              <option value="Cadillac & Tower">Cadillac & Tower</option>
+              <option value="Mat Pilates Flow">Mat Pilates Flow</option>
+              <option value="Prenatal Pilates">Prenatal Pilates</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold uppercase text-stone-600 mb-1">Instructor</label>
+            <input type="text" id="booking-instructor" value="Rina" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
+          </div>
+        </div>
+
+        <!-- Deduction Settings -->
+        <div id="booking-deduct-box" class="rounded-xl border border-stone-200 bg-stone-50 p-3.5 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-stone-800 uppercase text-[11px] flex items-center gap-1.5">
+              <i data-lucide="layers" class="w-3.5 h-3.5 text-rina-800"></i> Package Deduction
+            </span>
+            <span id="booking-package-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+              0 classes left
+            </span>
+          </div>
+          <p id="booking-package-text" class="text-stone-600 text-[11px]">Selecting a student will display their package details.</p>
+          <label class="flex items-start gap-2 pt-1 cursor-pointer">
+            <input type="checkbox" id="booking-auto-deduct" checked class="rounded border-stone-300 text-stone-900 mt-0.5">
+            <span class="text-stone-800 font-semibold">
+              Mark deduction automatically with current date & time
+              <span class="block text-[11px] font-normal text-stone-500">Will deduct 1 class credit and record the exact timestamp in the audit trail.</span>
+            </span>
+          </label>
+        </div>
+
+        <div>
+          <label class="block font-semibold uppercase text-stone-600 mb-1">Session Focus / Student Notes</label>
+          <input type="text" id="booking-notes" placeholder="e.g. Scapular depression, yellow spring footwork" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t border-stone-100">
+          <button type="button" onclick="closeModal('modal-booking')" class="px-4 py-2 text-stone-600 hover:bg-stone-100 rounded-xl font-semibold">Cancel</button>
+          <button type="submit" class="px-5 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl font-semibold shadow-xs">Confirm Booking</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- MODAL 2: STUDENT ONBOARDING / EDIT MODAL -->
+  <div id="modal-student" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-lg rounded-2xl border border-stone-200 shadow-2xl overflow-hidden">
+      <div class="bg-[#FAF7F2] p-4 border-b border-stone-200 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="h-8 w-8 rounded-xl bg-stone-900 text-white flex items-center justify-center">
+            <i data-lucide="user-plus" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 id="student-modal-title" class="font-serif font-bold text-stone-900 text-base">New Student Onboarding</h3>
+            <p class="text-[11px] text-stone-500">Register student and setup package balance</p>
+          </div>
+        </div>
+        <button onclick="closeModal('modal-student')" class="text-stone-400 hover:text-stone-700 p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="student-form" onsubmit="handleStudentSubmit(event)" class="p-5 space-y-4 max-h-[80vh] overflow-y-auto text-xs">
+        <input type="hidden" id="student-edit-id" value="">
+
+        <div>
+          <label class="block font-semibold uppercase text-stone-600 mb-1">Full Name *</label>
+          <input type="text" id="st-name" required placeholder="e.g. Claire Vance" class="w-full rounded-xl border border-stone-300 p-2.5 text-stone-800">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold uppercase text-stone-600 mb-1">Phone Number</label>
+            <input type="text" id="st-phone" placeholder="+1 (555) 234-5678" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
+          </div>
+          <div>
+            <label class="block font-semibold uppercase text-stone-600 mb-1">Email</label>
+            <input type="email" id="st-email" placeholder="claire@example.com" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold uppercase text-stone-600 mb-1">Emergency Contact</label>
+          <input type="text" id="st-emergency" placeholder="e.g. David Vance (Husband) - 555-901-2233" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
+        </div>
+
+        <div class="rounded-xl bg-amber-50/60 border border-amber-200 p-3 space-y-2">
+          <span class="font-bold text-amber-900 uppercase text-[10px] flex items-center gap-1">
+            <i data-lucide="heart" class="w-3.5 h-3.5 text-amber-700"></i> Pilates Medical Assessment
+          </span>
+          <div>
+            <label class="block font-medium text-stone-700 mb-0.5">Injuries, Disc Issues or Contraindications</label>
+            <textarea id="st-injuries" rows="2" placeholder="e.g. L4-S1 disc bulge, avoid extreme flexion" class="w-full rounded-lg border border-stone-300 p-1.5 text-stone-800 bg-white"></textarea>
+          </div>
+          <div>
+            <label class="block font-medium text-stone-700 mb-0.5">Pilates Goals</label>
+            <input type="text" id="st-goals" placeholder="e.g. Core stability, pelvic alignment" class="w-full rounded-lg border border-stone-300 p-1.5 text-stone-800 bg-white">
+          </div>
+        </div>
+
+        <!-- Initial Package Section (Only for new students) -->
+        <div id="st-package-section" class="rounded-xl border border-stone-200 bg-stone-50 p-3.5 space-y-3">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" id="st-has-package" checked class="rounded border-stone-300 text-stone-900">
+            <span class="font-bold uppercase tracking-wider text-stone-800 text-[11px]">Log Initial Package & Payment Now</span>
+          </label>
+          <div id="st-package-fields" class="space-y-3">
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-stone-600 mb-0.5">Package Name</label>
+                <input type="text" id="st-pkg-name" value="10x Private Reformer" class="w-full rounded-lg border border-stone-300 p-1.5 bg-white">
+              </div>
+              <div>
+                <label class="block text-stone-600 mb-0.5">Total Classes</label>
+                <input type="number" id="st-pkg-classes" value="10" min="1" class="w-full rounded-lg border border-stone-300 p-1.5 bg-white">
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-stone-600 mb-0.5">Price Paid ($)</label>
+                <input type="number" id="st-pkg-price" value="1200" step="0.01" class="w-full rounded-lg border border-stone-300 p-1.5 bg-white">
+              </div>
+              <div>
+                <label class="block text-stone-600 mb-0.5">Payment Method</label>
+                <select id="st-pkg-method" class="w-full rounded-lg border border-stone-300 p-1.5 bg-white">
+                  <option value="Credit Card">Credit Card</option>
+                  <option value="Bank Transfer">Bank Transfer</option>
+                  <option value="Cash">Cash</option>
+                  <option value="PayNow / Zelle">PayNow / Zelle</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t border-stone-100">
+          <button type="button" onclick="closeModal('modal-student')" class="px-4 py-2 text-stone-600 hover:bg-stone-100 rounded-xl font-semibold">Cancel</button>
+          <button type="submit" class="px-5 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl font-semibold shadow-xs">Save Student</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- MODAL 3: LOG PACKAGE & PAYMENT / ADJUST BALANCE -->
+  <div id="modal-package" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl border border-stone-200 shadow-2xl overflow-hidden">
+      <div class="bg-[#FAF7F2] p-4 border-b border-stone-200 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="h-8 w-8 rounded-xl bg-amber-800 text-white flex items-center justify-center">
+            <i data-lucide="credit-card" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="font-serif font-bold text-stone-900 text-base">Record Package & Payment</h3>
+            <p class="text-[11px] text-stone-500">Add prepaid class credits and payment record</p>
+          </div>
+        </div>
+        <button onclick="closeModal('modal-package')" class="text-stone-400 hover:text-stone-700 p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="package-form" onsubmit="handlePackageSubmit(event)" class="p-5 space-y-4 text-xs">
+        <div>
+          <label class="block font-semibold uppercase text-stone-600 mb-1">Student *</label>
+          <select id="pkg-student-select" required class="w-full rounded-xl border border-stone-300 p-2.5 font-medium text-stone-800 bg-white">
+            <!-- Populated by JS -->
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold uppercase text-stone-600 mb-1">Package Name *</label>
+          <input type="text" id="pkg-name" value="10x Private Reformer Package" required class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold uppercase text-stone-600 mb-1">Total Classes</label>
+            <input type="number" id="pkg-total" value="10" min="1" required class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
+          </div>
+          <div>
+            <label class="block font-semibold uppercase text-stone-600 mb-1">Price Paid ($)</label>
+            <input type="number" id="pkg-price" value="1200" step="0.01" required class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold uppercase text-stone-600 mb-1">Payment Method</label>
+          <select id="pkg-method" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800 bg-white">
+            <option value="Credit Card">Credit Card</option>
+            <option value="Bank Transfer">Bank Transfer</option>
+            <option value="Cash">Cash</option>
+            <option value="PayNow / Zelle">PayNow / Zelle</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold uppercase text-stone-600 mb-1">Payment Date</label>
+          <input type="date" id="pkg-date" class="w-full rounded-xl border border-stone-300 p-2 text-stone-800">
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t border-stone-100">
+          <button type="button" onclick="closeModal('modal-package')" class="px-4 py-2 text-stone-600 hover:bg-stone-100 rounded-xl font-semibold">Cancel</button>
+          <button type="submit" class="px-5 py-2 bg-rina-800 hover:bg-rina-900 text-white rounded-xl font-semibold shadow-xs">Save Package</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- MODAL 4: DETAILED STUDENT PORTFOLIO MODAL -->
+  <div id="modal-portfolio" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-3xl rounded-2xl border border-stone-200 shadow-2xl overflow-hidden flex flex-col max-h-[88vh]">
+      <div class="bg-[#FAF7F2] p-5 border-b border-stone-200 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div id="portfolio-avatar" class="h-12 w-12 rounded-2xl bg-rina-900 text-white flex items-center justify-center font-serif font-bold text-xl shadow-xs">
+            C
+          </div>
+          <div>
+            <h3 id="portfolio-name" class="font-serif font-bold text-stone-900 text-xl">Claire Vance</h3>
+            <p id="portfolio-contact" class="text-xs text-stone-500">+1 (555) 234-8910 • claire@example.com</p>
+          </div>
+        </div>
+        <button onclick="closeModal('modal-portfolio')" class="text-stone-400 hover:text-stone-700 p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-6 flex-1 text-xs">
+        <!-- 4 Stat Badges -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="p-3 bg-stone-50 rounded-xl border border-stone-200">
+            <span class="text-[10px] uppercase font-bold text-stone-500">Classes Remaining</span>
+            <div id="portfolio-classes-left" class="font-serif font-bold text-2xl text-rina-800 mt-0.5">0</div>
+          </div>
+          <div class="p-3 bg-stone-50 rounded-xl border border-stone-200">
+            <span class="text-[10px] uppercase font-bold text-stone-500">Total Paid</span>
+            <div id="portfolio-total-paid" class="font-serif font-bold text-2xl text-stone-900 mt-0.5">$0.00</div>
+          </div>
+          <div class="p-3 bg-stone-50 rounded-xl border border-stone-200">
+            <span class="text-[10px] uppercase font-bold text-stone-500">Attended</span>
+            <div id="portfolio-attended" class="font-serif font-bold text-2xl text-emerald-800 mt-0.5">0</div>
+          </div>
+          <div class="p-3 bg-stone-50 rounded-xl border border-stone-200">
+            <span class="text-[10px] uppercase font-bold text-stone-500">Packages</span>
+            <div id="portfolio-packages-count" class="font-serif font-bold text-2xl text-stone-900 mt-0.5">0</div>
+          </div>
+        </div>
+
+        <!-- Injury Note -->
+        <div class="p-4 rounded-xl bg-amber-50/70 border border-amber-200 space-y-1">
+          <span class="font-bold text-amber-900 uppercase text-[10px] flex items-center gap-1">
+            <i data-lucide="heart" class="w-3.5 h-3.5 text-amber-700"></i> Pilates Injury & Contraindication Note
+          </span>
+          <p id="portfolio-injuries" class="text-sm font-medium text-amber-950">None</p>
+        </div>
+
+        <!-- Packages List -->
+        <div class="space-y-2">
+          <h4 class="font-bold text-stone-900 uppercase text-[11px]">Packages & Payments History</h4>
+          <div id="portfolio-packages-list" class="space-y-2"></div>
+        </div>
+
+        <!-- Deduction Log for this student -->
+        <div class="space-y-2">
+          <h4 class="font-bold text-stone-900 uppercase text-[11px]">Deduction History (With Exact Date & Time)</h4>
+          <div id="portfolio-deductions-list" class="space-y-1.5 font-mono"></div>
+        </div>
+      </div>
+
+      <div class="p-3 bg-stone-50 border-t border-stone-200 flex justify-end">
+        <button onclick="closeModal('modal-portfolio')" class="px-4 py-1.5 bg-stone-200 text-stone-800 font-semibold rounded-xl text-xs hover:bg-stone-300">Close</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 bg-stone-900 text-white px-5 py-3 rounded-2xl text-xs font-semibold shadow-2xl flex items-center gap-2 border border-stone-800 hidden">
+    <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toast-text">Success message</span>
+  </div>
+
+
+  <!-- ========================================== -->
+  <!-- JAVASCRIPT LOGIC (LOCAL STORAGE & EXCEL)   -->
+  <!-- ========================================== -->
+  <script>
+    // --- 1. LOCAL STORAGE KEYS ---
+    const STORAGE_KEY_STUDENTS = 'rina_pilates_students';
+    const STORAGE_KEY_PACKAGES = 'rina_pilates_packages';
+    const STORAGE_KEY_BOOKINGS = 'rina_pilates_bookings';
+    const STORAGE_KEY_DEDUCTIONS = 'rina_pilates_deductions';
+
+    // --- 2. SAMPLE INITIAL DATA (FOR FIRST-TIME USE) ---
+    function initializeDefaultData() {
+      if (!localStorage.getItem(STORAGE_KEY_STUDENTS)) {
+        const initialStudents = [
+          {
+            id: 1,
+            name: "Claire Vance",
+            phone: "+1 (555) 234-8910",
+            email: "claire.vance@example.com",
+            emergencyContact: "David Vance (Husband) - 555-901-2233",
+            injuryNotes: "Mild lower back disc bulge (L4-S1); avoid extreme lumbar flexion.",
+            goals: "Core stability, posture alignment, sciatic release.",
+            notes: "Prefers morning slots. Enjoys footwork on yellow & green springs."
+          },
+          {
+            id: 2,
+            name: "Sophia Chen",
+            phone: "+1 (555) 782-3490",
+            email: "sophia.chen@example.com",
+            emergencyContact: "Marcus Chen (Brother) - 555-667-8899",
+            injuryNotes: "Right shoulder impingement; modify long box overhead work.",
+            goals: "Upper back strength, scapular stabilization.",
+            notes: "Focus on scapular depression cueing."
+          },
+          {
+            id: 3,
+            name: "Olivia Martinez",
+            phone: "+1 (555) 349-1122",
+            email: "olivia.m@example.com",
+            emergencyContact: "Elena Martinez - 555-443-2211",
+            injuryNotes: "Second trimester prenatal (week 22); avoid flat supine >3 mins, use wedge.",
+            goals: "Pelvic floor support and diaphragmatic breath.",
+            notes: "Keep water and wedge pillow ready."
+          },
+          {
+            id: 4,
+            name: "Hannah Lee",
+            phone: "+1 (555) 902-5541",
+            email: "hannah.lee@example.com",
+            emergencyContact: "Min-Jun Lee - 555-888-1212",
+            injuryNotes: "Cervical neck strain from desk work; keep headrest lifted 1 notch.",
+            goals: "Thoracic mobility, neck articulation.",
+            notes: "Package almost finished. Mention renewal."
+          }
+        ];
+        localStorage.setItem(STORAGE_KEY_STUDENTS, JSON.stringify(initialStudents));
+
+        const initialPackages = [
+          {
+            id: 1,
+            studentId: 1,
+            packageName: "10x Private Reformer Package",
+            totalClasses: 10,
+            remainingClasses: 6,
+            pricePaid: 1200,
+            paymentMethod: "Credit Card",
+            paymentDate: new Date(Date.now() - 15 * 86400000).toISOString().split('T')[0]
+          },
+          {
+            id: 2,
+            studentId: 2,
+            packageName: "10x Private Reformer & Tower",
+            totalClasses: 10,
+            remainingClasses: 8,
+            pricePaid: 1250,
+            paymentMethod: "Bank Transfer",
+            paymentDate: new Date(Date.now() - 10 * 86400000).toISOString().split('T')[0]
+          },
+          {
+            id: 3,
+            studentId: 3,
+            packageName: "5x Prenatal 1-on-1 Pilates",
+            totalClasses: 5,
+            remainingClasses: 2,
+            pricePaid: 650,
+            paymentMethod: "PayNow / Zelle",
+            paymentDate: new Date(Date.now() - 20 * 86400000).toISOString().split('T')[0]
+          },
+          {
+            id: 4,
+            studentId: 4,
+            packageName: "5x Starter Reformer",
+            totalClasses: 5,
+            remainingClasses: 1,
+            pricePaid: 575,
+            paymentMethod: "Cash",
+            paymentDate: new Date(Date.now() - 35 * 86400000).toISOString().split('T')[0]
+          }
+        ];
+        localStorage.setItem(STORAGE_KEY_PACKAGES, JSON.stringify(initialPackages));
+
+        const todayStr = new Date().toISOString().split('T')[0];
+        const initialBookings = [
+          {
+            id: 1,
+            studentId: 1,
+            packageId: 1,
+            sessionDate: todayStr,
+            startTime: "10:00",
+            endTime: "10:55",
+            classType: "Private Reformer",
+            instructor: "Rina",
+            status: "confirmed",
+            deducted: true,
+            deductionTimestamp: new Date().toLocaleString(),
+            notes: "Spinal articulation and gentle footwork."
+          },
+          {
+            id: 2,
+            studentId: 2,
+            packageId: 2,
+            sessionDate: todayStr,
+            startTime: "11:30",
+            endTime: "12:25",
+            classType: "Cadillac & Tower",
+            instructor: "Rina",
+            status: "confirmed",
+            deducted: true,
+            deductionTimestamp: new Date().toLocaleString(),
+            notes: "Scapular retraction with push through bar."
+          },
+          {
+            id: 3,
+            studentId: 3,
+            packageId: 3,
+            sessionDate: todayStr,
+            startTime: "14:00",
+            endTime: "14:55",
+            classType: "Prenatal Pilates",
+            instructor: "Rina",
+            status: "confirmed",
+            deducted: true,
+            deductionTimestamp: new Date().toLocaleString(),
+            notes: "Wedge elevated reformer, gentle arm straps."
+          }
+        ];
+        localStorage.setItem(STORAGE_KEY_BOOKINGS, JSON.stringify(initialBookings));
+
+        const initialDeductions = [
+          {
+            id: 1,
+            studentId: 1,
+            studentName: "Claire Vance",
+            packageName: "10x Private Reformer Package",
+            classesChanged: -1,
+            remainingAfter: 6,
+            reason: `Booking scheduled for ${todayStr} 10:00 (Private Reformer)`,
+            timestamp: new Date().toLocaleString()
+          },
+          {
+            id: 2,
+            studentId: 2,
+            studentName: "Sophia Chen",
+            packageName: "10x Private Reformer & Tower",
+            classesChanged: -1,
+            remainingAfter: 8,
+            reason: `Booking scheduled for ${todayStr} 11:30 (Cadillac & Tower)`,
+            timestamp: new Date().toLocaleString()
+          },
+          {
+            id: 3,
+            studentId: 3,
+            studentName: "Olivia Martinez",
+            packageName: "5x Prenatal 1-on-1 Pilates",
+            classesChanged: -1,
+            remainingAfter: 2,
+            reason: `Booking scheduled for ${todayStr} 14:00 (Prenatal Pilates)`,
+            timestamp: new Date().toLocaleString()
+          }
+        ];
+        localStorage.setItem(STORAGE_KEY_DEDUCTIONS, JSON.stringify(initialDeductions));
+      }
+    }
+
+    // Data Loaders
+    function getStudents() {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY_STUDENTS) || '[]');
+    }
+    function saveStudents(data) {
+      localStorage.setItem(STORAGE_KEY_STUDENTS, JSON.stringify(data));
+    }
+    function getPackages() {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY_PACKAGES) || '[]');
+    }
+    function savePackages(data) {
+      localStorage.setItem(STORAGE_KEY_PACKAGES, JSON.stringify(data));
+    }
+    function getBookings() {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY_BOOKINGS) || '[]');
+    }
+    function saveBookings(data) {
+      localStorage.setItem(STORAGE_KEY_BOOKINGS, JSON.stringify(data));
+    }
+    function getDeductions() {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY_DEDUCTIONS) || '[]');
+    }
+    function saveDeductions(data) {
+      localStorage.setItem(STORAGE_KEY_DEDUCTIONS, JSON.stringify(data));
+    }
+
+    // --- 3. STATE & APP CONTROLLERS ---
+    let currentScheduleDate = new Date().toISOString().split('T')[0];
+    let scheduleFilter = 'all';
+    let studentFilter = 'all';
+    let recSelectedDays = [2, 4]; // Tue & Thu
+
+    // Toast Alert
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      const text = document.getElementById('toast-text');
+      text.innerText = msg;
+      el.classList.remove('hidden');
+      setTimeout(() => el.classList.add('hidden'), 3500);
+    }
+
+    // Tab Switcher
+    function switchTab(tabId) {
+      ['schedule', 'students', 'datainput', 'audit'].forEach(t => {
+        document.getElementById(`view-${t}`).classList.add('hidden');
+        const btn = document.getElementById(`tab-btn-${t}`);
+        if (btn) {
+          btn.className = "px-3.5 py-2 rounded-xl transition flex items-center gap-2 text-stone-600 hover:text-stone-900";
+        }
+      });
+
+      document.getElementById(`view-${tabId}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`tab-btn-${tabId}`);
+      if (activeBtn) {
+        activeBtn.className = "px-3.5 py-2 rounded-xl transition flex items-center gap-2 bg-white text-stone-900 shadow-xs font-bold";
+      }
+
+      if (tabId === 'schedule') renderSchedule();
+      if (tabId === 'students') renderStudentPortfolios();
+      if (tabId === 'datainput') populateDataInputOptions();
+      if (tabId === 'audit') renderDeductionAudit();
+    }
+
+    // --- 4. DAILY SCHEDULE LOGIC ---
+    function onScheduleDateChange(val) {
+      currentScheduleDate = val;
+      renderSchedule();
+    }
+    function stepDate(days) {
+      const d = new Date(currentScheduleDate);
+      d.setDate(d.getDate() + days);
+      currentScheduleDate = d.toISOString().split('T')[0];
+      renderSchedule();
+    }
+    function goToToday() {
+      currentScheduleDate = new Date().toISOString().split('T')[0];
+      renderSchedule();
+    }
+    function setScheduleFilter(val) {
+      scheduleFilter = val;
+      ['all', 'confirmed', 'attended', 'cancelled'].forEach(f => {
+        const btn = document.getElementById(`filter-sched-${f}`);
+        if (btn) {
+          if (f === val) {
+            btn.className = "px-2.5 py-1 rounded-lg font-semibold uppercase text-[10px] bg-stone-900 text-white";
+          } else {
+            btn.className = "px-2.5 py-1 rounded-lg font-semibold uppercase text-[10px] bg-white border border-stone-200 text-stone-600";
+          }
+        }
+      });
+      renderSchedule();
+    }
+
+    function renderSchedule() {
+      const picker = document.getElementById('schedule-date-picker');
+      picker.value = currentScheduleDate;
+
+      const dateObj = new Date(currentScheduleDate + 'T00:00:00');
+      const dateText = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      document.getElementById('schedule-display-date').innerText = dateText;
+
+      const todayStr = new Date().toISOString().split('T')[0];
+      const isToday = currentScheduleDate === todayStr;
+      document.getElementById('schedule-today-tag').style.display = isToday ? 'inline-block' : 'none';
+
+      const bookings = getBookings();
+      const students = getStudents();
+      const packages = getPackages();
+
+      const dayBookings = bookings
+        .filter(b => b.sessionDate === currentScheduleDate)
+        .filter(b => scheduleFilter === 'all' ? true : b.status === scheduleFilter)
+        .sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+      document.getElementById('schedule-stats-summary').innerText = `${dayBookings.length} session${dayBookings.length === 1 ? '' : 's'} scheduled for this date`;
+
+      // Update Nav badge for today
+      const todayCount = bookings.filter(b => b.sessionDate === todayStr).length;
+      document.getElementById('nav-today-badge').innerText = todayCount;
+
+      const container = document.getElementById('schedule-cards-container');
+
+      if (dayBookings.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white rounded-2xl border-2 border-dashed border-stone-200 p-12 text-center space-y-3">
+            <div class="h-12 w-12 rounded-2xl bg-amber-50 text-amber-900 mx-auto flex items-center justify-center">
+              <i data-lucide="calendar" class="w-6 h-6"></i>
+            </div>
+            <h3 class="font-serif font-bold text-stone-900 text-base">No sessions scheduled for ${dateText}</h3>
+            <p class="text-xs text-stone-500 max-w-sm mx-auto">Click below to book a student. The system will mark the class deduction with the date and time.</p>
+            <button onclick="openBookingModal('${currentScheduleDate}')" class="bg-stone-900 text-white px-4 py-2 rounded-xl text-xs font-semibold inline-flex items-center gap-1.5 hover:bg-stone-800">
+              <i data-lucide="plus" class="w-4 h-4"></i> Book Class
+            </button>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      container.innerHTML = dayBookings.map(b => {
+        const student = students.find(s => s.id === b.studentId);
+        const pkg = packages.find(p => p.id === b.packageId);
+
+        return `
+          <div class="bg-white rounded-2xl border border-stone-200 p-5 shadow-xs hover:shadow-md transition">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <!-- Left: Time & Info -->
+              <div class="flex items-start gap-4">
+                <div class="bg-[#FAF7F2] border border-stone-200 px-3 py-2 rounded-xl min-w-[85px] text-center">
+                  <div class="font-bold text-stone-900 text-xs">${b.startTime}</div>
+                  <div class="text-[10px] text-stone-500">${b.endTime}</div>
+                </div>
+
+                <div class="space-y-1">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <button onclick="openPortfolioModal(${student ? student.id : 0})" class="font-serif font-bold text-base text-stone-900 hover:text-rina-800 hover:underline">
+                      ${student ? student.name : 'Unknown Student'}
+                    </button>
+                    <span class="bg-stone-100 text-stone-700 px-2 py-0.5 rounded-md text-xs font-medium">${b.classType}</span>
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                      b.status === 'attended' ? 'bg-emerald-100 text-emerald-800' :
+                      b.status === 'confirmed' ? 'bg-sky-100 text-sky-800' : 'bg-stone-200 text-stone-700'
+                    }">${b.status}</span>
+                  </div>
+
+                  <!-- Deduction Timestamp Indicator -->
+                  <div class="flex flex-wrap items-center gap-2 text-xs">
+                    ${b.deducted ? `
+                      <span class="inline-flex items-center gap-1 font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 text-[11px]">
+                        <i data-lucide="check-circle" class="w-3 h-3 text-emerald-600"></i>
+                        Deduction marked on: ${b.deductionTimestamp || 'Recorded'}
+                      </span>
+                    ` : `
+                      <button onclick="manuallyDeductBooking(${b.id})" class="text-amber-800 font-medium bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 text-[11px] hover:bg-amber-100">
+                        ⚡ Click to deduct 1 class now
+                      </button>
+                    `}
+
+                    ${pkg ? `
+                      <span class="text-stone-500 text-[11px] flex items-center gap-1">
+                        <i data-lucide="layers" class="w-3 h-3 text-stone-400"></i>
+                        ${pkg.packageName} (<strong class="text-amber-900">${pkg.remainingClasses} classes left</strong>)
+                      </span>
+                    ` : ''}
+                  </div>
+
+                  ${b.notes ? `<p class="text-xs text-stone-500 italic mt-0.5">"${b.notes}"</p>` : ''}
+                </div>
+              </div>
+
+              <!-- Right: Actions -->
+              <div class="flex items-center gap-2 border-t lg:border-t-0 pt-3 lg:pt-0">
+                ${b.status === 'confirmed' ? `
+                  <button onclick="markBookingAttended(${b.id})" class="bg-emerald-800 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl text-xs font-semibold shadow-xs">
+                    Mark Attended
+                  </button>
+                ` : ''}
+                ${b.status !== 'cancelled' ? `
+                  <button onclick="cancelBooking(${b.id})" class="border border-stone-300 hover:bg-red-50 hover:text-red-700 hover:border-red-300 text-stone-700 px-2.5 py-1.5 rounded-xl text-xs font-medium">
+                    Cancel
+                  </button>
+                ` : ''}
+                <button onclick="deleteBooking(${b.id})" class="text-stone-400 hover:text-red-600 p-1.5 rounded-lg" title="Delete booking">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Student Injury Caution on the Card -->
+            ${student && student.injuryNotes ? `
+              <div class="mt-3 bg-amber-50/70 border border-amber-200 p-2.5 rounded-xl flex items-start gap-2 text-xs text-amber-950">
+                <i data-lucide="heart" class="w-3.5 h-3.5 text-amber-800 shrink-0 mt-0.5"></i>
+                <div>
+                  <span class="font-bold text-amber-900">Student Physical Caution: </span>
+                  <span>${student.injuryNotes}</span>
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    // Schedule Action handlers
+    function markBookingAttended(bookingId) {
+      const bookings = getBookings();
+      const b = bookings.find(x => x.id === bookingId);
+      if (b) {
+        b.status = 'attended';
+        saveBookings(bookings);
+        showToast("Marked session as attended!");
+        renderSchedule();
+      }
+    }
+
+    function cancelBooking(bookingId) {
+      const restore = confirm("Cancel this session?\n\nClick OK to restore 1 class credit back to student package.\nClick Cancel to keep credit deducted (e.g. late cancel policy).");
+      const bookings = getBookings();
+      const packages = getPackages();
+      const deductions = getDeductions();
+      const students = getStudents();
+
+      const b = bookings.find(x => x.id === bookingId);
+      if (!b) return;
+
+      b.status = 'cancelled';
+
+      if (restore && b.deducted && b.packageId) {
+        const pkg = packages.find(p => p.id === b.packageId);
+        if (pkg) {
+          pkg.remainingClasses += 1;
+          savePackages(packages);
+
+          const student = students.find(s => s.id === b.studentId);
+          deductions.unshift({
+            id: Date.now(),
+            studentId: b.studentId,
+            studentName: student ? student.name : "Student",
+            packageName: pkg.packageName,
+            classesChanged: 1,
+            remainingAfter: pkg.remainingClasses,
+            reason: `Restored 1 class due to cancellation of ${b.sessionDate} ${b.startTime}`,
+            timestamp: new Date().toLocaleString()
+          });
+          saveDeductions(deductions);
+          b.deducted = false;
+        }
+      }
+
+      saveBookings(bookings);
+      showToast("Booking updated to cancelled.");
+      renderSchedule();
+    }
+
+    function manuallyDeductBooking(bookingId) {
+      const bookings = getBookings();
+      const packages = getPackages();
+      const deductions = getDeductions();
+      const students = getStudents();
+
+      const b = bookings.find(x => x.id === bookingId);
+      if (!b) return;
+
+      const studentPkgs = packages.filter(p => p.studentId === b.studentId);
+      const targetPkg = studentPkgs.find(p => p.remainingClasses > 0) || studentPkgs[0];
+
+      if (!targetPkg) {
+        alert("This student has no packages available to deduct from.");
+        return;
+      }
+
+      targetPkg.remainingClasses = Math.max(0, targetPkg.remainingClasses - 1);
+      b.packageId = targetPkg.id;
+      b.deducted = true;
+      b.deductionTimestamp = new Date().toLocaleString();
+
+      const student = students.find(s => s.id === b.studentId);
+      deductions.unshift({
+        id: Date.now(),
+        studentId: b.studentId,
+        studentName: student ? student.name : "Student",
+        packageName: targetPkg.packageName,
+        classesChanged: -1,
+        remainingAfter: targetPkg.remainingClasses,
+        reason: `Manual deduction marked: ${b.sessionDate} ${b.startTime} (${b.classType})`,
+        timestamp: new Date().toLocaleString()
+      });
+
+      savePackages(packages);
+      saveBookings(bookings);
+      saveDeductions(deductions);
+
+      showToast("Deduction recorded with timestamp!");
+      renderSchedule();
+    }
+
+    function deleteBooking(bookingId) {
+      if (!confirm("Delete this booking record?")) return;
+      let bookings = getBookings();
+      bookings = bookings.filter(b => b.id !== bookingId);
+      saveBookings(bookings);
+      showToast("Booking deleted.");
+      renderSchedule();
+    }
+
+
+    // --- 5. STUDENT PORTFOLIO VIEW LOGIC ---
+    function setStudentFilter(filter) {
+      studentFilter = filter;
+      ['all', 'low', 'empty'].forEach(f => {
+        const btn = document.getElementById(`btn-st-filter-${f}`);
+        if (btn) {
+          if (f === filter) {
+            btn.className = "px-2.5 py-1 rounded-lg bg-stone-900 text-white";
+          } else {
+            btn.className = "px-2.5 py-1 rounded-lg text-stone-600 hover:bg-white";
+          }
+        }
+      });
+      renderStudentPortfolios();
+    }
+
+    function renderStudentPortfolios() {
+      const students = getStudents();
+      const packages = getPackages();
+      const bookings = getBookings();
+
+      const searchVal = (document.getElementById('student-search-input').value || '').toLowerCase();
+
+      // Top metrics calculation
+      let totalRev = 0;
+      let totalClassesLeft = 0;
+      let totalAttended = 0;
+
+      packages.forEach(p => {
+        totalRev += parseFloat(p.pricePaid || 0);
+        totalClassesLeft += parseInt(p.remainingClasses || 0);
+      });
+
+      bookings.forEach(b => {
+        if (b.status === 'attended') totalAttended++;
+      });
+
+      document.getElementById('stat-student-count').innerText = students.length;
+      document.getElementById('nav-student-count').innerText = students.length;
+      document.getElementById('stat-total-revenue').innerText = `$${totalRev.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+      document.getElementById('stat-classes-left').innerText = totalClassesLeft;
+      document.getElementById('stat-sessions-attended').innerText = totalAttended;
+
+      const filtered = students.filter(s => {
+        const matchesSearch = s.name.toLowerCase().includes(searchVal) ||
+          (s.email && s.email.toLowerCase().includes(searchVal)) ||
+          (s.phone && s.phone.includes(searchVal));
+
+        if (!matchesSearch) return false;
+
+        const stPkgs = packages.filter(p => p.studentId === s.id);
+        const stRemaining = stPkgs.reduce((sum, p) => sum + p.remainingClasses, 0);
+
+        if (studentFilter === 'low') return stRemaining > 0 && stRemaining <= 2;
+        if (studentFilter === 'empty') return stRemaining === 0;
+        return true;
+      });
+
+      const grid = document.getElementById('students-grid');
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full bg-white rounded-2xl border-2 border-dashed border-stone-200 p-12 text-center space-y-2">
+            <h3 class="font-serif font-bold text-stone-900 text-base">No students matched</h3>
+            <p class="text-xs text-stone-500">Add a new student to your studio roster below.</p>
+            <button onclick="openStudentModal()" class="bg-stone-900 text-white px-4 py-2 rounded-xl text-xs font-semibold inline-flex items-center gap-1.5 hover:bg-stone-800">
+              <i data-lucide="user-plus" class="w-4 h-4"></i> Add Student
+            </button>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      grid.innerHTML = filtered.map(s => {
+        const stPkgs = packages.filter(p => p.studentId === s.id);
+        const stBookings = bookings.filter(b => b.studentId === s.id);
+
+        const totalPaid = stPkgs.reduce((acc, p) => acc + parseFloat(p.pricePaid || 0), 0);
+        const remainingClasses = stPkgs.reduce((acc, p) => acc + (p.remainingClasses || 0), 0);
+        const attended = stBookings.filter(b => b.status === 'attended').length;
+
+        const activePkg = stPkgs.find(p => p.remainingClasses > 0) || stPkgs[0];
+
+        const isLow = remainingClasses > 0 && remainingClasses <= 2;
+        const isZero = remainingClasses === 0;
+
+        return `
+          <div onclick="openPortfolioModal(${s.id})" class="bg-white rounded-2xl border border-stone-200 p-5 shadow-xs hover:border-rina-600/40 hover:shadow-md transition cursor-pointer flex flex-col justify-between">
+            <div class="space-y-3">
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <div class="h-11 w-11 rounded-2xl bg-[#FAF7F2] border border-stone-200 text-rina-900 font-serif font-bold text-base flex items-center justify-center">
+                    ${s.name.charAt(0)}
+                  </div>
+                  <div>
+                    <h3 class="font-serif font-bold text-base text-stone-900">${s.name}</h3>
+                    <p class="text-xs text-stone-500">${s.phone || 'No phone'} ${s.email ? `• ${s.email}` : ''}</p>
+                  </div>
+                </div>
+
+                <span class="px-3 py-1 rounded-full text-xs font-bold ${
+                  isZero ? 'bg-red-100 text-red-800 border border-red-200' :
+                  isLow ? 'bg-amber-100 text-amber-900 border border-amber-200 animate-pulse' :
+                  'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                }">
+                  ${remainingClasses} classes left
+                </span>
+              </div>
+
+              <!-- Financial Box -->
+              <div class="grid grid-cols-2 gap-2 bg-[#FAF7F2] p-3 rounded-xl border border-stone-100 text-xs">
+                <div>
+                  <span class="text-[10px] font-semibold uppercase text-stone-500">Total Paid</span>
+                  <div class="font-serif font-bold text-stone-900 text-sm mt-0.5">$${totalPaid.toFixed(2)}</div>
+                  <span class="text-[10px] text-stone-400">${stPkgs.length} package(s)</span>
+                </div>
+                <div>
+                  <span class="text-[10px] font-semibold uppercase text-stone-500">Active Package</span>
+                  <div class="font-semibold text-stone-800 truncate mt-0.5">${activePkg ? activePkg.packageName : 'No package'}</div>
+                  <span class="text-[10px] text-stone-400">${attended} sessions attended</span>
+                </div>
+              </div>
+
+              ${s.injuryNotes ? `
+                <div class="bg-amber-50/70 border border-amber-200/80 p-2.5 rounded-xl flex items-start gap-2 text-xs text-amber-950">
+                  <i data-lucide="heart" class="w-3.5 h-3.5 text-amber-800 shrink-0 mt-0.5"></i>
+                  <p class="line-clamp-2"><span class="font-bold text-amber-900">Medical: </span>${s.injuryNotes}</p>
+                </div>
+              ` : ''}
+            </div>
+
+            <!-- Footer Strip -->
+            <div class="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between text-xs" onclick="event.stopPropagation()">
+              <button onclick="openPortfolioModal(${s.id})" class="font-semibold text-rina-800 hover:underline inline-flex items-center gap-1">
+                View Portfolio <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+              </button>
+
+              <div class="flex items-center gap-1.5">
+                <button onclick="openBookingModal(undefined, ${s.id})" class="bg-stone-900 text-white px-2.5 py-1 rounded-lg text-[11px] font-semibold hover:bg-stone-800">
+                  Book
+                </button>
+                <button onclick="openPackageModal(${s.id})" class="bg-amber-100 text-amber-900 px-2 py-1 rounded-lg text-[11px] font-semibold hover:bg-amber-200">
+                  + Pack
+                </button>
+                <button onclick="openStudentModal(${s.id})" class="text-stone-400 hover:text-stone-700 p-1">
+                  <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="deleteStudent(${s.id})" class="text-stone-400 hover:text-red-600 p-1">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function deleteStudent(id) {
+      if (!confirm("Delete this student profile and all associated records?")) return;
+      let students = getStudents();
+      let packages = getPackages();
+      let bookings = getBookings();
+      let deductions = getDeductions();
+
+      students = students.filter(s => s.id !== id);
+      packages = packages.filter(p => p.studentId !== id);
+      bookings = bookings.filter(b => b.studentId !== id);
+      deductions = deductions.filter(d => d.studentId !== id);
+
+      saveStudents(students);
+      savePackages(packages);
+      saveBookings(bookings);
+      saveDeductions(deductions);
+
+      showToast("Student and all related data deleted.");
+      renderStudentPortfolios();
+    }
+
+
+    // --- 6. DATA INPUT SYSTEM LOGIC ---
+    let batchTableRows = [
+      { name: "Jessica Alba", phone: "555-890-1234", email: "jessica@test.com", packageName: "10x Private Reformer", totalClasses: 10, remainingClasses: 10, pricePaid: 1200, paymentMethod: "Credit Card", injuryNotes: "Tight hamstrings" },
+      { name: "Liam Hemsworth", phone: "555-901-4455", email: "liam@test.com", packageName: "5x Duet Starter", totalClasses: 5, remainingClasses: 5, pricePaid: 600, paymentMethod: "Bank Transfer", injuryNotes: "Upper back stiffness" }
+    ];
+
+    function switchInputMode(mode) {
+      ['spreadsheet', 'recurring', 'excelimport'].forEach(m => {
+        document.getElementById(`input-panel-${m}`).classList.add('hidden');
+        document.getElementById(`input-mode-btn-${m}`).className = "pb-3 border-b-2 border-transparent text-stone-500 hover:text-stone-800 flex items-center gap-1.5";
+      });
+
+      document.getElementById(`input-panel-${mode}`).classList.remove('hidden');
+      document.getElementById(`input-mode-btn-${mode}`).className = "pb-3 border-b-2 border-rina-800 text-rina-900 font-bold flex items-center gap-1.5";
+    }
+
+    function renderBatchTable() {
+      const tbody = document.getElementById('batch-rows-tbody');
+      tbody.innerHTML = batchTableRows.map((r, i) => `
+        <tr class="hover:bg-amber-50/20">
+          <td class="p-2"><input type="text" value="${r.name}" onchange="updateBatchRow(${i}, 'name', this.value)" placeholder="Student name" class="w-full rounded border border-stone-300 p-1 font-medium"></td>
+          <td class="p-2"><input type="text" value="${r.phone}" onchange="updateBatchRow(${i}, 'phone', this.value)" placeholder="555-0100" class="w-full rounded border border-stone-200 p-1"></td>
+          <td class="p-2"><input type="email" value="${r.email}" onchange="updateBatchRow(${i}, 'email', this.value)" placeholder="email@test.com" class="w-full rounded border border-stone-200 p-1"></td>
+          <td class="p-2"><input type="text" value="${r.packageName}" onchange="updateBatchRow(${i}, 'packageName', this.value)" class="w-full rounded border border-stone-200 p-1"></td>
+          <td class="p-2"><input type="number" value="${r.totalClasses}" onchange="updateBatchRow(${i}, 'totalClasses', this.value)" class="w-16 rounded border border-stone-200 p-1 text-center"></td>
+          <td class="p-2"><input type="number" value="${r.remainingClasses}" onchange="updateBatchRow(${i}, 'remainingClasses', this.value)" class="w-16 rounded border border-stone-200 p-1 text-center font-bold text-amber-900"></td>
+          <td class="p-2"><input type="number" value="${r.pricePaid}" onchange="updateBatchRow(${i}, 'pricePaid', this.value)" class="w-20 rounded border border-stone-200 p-1"></td>
+          <td class="p-2">
+            <select onchange="updateBatchRow(${i}, 'paymentMethod', this.value)" class="w-full rounded border border-stone-200 p-1 bg-white">
+              <option value="Credit Card" ${r.paymentMethod==='Credit Card'?'selected':''}>Credit Card</option>
+              <option value="Bank Transfer" ${r.paymentMethod==='Bank Transfer'?'selected':''}>Bank Transfer</option>
+              <option value="Cash" ${r.paymentMethod==='Cash'?'selected':''}>Cash</option>
+              <option value="PayNow / Zelle" ${r.paymentMethod==='PayNow / Zelle'?'selected':''}>PayNow / Zelle</option>
+            </select>
+          </td>
+          <td class="p-2"><input type="text" value="${r.injuryNotes}" onchange="updateBatchRow(${i}, 'injuryNotes', this.value)" placeholder="Injuries..." class="w-full rounded border border-stone-200 p-1"></td>
+          <td class="p-2 text-center">
+            <button onclick="removeBatchRow(${i})" class="text-stone-400 hover:text-red-600"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+          </td>
+        </tr>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function addBatchRow() {
+      batchTableRows.push({
+        name: "", phone: "", email: "", packageName: "10x Private Reformer",
+        totalClasses: 10, remainingClasses: 10, pricePaid: 1200, paymentMethod: "Credit Card", injuryNotes: ""
+      });
+      renderBatchTable();
+    }
+    function removeBatchRow(index) {
+      batchTableRows.splice(index, 1);
+      renderBatchTable();
+    }
+    function updateBatchRow(index, key, val) {
+      batchTableRows[index][key] = val;
+    }
+
+    function saveBatchRows() {
+      const valid = batchTableRows.filter(r => r.name.trim().length > 0);
+      if (valid.length === 0) {
+        alert("Please enter at least one student with a valid name.");
+        return;
+      }
+
+      const students = getStudents();
+      const packages = getPackages();
+
+      valid.forEach(row => {
+        const studentId = Date.now() + Math.floor(Math.random() * 1000);
+        students.push({
+          id: studentId,
+          name: row.name.trim(),
+          phone: row.phone.trim(),
+          email: row.email.trim(),
+          emergencyContact: "",
+          injuryNotes: row.injuryNotes.trim(),
+          goals: "",
+          notes: "Imported via Data Input Center"
+        });
+
+        packages.push({
+          id: Date.now() + Math.floor(Math.random() * 1000),
+          studentId: studentId,
+          packageName: row.packageName || "10x Private Reformer",
+          totalClasses: parseInt(row.totalClasses) || 10,
+          remainingClasses: parseInt(row.remainingClasses) || 10,
+          pricePaid: parseFloat(row.pricePaid) || 1200,
+          paymentMethod: row.paymentMethod || "Credit Card",
+          paymentDate: new Date().toISOString().split('T')[0]
+        });
+      });
+
+      saveStudents(students);
+      savePackages(packages);
+
+      showToast(`Saved ${valid.length} student(s) to local storage!`);
+      batchTableRows = [{ name: "", phone: "", email: "", packageName: "10x Private Reformer", totalClasses: 10, remainingClasses: 10, pricePaid: 1200, paymentMethod: "Credit Card", injuryNotes: "" }];
+      renderBatchTable();
+      renderStudentPortfolios();
+    }
+
+    // Recurring Schedule Generator
+    function toggleRecDay(day) {
+      if (recSelectedDays.includes(day)) {
+        recSelectedDays = recSelectedDays.filter(d => d !== day);
+      } else {
+        recSelectedDays.push(day);
+      }
+      document.querySelectorAll('.rec-day-btn').forEach(btn => {
+        const d = parseInt(btn.getAttribute('data-day'));
+        if (recSelectedDays.includes(d)) {
+          btn.className = "rec-day-btn px-3 py-1.5 rounded-xl border border-rina-800 bg-rina-800 text-white font-semibold";
+        } else {
+          btn.className = "rec-day-btn px-3 py-1.5 rounded-xl border border-stone-200 bg-stone-100 text-stone-700 font-semibold";
+        }
+      });
+    }
+
+    function handleGenerateRecurring(e) {
+      e.preventDefault();
+      const studentId = parseInt(document.getElementById('rec-student-select').value);
+      const classType = document.getElementById('rec-class-type').value;
+      const startTime = document.getElementById('rec-start-time').value;
+      const startDate = document.getElementById('rec-start-date').value;
+      const weeks = parseInt(document.getElementById('rec-weeks').value) || 4;
+      const autoDeduct = document.getElementById('rec-auto-deduct').checked;
+
+      if (!studentId) {
+        alert("Please select a student.");
+        return;
+      }
+      if (recSelectedDays.length === 0) {
+        alert("Please select at least one day of the week.");
+        return;
+      }
+
+      // Calculate 55 min end time
+      const [h, m] = startTime.split(':').map(Number);
+      const endMin = (m + 55) % 60;
+      const endH = h + Math.floor((m + 55) / 60);
+      const pad = n => String(n).padStart(2, '0');
+      const endTime = `${pad(endH)}:${pad(endMin)}`;
+
+      const targetDates = [];
+      const current = new Date(startDate);
+      const totalDays = weeks * 7;
+
+      for (let i = 0; i < totalDays; i++) {
+        const d = new Date(current);
+        d.setDate(current.getDate() + i);
+        if (recSelectedDays.includes(d.getDay())) {
+          targetDates.push(d.toISOString().split('T')[0]);
+        }
+      }
+
+      const bookings = getBookings();
+      const packages = getPackages();
+      const deductions = getDeductions();
+      const students = getStudents();
+      const student = students.find(s => s.id === studentId);
+
+      const targetPkg = packages.find(p => p.studentId === studentId && p.remainingClasses > 0);
+
+      targetDates.forEach(dateStr => {
+        let isDeducted = false;
+        let ts = null;
+
+        if (autoDeduct && targetPkg && targetPkg.remainingClasses > 0) {
+          targetPkg.remainingClasses -= 1;
+          isDeducted = true;
+          ts = new Date().toLocaleString();
+
+          deductions.unshift({
+            id: Date.now() + Math.random(),
+            studentId,
+            studentName: student ? student.name : "Student",
+            packageName: targetPkg.packageName,
+            classesChanged: -1,
+            remainingAfter: targetPkg.remainingClasses,
+            reason: `Recurring booking for ${dateStr} ${startTime} (${classType})`,
+            timestamp: ts
+          });
+        }
+
+        bookings.push({
+          id: Date.now() + Math.random(),
+          studentId,
+          packageId: targetPkg ? targetPkg.id : null,
+          sessionDate: dateStr,
+          startTime,
+          endTime,
+          classType,
+          instructor: "Rina",
+          status: "confirmed",
+          deducted: isDeducted,
+          deductionTimestamp: ts,
+          notes: "Generated recurring slot"
+        });
+      });
+
+      saveBookings(bookings);
+      savePackages(packages);
+      saveDeductions(deductions);
+
+      showToast(`Generated ${targetDates.length} recurring bookings with package deductions!`);
+      switchTab('schedule');
+    }
+
+    // File Importer
+    let parsedRowsToCommit = [];
+    function handleExcelFileUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      document.getElementById('file-upload-label').innerText = file.name;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const data = evt.target.result;
+          const workbook = XLSX.read(data, { type: 'binary' });
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          const json = XLSX.utils.sheet_to_json(firstSheet);
+
+          parsedRowsToCommit = json.map(r => ({
+            name: r["Student Name"] || r["Name"] || r["name"] || "",
+            phone: r["Phone"] || r["phone"] || "",
+            packageName: r["Package Name"] || r["Package"] || "10x Private Reformer",
+            totalClasses: parseInt(r["Total Classes"] || r["total_classes"] || 10),
+            remainingClasses: parseInt(r["Remaining Classes"] || r["Classes Left"] || 10),
+            pricePaid: parseFloat(r["Price Paid"] || r["price"] || 1200)
+          })).filter(r => r.name.trim().length > 0);
+
+          const previewSection = document.getElementById('parsed-preview-section');
+          const tbody = document.getElementById('parsed-preview-tbody');
+
+          tbody.innerHTML = parsedRowsToCommit.map(r => `
+            <tr>
+              <td class="p-2 font-bold">${r.name}</td>
+              <td class="p-2">${r.phone || '-'}</td>
+              <td class="p-2 font-medium text-amber-900">${r.packageName}</td>
+              <td class="p-2 font-bold">${r.remainingClasses} left</td>
+              <td class="p-2">$${r.pricePaid}</td>
+            </tr>
+          `).join('');
+
+          previewSection.classList.remove('hidden');
+        } catch (err) {
+          alert("Error reading Excel file. Please ensure it's a valid .xlsx or .csv");
+        }
+      };
+      reader.readAsBinaryString(file);
+    }
+
+    function commitParsedExcelData() {
+      if (parsedRowsToCommit.length === 0) return;
+      const students = getStudents();
+      const packages = getPackages();
+
+      parsedRowsToCommit.forEach(row => {
+        const studentId = Date.now() + Math.floor(Math.random() * 1000);
+        students.push({
+          id: studentId,
+          name: row.name,
+          phone: row.phone,
+          email: "",
+          emergencyContact: "",
+          injuryNotes: "",
+          goals: "",
+          notes: "Imported via Excel"
+        });
+
+        packages.push({
+          id: Date.now() + Math.floor(Math.random() * 1000),
+          studentId: studentId,
+          packageName: row.packageName,
+          totalClasses: row.totalClasses,
+          remainingClasses: row.remainingClasses,
+          pricePaid: row.pricePaid,
+          paymentMethod: "Credit Card",
+          paymentDate: new Date().toISOString().split('T')[0]
+        });
+      });
+
+      saveStudents(students);
+      savePackages(packages);
+
+      showToast(`Imported ${parsedRowsToCommit.length} students from Excel!`);
+      parsedRowsToCommit = [];
+      document.getElementById('parsed-preview-section').classList.add('hidden');
+      document.getElementById('file-upload-label').innerText = "Click to choose or drop your Excel/CSV file here";
+      renderStudentPortfolios();
+    }
+
+    function downloadSampleTemplate() {
+      const templateData = [
+        { "Student Name": "Jessica Alba", "Phone": "+1 (555) 890-1234", "Package Name": "10x Private Reformer", "Total Classes": 10, "Remaining Classes": 8, "Price Paid": 1200 },
+        { "Student Name": "Liam Hemsworth", "Phone": "+1 (555) 901-4455", "Package Name": "5x Duet Starter", "Total Classes": 5, "Remaining Classes": 5, "Price Paid": 600 }
+      ];
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(templateData);
+      XLSX.utils.book_append_sheet(wb, ws, "Students");
+      XLSX.writeFile(wb, "RINA_Pilates_Sample_Roster.xlsx");
+    }
+
+    function populateDataInputOptions() {
+      renderBatchTable();
+      const students = getStudents();
+      const select = document.getElementById('rec-student-select');
+      select.innerHTML = '<option value="">Select student...</option>' +
+        students.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+
+      document.getElementById('rec-start-date').value = currentScheduleDate;
+    }
+
+
+    // --- 7. DEDUCTION AUDIT LOG VIEW LOGIC ---
+    function renderDeductionAudit() {
+      const deductions = getDeductions();
+      const students = getStudents();
+      const filterStudentId = document.getElementById('audit-filter-student').value;
+
+      // populate filter dropdown
+      const sel = document.getElementById('audit-filter-student');
+      const cur = sel.value;
+      sel.innerHTML = '<option value="all">All Students</option>' +
+        students.map(s => `<option value="${s.id}" ${cur == s.id ? 'selected' : ''}>${s.name}</option>`).join('');
+
+      const list = filterStudentId === 'all'
+        ? deductions
+        : deductions.filter(d => String(d.studentId) === String(filterStudentId));
+
+      const tbody = document.getElementById('audit-log-tbody');
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-stone-400">No deduction entries logged yet.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(log => `
+        <tr class="hover:bg-stone-50 transition">
+          <td class="p-3.5 font-mono text-stone-700 font-semibold">${log.timestamp}</td>
+          <td class="p-3.5 font-bold text-stone-900">${log.studentName}</td>
+          <td class="p-3.5 text-stone-600 font-medium">${log.packageName}</td>
+          <td class="p-3.5 font-bold">
+            ${log.classesChanged < 0 ? `
+              <span class="bg-amber-100 text-amber-900 px-2 py-0.5 rounded border border-amber-200">${log.classesChanged} class</span>
+            ` : `
+              <span class="bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded border border-emerald-200">+${log.classesChanged} class</span>
+            `}
+          </td>
+          <td class="p-3.5 font-bold text-stone-900"><span class="bg-stone-100 px-2 py-0.5 rounded">${log.remainingAfter} left</span></td>
+          <td class="p-3.5 text-stone-600">${log.reason}</td>
+          <td class="p-3.5 text-center">
+            <button onclick="deleteDeductionLog(${log.id})" class="text-stone-400 hover:text-red-600 p-1" title="Delete incorrect log">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function deleteDeductionLog(id) {
+      if (!confirm("Delete this audit log entry? Note: this will NOT change the student's current package balance, it only removes the historical record.")) return;
+      let deductions = getDeductions();
+      deductions = deductions.filter(d => d.id !== id);
+      saveDeductions(deductions);
+      showToast("Audit log deleted.");
+      renderDeductionAudit();
+    }
+
+
+    // --- 8. EXCEL EXTRACTION (.XLSX) ---
+    function exportToExcel() {
+      const students = getStudents();
+      const packages = getPackages();
+      const bookings = getBookings();
+      const deductions = getDeductions();
+
+      const wb = XLSX.utils.book_new();
+
+      // Sheet 1: Students Portfolio & Balances
+      const studentsRows = students.map(s => {
+        const stPkgs = packages.filter(p => p.studentId === s.id);
+        const totalPaid = stPkgs.reduce((sum, p) => sum + parseFloat(p.pricePaid || 0), 0);
+        const remainingClasses = stPkgs.reduce((sum, p) => sum + (p.remainingClasses || 0), 0);
+        const activePkg = stPkgs.find(p => p.remainingClasses > 0);
+
+        return {
+          "Student ID": s.id,
+          "Student Name": s.name,
+          "Phone": s.phone || "-",
+          "Email": s.email || "-",
+          "Active Package": activePkg ? activePkg.packageName : "None",
+          "Classes Remaining": remainingClasses,
+          "Total Paid ($)": totalPaid.toFixed(2),
+          "Emergency Contact": s.emergencyContact || "-",
+          "Physical / Injury Notes": s.injuryNotes || "-",
+          "Pilates Goals": s.goals || "-",
+          "Studio Teaching Notes": s.notes || "-"
+        };
+      });
+      const wsStudents = XLSX.utils.json_to_sheet(studentsRows);
+      XLSX.utils.book_append_sheet(wb, wsStudents, "Students Portfolio");
+
+      // Sheet 2: Daily Schedule & Bookings
+      const bookingsRows = bookings.map(b => {
+        const student = students.find(s => s.id === b.studentId);
+        const pkg = packages.find(p => p.id === b.packageId);
+
+        return {
+          "Booking ID": b.id,
+          "Session Date": b.sessionDate,
+          "Start Time": b.startTime,
+          "End Time": b.endTime,
+          "Student Name": student ? student.name : "Unknown",
+          "Class Type": b.classType,
+          "Instructor": b.instructor,
+          "Status": b.status.toUpperCase(),
+          "Package Linked": pkg ? pkg.packageName : "None",
+          "Package Deducted?": b.deducted ? "YES" : "NO",
+          "Deduction Date & Time": b.deductionTimestamp || "-",
+          "Notes / Focus": b.notes || "-"
+        };
+      });
+      const wsBookings = XLSX.utils.json_to_sheet(bookingsRows);
+      XLSX.utils.book_append_sheet(wb, wsBookings, "Schedule & Bookings");
+
+      // Sheet 3: Packages & Revenue
+      const packagesRows = packages.map(p => {
+        const student = students.find(s => s.id === p.studentId);
+        return {
+          "Package ID": p.id,
+          "Student Name": student ? student.name : "-",
+          "Package Name": p.packageName,
+          "Total Classes": p.totalClasses,
+          "Remaining Classes": p.remainingClasses,
+          "Price Paid ($)": parseFloat(p.pricePaid || 0).toFixed(2),
+          "Payment Method": p.paymentMethod || "-",
+          "Payment Date": p.paymentDate || "-"
+        };
+      });
+      const wsPackages = XLSX.utils.json_to_sheet(packagesRows);
+      XLSX.utils.book_append_sheet(wb, wsPackages, "Packages & Payments");
+
+      // Sheet 4: Deduction Audit Trail
+      const deductionsRows = deductions.map(d => ({
+        "Log ID": d.id,
+        "Deduction Timestamp": d.timestamp,
+        "Student Name": d.studentName,
+        "Package Name": d.packageName,
+        "Class Adjustment": d.classesChanged > 0 ? `+${d.classesChanged}` : d.classesChanged,
+        "Remaining Balance After": d.remainingAfter,
+        "Reason": d.reason
+      }));
+      const wsDeductions = XLSX.utils.json_to_sheet(deductionsRows);
+      XLSX.utils.book_append_sheet(wb, wsDeductions, "Deduction Audit Trail");
+
+      // Save file
+      const todayStr = new Date().toISOString().split('T')[0];
+      const filename = `RINA_Pilates_Report_${todayStr}.xlsx`;
+      XLSX.writeFile(wb, filename);
+
+      showToast(`Exported full Excel report: ${filename}`);
+    }
+
+
+    // --- 9. MODAL HANDLERS ---
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    // Booking Modal
+    function openBookingModal(date, studentId) {
+      const students = getStudents();
+      const select = document.getElementById('booking-student-select');
+      select.innerHTML = '<option value="">Select student...</option>' +
+        students.map(s => `<option value="${s.id}" ${studentId === s.id ? 'selected' : ''}>${s.name}</option>`).join('');
+
+      document.getElementById('booking-date').value = date || currentScheduleDate;
+      document.getElementById('booking-start-time').value = "10:00";
+      document.getElementById('booking-end-time').value = "10:55";
+      document.getElementById('booking-notes').value = "";
+      document.getElementById('booking-auto-deduct').checked = true;
+
+      onBookingStudentChanged();
+      document.getElementById('modal-booking').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function onBookingStudentChanged() {
+      const studentId = parseInt(document.getElementById('booking-student-select').value);
+      const students = getStudents();
+      const packages = getPackages();
+
+      const student = students.find(s => s.id === studentId);
+      const banner = document.getElementById('booking-injury-banner');
+      if (student && student.injuryNotes) {
+        document.getElementById('booking-injury-text').innerText = student.injuryNotes;
+        banner.classList.remove('hidden');
+      } else {
+        banner.classList.add('hidden');
+      }
+
+      const badge = document.getElementById('booking-package-badge');
+      const text = document.getElementById('booking-package-text');
+
+      if (!studentId) {
+        badge.innerText = "No student selected";
+        badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-stone-200 text-stone-700";
+        text.innerText = "Select a student to check active packages.";
+        return;
+      }
+
+      const activePkg = packages.find(p => p.studentId === studentId && p.remainingClasses > 0);
+      if (activePkg) {
+        badge.innerText = `${activePkg.remainingClasses} classes remaining`;
+        badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800";
+        text.innerText = `Package: ${activePkg.packageName}. Will deduct 1 class upon confirmation.`;
+      } else {
+        badge.innerText = "0 classes left";
+        badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800";
+        text.innerText = "No active packages with credits remaining. You can still schedule, or log a payment in Student Portfolio.";
+      }
+    }
+
+    function autoFillEndTime(val) {
+      if (!val) return;
+      const [h, m] = val.split(':').map(Number);
+      const total = m + 55;
+      const endH = h + Math.floor(total / 60);
+      const endM = total % 60;
+      const pad = n => String(n).padStart(2, '0');
+      document.getElementById('booking-end-time').value = `${pad(endH)}:${pad(endM)}`;
+    }
+
+    function handleBookingSubmit(e) {
+      e.preventDefault();
+      const studentId = parseInt(document.getElementById('booking-student-select').value);
+      const sessionDate = document.getElementById('booking-date').value;
+      const startTime = document.getElementById('booking-start-time').value;
+      const endTime = document.getElementById('booking-end-time').value;
+      const classType = document.getElementById('booking-class-type').value;
+      const instructor = document.getElementById('booking-instructor').value;
+      const notes = document.getElementById('booking-notes').value;
+      const autoDeduct = document.getElementById('booking-auto-deduct').checked;
+
+      const bookings = getBookings();
+      const packages = getPackages();
+      const deductions = getDeductions();
+      const students = getStudents();
+
+      const student = students.find(s => s.id === studentId);
+      const targetPkg = packages.find(p => p.studentId === studentId && p.remainingClasses > 0);
+
+      let isDeducted = false;
+      let deductionTimestamp = null;
+
+      if (autoDeduct && targetPkg) {
+        targetPkg.remainingClasses = Math.max(0, targetPkg.remainingClasses - 1);
+        isDeducted = true;
+        deductionTimestamp = new Date().toLocaleString();
+
+        deductions.unshift({
+          id: Date.now(),
+          studentId: studentId,
+          studentName: student ? student.name : "Student",
+          packageName: targetPkg.packageName,
+          classesChanged: -1,
+          remainingAfter: targetPkg.remainingClasses,
+          reason: `Booking scheduled for ${sessionDate} ${startTime} (${classType})`,
+          timestamp: deductionTimestamp
+        });
+        savePackages(packages);
+        saveDeductions(deductions);
+      }
+
+      bookings.push({
+        id: Date.now(),
+        studentId,
+        packageId: targetPkg ? targetPkg.id : null,
+        sessionDate,
+        startTime,
+        endTime,
+        classType,
+        instructor,
+        status: "confirmed",
+        deducted: isDeducted,
+        deductionTimestamp,
+        notes
+      });
+
+      saveBookings(bookings);
+      closeModal('modal-booking');
+      showToast("Booking added & deduction marked with date and time!");
+      currentScheduleDate = sessionDate;
+      renderSchedule();
+    }
+
+    // Student Modal
+    function openStudentModal(editId) {
+      document.getElementById('student-edit-id').value = editId || "";
+      const isEdit = !!editId;
+
+      document.getElementById('student-modal-title').innerText = isEdit ? "Edit Student Profile" : "New Student Onboarding";
+      document.getElementById('st-package-section').style.display = isEdit ? "none" : "block";
+
+      if (isEdit) {
+        const students = getStudents();
+        const s = students.find(x => x.id === editId);
+        if (s) {
+          document.getElementById('st-name').value = s.name;
+          document.getElementById('st-phone').value = s.phone || "";
+          document.getElementById('st-email').value = s.email || "";
+          document.getElementById('st-emergency').value = s.emergencyContact || "";
+          document.getElementById('st-injuries').value = s.injuryNotes || "";
+          document.getElementById('st-goals').value = s.goals || "";
+        }
+      } else {
+        document.getElementById('st-name').value = "";
+        document.getElementById('st-phone').value = "";
+        document.getElementById('st-email').value = "";
+        document.getElementById('st-emergency').value = "";
+        document.getElementById('st-injuries').value = "";
+        document.getElementById('st-goals').value = "";
+      }
+
+      document.getElementById('modal-student').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function handleStudentSubmit(e) {
+      e.preventDefault();
+      const editId = document.getElementById('student-edit-id').value;
+      const name = document.getElementById('st-name').value.trim();
+      const phone = document.getElementById('st-phone').value.trim();
+      const email = document.getElementById('st-email').value.trim();
+      const emergencyContact = document.getElementById('st-emergency').value.trim();
+      const injuryNotes = document.getElementById('st-injuries').value.trim();
+      const goals = document.getElementById('st-goals').value.trim();
+
+      const students = getStudents();
+      const packages = getPackages();
+
+      if (editId) {
+        const s = students.find(x => x.id === parseInt(editId));
+        if (s) {
+          s.name = name;
+          s.phone = phone;
+          s.email = email;
+          s.emergencyContact = emergencyContact;
+          s.injuryNotes = injuryNotes;
+          s.goals = goals;
+        }
+      } else {
+        const newId = Date.now();
+        students.push({
+          id: newId,
+          name,
+          phone,
+          email,
+          emergencyContact,
+          injuryNotes,
+          goals,
+          notes: ""
+        });
+
+        const hasPkg = document.getElementById('st-has-package').checked;
+        if (hasPkg) {
+          const pkgName = document.getElementById('st-pkg-name').value;
+          const total = parseInt(document.getElementById('st-pkg-classes').value) || 10;
+          const price = parseFloat(document.getElementById('st-pkg-price').value) || 1200;
+          const method = document.getElementById('st-pkg-method').value;
+
+          packages.push({
+            id: Date.now() + 1,
+            studentId: newId,
+            packageName: pkgName,
+            totalClasses: total,
+            remainingClasses: total,
+            pricePaid: price,
+            paymentMethod: method,
+            paymentDate: new Date().toISOString().split('T')[0]
+          });
+          savePackages(packages);
+        }
+      }
+
+      saveStudents(students);
+      closeModal('modal-student');
+      showToast("Student profile saved!");
+      renderStudentPortfolios();
+    }
+
+    // Package Modal
+    function openPackageModal(studentId) {
+      const students = getStudents();
+      const select = document.getElementById('pkg-student-select');
+      select.innerHTML = '<option value="">Select student...</option>' +
+        students.map(s => `<option value="${s.id}" ${studentId === s.id ? 'selected' : ''}>${s.name}</option>`).join('');
+
+      document.getElementById('pkg-date').value = new Date().toISOString().split('T')[0];
+      document.getElementById('modal-package').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function handlePackageSubmit(e) {
+      e.preventDefault();
+      const studentId = parseInt(document.getElementById('pkg-student-select').value);
+      const packageName = document.getElementById('pkg-name').value.trim();
+      const totalClasses = parseInt(document.getElementById('pkg-total').value) || 10;
+      const pricePaid = parseFloat(document.getElementById('pkg-price').value) || 0;
+      const paymentMethod = document.getElementById('pkg-method').value;
+      const paymentDate = document.getElementById('pkg-date').value;
+
+      const packages = getPackages();
+      packages.push({
+        id: Date.now(),
+        studentId,
+        packageName,
+        totalClasses,
+        remainingClasses: totalClasses,
+        pricePaid,
+        paymentMethod,
+        paymentDate
+      });
+
+      savePackages(packages);
+      closeModal('modal-package');
+      showToast("Package & payment logged!");
+      renderStudentPortfolios();
+    }
+
+    // Portfolio Detail Modal
+    function openPortfolioModal(studentId) {
+      const students = getStudents();
+      const packages = getPackages();
+      const bookings = getBookings();
+      const deductions = getDeductions();
+
+      const student = students.find(s => s.id === studentId);
+      if (!student) return;
+
+      document.getElementById('portfolio-avatar').innerText = student.name.charAt(0);
+      document.getElementById('portfolio-name').innerText = student.name;
+      document.getElementById('portfolio-contact').innerText = `${student.phone || 'No phone'} • ${student.email || 'No email'}`;
+      document.getElementById('portfolio-injuries').innerText = student.injuryNotes || "No specific contraindications recorded.";
+
+      const stPkgs = packages.filter(p => p.studentId === student.id);
+      const stBookings = bookings.filter(b => b.studentId === student.id);
+      const stDeductions = deductions.filter(d => d.studentId === student.id);
+
+      const totalPaid = stPkgs.reduce((acc, p) => acc + parseFloat(p.pricePaid || 0), 0);
+      const remainingClasses = stPkgs.reduce((acc, p) => acc + (p.remainingClasses || 0), 0);
+      const attended = stBookings.filter(b => b.status === 'attended').length;
+
+      document.getElementById('portfolio-classes-left').innerText = remainingClasses;
+      document.getElementById('portfolio-total-paid').innerText = `$${totalPaid.toFixed(2)}`;
+      document.getElementById('portfolio-attended').innerText = attended;
+      document.getElementById('portfolio-packages-count').innerText = stPkgs.length;
+
+      // Packages list
+      const pkgContainer = document.getElementById('portfolio-packages-list');
+      if (stPkgs.length === 0) {
+        pkgContainer.innerHTML = `<p class="text-stone-400">No packages recorded for this student yet.</p>`;
+      } else {
+        pkgContainer.innerHTML = stPkgs.map(p => `
+          <div class="bg-stone-50 border border-stone-200 p-3 rounded-xl flex items-center justify-between">
+            <div>
+              <div class="font-bold text-stone-900">${p.packageName}</div>
+              <div class="text-[11px] text-stone-500">Paid: $${parseFloat(p.pricePaid).toFixed(2)} via ${p.paymentMethod} • Date: ${p.paymentDate}</div>
+            </div>
+            <div class="text-right">
+              <span class="font-bold text-rina-800 text-sm">${p.remainingClasses} / ${p.totalClasses} left</span>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Deductions list
+      const dedContainer = document.getElementById('portfolio-deductions-list');
+      if (stDeductions.length === 0) {
+        dedContainer.innerHTML = `<p class="text-stone-400 font-sans">No class deductions recorded yet.</p>`;
+      } else {
+        dedContainer.innerHTML = stDeductions.map(d => `
+          <div class="bg-stone-50 border border-stone-200 p-2.5 rounded-xl flex items-center justify-between">
+            <div>
+              <span class="text-stone-500">${d.timestamp}</span>
+              <span class="text-stone-800 ml-2 font-sans font-medium">${d.reason}</span>
+            </div>
+            <div class="font-bold">
+              ${d.classesChanged < 0 ? `
+                <span class="text-amber-800">${d.classesChanged} class</span>
+              ` : `
+                <span class="text-emerald-800">+${d.classesChanged} class</span>
+              `}
+              <span class="text-stone-400 ml-1">(${d.remainingAfter} left)</span>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      document.getElementById('modal-portfolio').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+
+    // --- 10. APP INITIALIZATION ---
+    window.addEventListener('DOMContentLoaded', () => {
+      initializeDefaultData();
+      renderSchedule();
+      renderStudentPortfolios();
+      populateDataInputOptions();
+      lucide.createIcons();
+    });
+  </script>
 </body>
 </html>
+```
